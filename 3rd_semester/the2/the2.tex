@@ -1,0 +1,271 @@
+\documentclass[11pt]{article}
+\usepackage[utf8]{inputenc}
+\usepackage{float}
+\usepackage{amsmath}
+\usepackage{amssymb}
+
+\usepackage[hmargin=3cm,vmargin=6.0cm]{geometry}
+%\topmargin=0cm
+\topmargin=-2cm
+\addtolength{\textheight}{6.5cm}
+\addtolength{\textwidth}{2.0cm}
+%\setlength{\leftmargin}{-5cm}
+\setlength{\oddsidemargin}{0.0cm}
+\setlength{\evensidemargin}{0.0cm}
+
+% symbol commands for the curious
+\newcommand{\setZp}{\mathbb{Z}^+}
+\newcommand{\setR}{\mathbb{R}}
+\newcommand{\calT}{\mathcal{T}}
+
+\begin{document}
+
+\section*{Student Information } 
+%Write your full name and id number between the colon and newline
+%Put one empty space character after colon and before newline
+Full Name :  Mustafa Sezgin \\
+Id Number :  2380863 \\
+
+% Write your answers below the section tags
+\section*{Answer 1}
+\paragraph{a.}
+\paragraph{i)}
+$\mathcal{T}_1$ is a topology. It contains $\varnothing$ and $A$, and the intersection and the union of them.
+\paragraph{ii)}
+$\mathcal{T}_2$ is not a topology. For the counter example, we have $\{\{a\}, \{b\}\} \subseteq \mathcal{T}_2$; however, the union of its elements $\{a, b\} \notin \mathcal{T}_2$.
+\paragraph{iii)}
+$\mathcal{T}_3$ is a topology. It contains $\varnothing$ and $A$, and the intersection and the union of any subset of it.
+\paragraph{iv)}
+$\mathcal{T}_4$ is not a topology. For the counter example, we have $\{\{b, c\}, \{b, d\}\} \subseteq \mathcal{T}_4$; however, the union of its elements $\{b, c, d\} \notin \mathcal{T}_4$.
+
+\newpage
+\paragraph{b.}
+\paragraph{i)} Let $\mathcal{T}_1 = \{U \ | \ A - U$ is either finite or is $A\}$ \\ \\
+1.
+\begin{align*}
+    A - \varnothing &= A \ \text{, so} \ \varnothing \in \mathcal{T}_1 \\
+    A - A &= \varnothing \ \text{is finite, so} \ A \in \mathcal{T}_1
+\end{align*}
+Say $\{U_1, U_2, \dots U_n\} \subseteq \mathcal{T}_1$ meaning that $A - U_1, A - U_2, \dots A - U_n$ are finite. \\
+2. Then, since the intersection of n finite sets is also finite,
+\begin{align*}
+    \bigcap_{i = 1}^n A - U_i &= \bigcap_{i = 1}^n A \cap \overline{U_i} \\
+                              &= A \cap \bigcap_{i = 1}^n \overline{U_i} \\
+                              &= A \cap \overline{\bigcup_{i = 1}^n U_i} \\
+                              &= A - \bigcup_{i = 1}^n U_i \\
+\end{align*}
+is finite. Thus, $\bigcup_{i = 1}^n U_i \in \mathcal{T}_1$. \\ \\
+3. Similarly, since the union of n finite sets is also finite,
+\begin{align*}
+    \bigcup_{i = 1}^n A - U_i &= \bigcup_{i = 1}^n A \cap \overline{U_i} \\
+                              &= A \cap \bigcup_{i = 1}^n \overline{U_i} \\
+                              &= A \cap \overline{\bigcap_{i = 1}^n U_i} \\
+                              &= A - \bigcap_{i = 1}^n U_i \\
+\end{align*}
+is finite. Thus, $\bigcap_{i = 1}^n U_i \in \mathcal{T}_1$. Therefore, since all the conditions are satisfied $\mathcal{T}_1$ is a topology. 
+
+\newpage
+\paragraph{ii)} Let $\mathcal{T}_2 = \{U \ | \ A - U$ is either countable or is all of $A\}$ \\ \\
+1.
+\begin{align*}
+    A - \varnothing &= A \ \text{, so} \ \varnothing \in \mathcal{T}_2 \\
+    A - A &= \varnothing \ \text{is countable, so} \ A \in \mathcal{T}_2
+\end{align*}
+Say $\{U_1, U_2, \dots U_n\} \subseteq \mathcal{T}_2$, meaning that $A - U_1, A - U_2, \dots A - U_n$ are countable. \\
+2. Then, since the intersection of n sets is a subset of each of them, and any subset of a countable set is countable by \textit{Exercise 16} from chapter 2.5 in the textbook,
+\begin{align*}
+    \bigcap_{i = 1}^n A - U_i &= \bigcap_{i = 1}^n A \cap \overline{U_i} \\
+                              &= A \cap \bigcap_{i = 1}^n \overline{U_i} \\
+                              &= A \cap \overline{\bigcup_{i = 1}^n U_i} \\
+                              &= A - \bigcup_{i = 1}^n U_i \\
+\end{align*}
+is countable. Thus, $\bigcup_{i = 1}^n U_i \in \mathcal{T}_2$. \\ \\
+3. Similarly, since the union of n countable sets is also countable by \textit{Theorem 1} from chapter 2.5 in the textbook,
+\begin{align*}
+    \bigcup_{i = 1}^n A - U_i &= \bigcup_{i = 1}^n A \cap \overline{U_i} \\
+                              &= A \cap \bigcup_{i = 1}^n \overline{U_i} \\
+                              &= A \cap \overline{\bigcap_{i = 1}^n U_i} \\
+                              &= A - \bigcap_{i = 1}^n U_i \\
+\end{align*}
+is countable. Thus, $\bigcap_{i = 1}^n U_i \in \mathcal{T}_2$. Therefore, since all the conditions are satisfied $\mathcal{T}_2$ is a topology. 
+
+\newpage
+\paragraph{iii)} Proof by counter example. \\
+
+Let $A = \mathbb{Z}$ and $\mathcal{T}_3 = \{U \ | \ A - U$ is infinite or $\varnothing$ or $A\}$. Let us look at two specific subsets of $A$, $U_1 = \{ \dots -3, -2, -1\} \subseteq A$ and $U_2 = \{1, 2, 3, \dots \} \subseteq A$. Then \\
+\begin{align*}
+    A - U_1 &= \{0, 1, 2, \dots\} \\
+    A - U_2 &= \{\dots -2, -1, 0\}
+\end{align*}
+are infinite, so $U_1, U_2 \in \mathcal{T}_3$. However,
+\[
+    A - (U_1 \cup U_2) = A - \{\dots -2, -1, 1, 2, \dots\} = \{0\}
+\]
+is not infinite nor $\varnothing$ nor $A$. So $U_1 \cup U_2 \notin \mathcal{T}_3$. This is a counter example to a set $A$, on which the corresponding set $\mathcal{T}_3$ is not a topology.
+
+\newpage
+\section*{Answer 2}
+\paragraph{a.} $f$ is injective. Proof by contradiction. \\
+
+Say $f(a_1, b_1) = f(a_2, b_2)$ and, thus, $a_1 + b_1 = a_2 + b_2$ for some $(a_1, b_1), (a_2, b_2) \in A \times (0, 1)$. Assume $(a_1, b_1) \neq (a_2, b_2)$. \\
+
+\noindent \textit{Case 1:} $a_1 = a_2$, $b_1 \neq b_2$ \\
+From the equation $a_1 + b_1 = a_2 + b_2$, cancelling $a_1$ and $a_2$ we get $b_1 = b_2$. This is a contradiction. \\
+
+\noindent \textit{Case 2:} $a_1 \neq a_2$ \\
+Using the equation $a_1 + b_1 = a_2 + b_2$, we have $a_1 - a_2 = b_2 - b_1$. Besides, the difference of two distinct element in $A$ is an integer, and the difference of two elements in $(0, 1)$ is in $(-1, 1)$. However, this is possible only when $a_1 - a_2 = b_2 - b_1 = 0$, which implies $a_1 = a_2$, $b_1 = b_2$. This is a contradiction. \\
+
+\noindent In all cases, we reach contradiction. So, we can conclude that whenever $f(a_1, b_1) = f(a_2, b_2)$ then $(a_1, b_1) = (a_2, b_2)$. Hence, $f$ is injective. \\
+
+\paragraph{b.} $f$ is not surjective. Proof by contradiction. \\
+
+Assume $f$ is surjective. Then $\forall y \in [0, \infty) \ \exists (a, b) \in A \times (0, 1) \ (y = f(a, b))$. However, for $0 \in [0, \infty)$ there is no pair $(a, b) \in A \times (0, 1)$ satisfying $0 = f(a, b) = a + b$. This is a contradiction. Thus, $f$ is not surjective. \\
+
+\paragraph{c.} From part \textbf{a.}, we have an injective function $f: A \times (0, 1) \rightarrow [0, \infty)$. If we also have an injective function $g: [0, \infty) \rightarrow A \times (0, 1)$, then by \textit{Schroder-Bernstein Theorem} from chapter 2.5 in the textbook, there is one-to-one correspondence between $A \times (0, 1)$ and $[0, \infty)$, and their cardinalities are the same.
+
+\newpage
+\section*{Answer 3}
+\paragraph{a.} $A = \{f \mid f: \{0, 1\} \rightarrow \mathbb{Z}^+\}$ is countable. We can show this set as
+\begin{align*}
+    A = \{(a, b) \mid (a, b) = (f_{ij}(0), f_{ij}(1)), f_{ij}: \{0, 1\} \rightarrow \mathbb{Z}^+\}
+\end{align*}
+We can count this set. \\
+\begin{center}
+\begin{tabular}{c c c c c c c c c}
+                     & $f_{j_1}(1) = 1$ &       & $f_{j_2}(1) = 2$ &  & $f_{j_3}(1) = 3$ &       & $f_{j_4}(1) = 4$ & $\dots$ \\ \hline
+    $f_{i_1}(0) = 1$ & $(1, 1)$ & $\rightarrow$ & $(1, 2)$ &          & $(1, 3)$ & $\rightarrow$ & $(1, 4)$ & $\dots$ \\
+                     &          & $\swarrow$    &          & $\nearrow$ &        & $\swarrow$    & \\
+    $f_{i_2}(0) = 2$ & $(2, 1)$ &               & $(2, 2)$ &          & $(2, 3)$ &               & $(2, 4)$ & $\dots$ \\
+                     & $\downarrow$ & $\nearrow$ &         & $\swarrow$ &        & $\nearrow$    & \\
+    $f_{i_3}(0) = 3$ & $(3, 1)$ &               & $(3, 2)$ &          & $(3, 3)$ &               & $(3, 4)$ & $\dots$ \\
+                     &          & $\swarrow$    &          & $\nearrow$ &        & $\swarrow$    & \\
+    $f_{i_4}(0) = 4$ & $(4, 1)$ &               & $(4, 2)$ &          & $(4, 3)$ &               & $\dots$ \\
+                     & $\downarrow$ & $\nearrow$ &         & $\swarrow$ &        & \\
+    $f_{i_5}(0) = 5$ & $(5, 1)$ &               & $(5, 2)$ &          & $\dots$ \\
+    $\vdots$         & $\vdots$ &               & $\vdots$ \\
+    
+    %$f_1(1) = 1$ & $f_{11}$ & $f_{12}$ & $f_{13}$ & $f_{14}$ & $f_{15}$ \\
+    %$f_2(1) = 2$ & $f_{21}$ & $f_{22}$ & $f_{23}$ & $f_{24}$ & $f_{25}$ \\
+    %$f_3(1) = 3$ & $f_{31}$ & $f_{32}$ & $f_{33}$ & $f_{34}$ & $f_{35}$ \\
+    %$f_4(1) = 4$ & $f_{41}$ & $f_{42}$ & $f_{43}$ & $f_{44}$ & $f_{45}$ \\
+    %$f_5(1) = 5$ & $f_{51}$ & $f_{52}$ & $f_{53}$ & $f_{54}$ & $f_{55}$ \\
+\end{tabular}
+\end{center}
+Going through the path shown in the table above, we have a countable set
+\begin{align*}
+    A = \{(1, 1), (1, 2), (2, 1), (3, 1), (2, 2), \dots\}
+\end{align*}
+where each tuple element represents the function $f_{ij}: \{0, 1\} \rightarrow \mathbb{Z}^+$ at $i$th row and $j$th column. \\
+
+\paragraph{b.} $B = \{f \mid f: \{0, 1, \dots n\} \rightarrow \mathbb{Z}^+\}$ is countable. By using the $n$th dimensional version of the table in part \textbf{a.}, we can show this set as
+\begin{align*}
+    B &= \{(a_1, a_2, \dots a_n) \mid (a_1, a_2, \dots a_n) = (f(1), f(2), \dots f(n)), f: \{0, 1, \dots n\} \rightarrow \mathbb{Z}^+\} \\
+    B &= \{(1, 1, \dots 1, 1), \ (1, 1, \dots 1, 2), \ (1, 1, \dots 2, 1), \dots\}
+\end{align*}
+
+\paragraph{c.} $C = \{f \mid f: \mathbb{Z}^+ \rightarrow \mathbb{Z}^+\}$ is uncountable. \\
+Assume that $C$ is countable. Since $\{0, 1\} \subseteq \mathbb{Z}^+$, then $D \subseteq C$ for the set $D$ in part \textbf{d.}. $D$ should be countable since a subset of a countable set is also countable by \textit{Exercise 16} from chapter 2.5 in the textbook. However, we know from part \textbf{d.} that the set $D$ is uncountable. This is a contradiction. So, $C$ is uncountable. \\
+
+\paragraph{d.} $D = \{f \mid f: \mathbb{Z}^+ \rightarrow \{0, 1\}\}$ is uncountable. \\
+Let us consider the binary representations of the real numbers in the interval $[0, 1]$. Say, $b = 0.b_1 b_2 b_3 \dots$ is the binary representation of a real number $c \in [0, 1]$. For any such number $b$, let us define the corresponding function $f$ such that $f(i) = b_i$, for any $i \in \mathbb{Z}^+$ and $b_i \in \{0, 1\}$. This creates a one-to-one correspondence from $D$ to the set of all real numbers in the interval $[0, 1]$, which means the two sets have the same cardinality by \textit{Definition 1} from the chapter 2.5 in the textbook. But, we know that the set $S$ of all real numbers between 0 and 1 is uncountable by \textit{Cantor diagonalization argument} from the chapter 2.5 in the textbook. Then, the set of all real numbers in the interval $[0, 1]$, which is $S \cup \{0, 1\}$, is uncountable. Then $D$ is uncountable.
+
+\paragraph{e.} $E = \{f \mid f: \mathbb{Z}^+ \rightarrow \mathbb{Z}^+$ and $f$ is eventually zero$\}$ is countable. \\
+Let us define our function $f_N$ as
+\[
+    f_N (n) =
+    \begin{cases}
+        g_N (n) & \text{if} \ n \le N - 2 \\
+        1 & \text{if} \ n = N - 1 \\
+        0 & \text{if} \ n \ge N
+    \end{cases}
+\]
+where $g_N (n) : \mathbb{Z}^+ - \{N - 1, N, \dots \} \rightarrow \{0, 1\}$ is a function. The set $S_N$ of all functions $g_N$ is countable since their domain and co-domain are finite. Then, the set $T_N$ of all functions $f_N$ is also countable since there is one-to-one correspondence between the sets $S_N$ and $T_N$, and they have the same cardinality. Thus, we have
+\[
+    E = \bigcup_{i \in \mathbb{Z}^+} T_i
+\]
+is countable since all sets $T_i$ are countable.
+
+\newpage
+\section*{Answer 4}
+\paragraph{a.} $n! \neq \Theta(n^n)$ \\
+
+\noindent \textit{Proof by contradiction:} Assume $n! = \Theta(n^n)$, then we should have $C_1 n^n \le n! \le C_2 n^n$, $\forall n \ge k$ for some positive real constants $C_1$, $C_2$, and $k$. Using \textit{Stirling's approximation}, we should have $C_1 n^n \le \sqrt{2 \pi n} \left( \frac{n}{e} \right)^n \le C_2 n^n$, $\forall n \ge k$. More specifically,
+\begin{align*}
+    C_1 n^n &\le \sqrt{2 \pi n} \left( \frac{n}{e} \right)^n \\
+    C_1 n^n &\le \sqrt{2 \pi n} \left( \frac{n^n}{e^n} \right) \\
+    C_1 &\le \frac{\sqrt{2 \pi n}}{e^n},
+\end{align*}
+$\forall n \ge k$. However, this is not possible since $\lim_{x \rightarrow \infty} \frac{\sqrt{2 \pi n}}{e^n} = 0$, which cannot be greater than or equal to a positive constant $C_1$. This is a contradiction. Hence, $n! \neq \Theta(n^n)$. \\
+
+\paragraph{b.} $(n + a)^b = \Theta(n^b)$ \\
+That is, we have $C_1 n^b \le (n + a)^b \le C_2 n^b$, $\forall n \ge k$ with witnesses $C_1 = \frac{1}{2}$, $C_2 = 2^b$, and $k = \frac{\left| a \right|}{1 - \sqrt[b]{\frac{1}{2}}}$. \\
+\textit{Proof:} $a \in \mathbb{R}, b \in \mathbb{Z}^+$, and $\forall n \ge k$ we have that
+\begin{align*}
+    \frac{-a}{1 - \sqrt[b]{\frac{1}{2}}} &\le \frac{\left| a \right|}{1 - \sqrt[b]{\frac{1}{2}}} \le n \\
+    -a &\le n - \sqrt[b]{\frac{1}{2}} n \\
+    \sqrt[b]{\frac{1}{2}} n &\le n + a \\
+    \frac{1}{2} n^b &\le (n + a)^b,
+\end{align*}
+and that
+\begin{align*}
+    a \le \left| a \right| &< \frac{\left| a \right|}{1 - \sqrt[b]{\frac{1}{2}}} \le n \\
+    n + a &\le n + n \\
+    (n + a)^b &\le (2n)^b \\
+    (n + a)^b &\le 2^b n^b.
+\end{align*}
+Therefore, $\frac{1}{2} n^b \le (n + a)^b \le 2^b n^b$, $\forall n \ge \frac{\left| a \right|}{1 - \sqrt[b]{\frac{1}{2}}}$.
+
+\newpage
+\section*{Answer 5}
+\paragraph{a.} \textit{Proof by contradiction:} For $x, y \in \mathbb{Z}^+$, assume $(2^x - 1) \bmod (2^y - 1) \neq (2^{x \bmod y} - 1)$. Then,
+\begin{align}
+    2^x - 1 \neq (2^y - 1)q + 2^{x \bmod y} - 1
+\end{align}
+where $q = (2^x - 1)$ div $(2^y - 1)$, and $0 \le 2^{x \bmod y} - 1 < 2^y - 1$ by \textit{Theorem 2} and \textit{Definition 2} from chapter 4.1 in the textbook. \\
+
+\noindent If $x < y$, then $2^x - 1 < 2^y - 1$ and $q = 0$. Using the equation (1), we have
+\begin{align*}
+    2^x - 1 &\neq 2^{x \bmod y} - 1 \\
+    2^x &\neq 2^{x \bmod y} \\
+    x &\neq x \bmod y.
+\end{align*}
+However, we know that $x = x \bmod y$ when $x < y$ since $x = (0)(y) + x$. This is a contradiction. \\
+
+\noindent If $x \ge y$, using the equation (1) again, we have
+\begin{align*}
+    (2^y - 1)q &\neq 2^x - 2^{x \bmod y} \\
+    q &\neq \frac{2^x - 2^{x \bmod y}}{2^y - 1} \\
+    q &\neq \frac{2^{x \bmod y} (2^{x - (x \bmod y)} - 1)}{2^y - 1} \\
+    q &\neq \frac{2^{x \bmod y} \left(2^\frac{x - (x \bmod y)}{2} + 1 \right)  \left(2^\frac{x - (x \bmod y)}{2^2} + 1 \right) \dots  \left(2^\frac{x - (x \bmod y)}{2^i} + 1 \right)  \left(2^\frac{x - (x \bmod y)}{2^i} - 1 \right)}{2^y - 1}
+\end{align*}
+Since $q$ is an integer, it should be impossible for us to find a non-negative integer $i$ such that $2^y - 1 = 2^\frac{x - (x \bmod y)}{2^i} - 1$ to get
+\begin{align*}
+    2^{x \bmod y} \left(2^\frac{x - (x \bmod y)}{2} + 1 \right)  \left(2^\frac{x - (x \bmod y)}{2^2} + 1 \right) \dots  \left(2^\frac{x - (x \bmod y)}{2^i} + 1 \right)
+\end{align*}
+on the right hand side. Thus,
+\begin{align*}
+    y &\neq \frac{x - (x \bmod y)}{2^i} \\
+    x &\neq (2^i) y + (x \bmod y).
+\end{align*}
+This is a contradiction since when $x \ge y$, we know that $x = q_x y + (x \bmod y)$ for an appropriate integer $q_x$, which is $2^i$ in our case. All in all, since we reach contradiction in all cases, our assumption at first is false, and the conclusion is $(2^x - 1) \bmod (2^y - 1) = (2^{x \bmod y} - 1)$.
+
+\paragraph{b.} \textit{Proof by induction:} \\
+\textit{Base step:} When $x \in \mathbb{Z}^+$ and $y = 1$, using \textit{the Euclidean Algorithm},
+\begin{align*}
+    \gcd{(2^x - 1, 2^1 - 1)} &= 2^{\gcd{(x, 1)}} - 1 \\
+    \gcd{(2^x - 1, 1)} &= 2^{\gcd{(x, 1)}} - 1 \\
+    \gcd{(1, (2^x - 1) \bmod 1)} &= 2^{\gcd{(1, x \bmod 1)}} - 1 \\
+    \gcd{(1, 0)} &= 2^{\gcd{(1, 0)}} - 1 \\
+    1 &= 2^1 - 1 \\
+    1 &= 1
+\end{align*}
+\textit{Inductive step:} Assume $\gcd{(2^x - 1, 2^y - 1)} = 2^{\gcd{(x, y)}} - 1$ is true when $x \in \mathbb{Z}^+$ and $y > 1$. For the next step, using \textit{the Euclidean Algorithm} again and the results from part \textbf{a.}, we have 
+\begin{align*}
+    \gcd{(2^x - 1, 2^y - 1)} &= 2^{\gcd{(x, y)}} - 1 \\
+    \gcd{(2^y - 1, (2^x - 1) \bmod (2^y - 1))} &= 2^{\gcd{(y, x \bmod y)}} - 1 \\
+    \gcd{(2^y - 1, 2^{x \bmod y} - 1)} &= 2^{\gcd{(y, x \bmod y)}} - 1,
+\end{align*}
+which is in the form of our assumption. Therefore, we proved that $\gcd{(2^x - 1, 2^y - 1)} = 2^{\gcd{(x, y)}} - 1$ is true for any $x, y \in \mathbb{Z}^+$.
+
+
+\end{document}
