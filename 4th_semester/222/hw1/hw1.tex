@@ -1,0 +1,125 @@
+\documentclass[12pt]{article}
+\usepackage[utf8]{inputenc}
+\usepackage{float}
+\usepackage{amsmath}
+
+
+\usepackage[hmargin=3cm,vmargin=6.0cm]{geometry}
+\topmargin=-2cm
+\addtolength{\textheight}{6.5cm}
+\addtolength{\textwidth}{2.0cm}
+\setlength{\oddsidemargin}{0.0cm}
+\setlength{\evensidemargin}{0.0cm}
+\usepackage{indentfirst}
+\usepackage{amsfonts}
+
+\begin{document}
+
+\section*{Student Information}
+
+Name : Mustafa Sezgin \\
+
+ID : 2380863 \\
+
+
+\section*{Answer 1}
+
+\subsection*{a)}
+Let $\mu_{B}$, $\mu_{Y}$, and $\mu_{R}$ be the expected values of blue, yellow, and red dice respectively.
+\begin{align*}
+    \mu_{B} &= E(B) = 2 \cdot \frac{4}{6} + 3 \cdot \frac{1}{6} + 4 \cdot \frac{1}{6} = \frac{15}{6} = 2.5 \\
+    \mu_{Y} &= E(Y) = 1 \cdot \frac{2}{6} + 2 \cdot \frac{2}{6} + 3 \cdot \frac{2}{6} = \frac{12}{6} = 2 \\
+    \mu_{R} &= E(R) = 1 \cdot \frac{2}{8} + 2 \cdot \frac{2}{8} + 3 \cdot \frac{3}{8} + 5 \cdot \frac{1}{8} = \frac{20}{8} = 2.5
+\end{align*}
+
+\subsection*{b)}
+Expected value of rolling 2 red and 1 yellow dice is
+\[ E(2R + Y) = 2 E(R) + E(Y) = 2 (2.5) + 2 = 7, \]
+and similarly, expected value of rolling 2 yellow and 1 blue dice is
+\[ E(2Y + B) = 2 E(Y) + E(B) = 2 (2) + 2.5 = 6.5, \]
+by linearity of expectation. Thus, rolling 2 red and 1 yellow dice would be a better choice.
+
+\subsection*{c)}
+In this case, the expected value of rolling a blue die is $E(R) = 4 \cdot 1 = 4$. While nothing changes for the first option, the expected value of the second one will be
+\[ E(2Y + B) = 2 E(Y) + E(B) = 2 (2) + 4 = 8. \]
+Now, it would be better to choose the second option.
+
+\subsection*{d)}
+Let $B$, $Y$, $R$ denote the events choosing the blue, yellow, and red dice respectively, and $V$ denote the event "the value is 3". We need to find the probability of $C$ given $V$, that is, $P(C \mid V)$. By the \textit{Bayes Rule},
+\[ P(C \mid V) = \frac{P(V \mid C) P(C)}{P(V)}, \]
+where $P(V \mid C) = \cfrac{3}{8}$ is the probability of getting the value 3 when red die is rolled, and
+\begin{align*}
+    P(V) &= P(B \cap V) + P(Y \cap V) + P(R \cap V) \\
+         &= P(V \mid B) P(B) + P(V \mid Y) P(Y) + P(V \mid R) P(R) \\
+         &= \frac{1}{6} \cdot \frac{1}{3} + \frac{2}{6} \cdot \frac{1}{3} + \frac{3}{8} \cdot \frac{1}{3} \\
+         &= \frac{7}{24},
+\end{align*}
+since the intersections are exhaustive and mutually exclusive. Thus,
+\begin{align*}
+    P(C \mid V) &= \frac{\cfrac{3}{8} \cdot \cfrac{1}{3}}{\cfrac{7}{24}} \\
+    &= \frac{3}{7}.
+\end{align*}
+
+\subsection*{e)}
+Let $V_1$, $V_3$, $V_5$ denote the events "the value is 1, 3, and 5" respectively. The total value will be 6 when $R = 3$ and $Y = 3$, or $R = 5$ and $Y = 1$, which are independent. The probability is
+\begin{align*}
+    P(V_3 \mid R) P(V_3 \mid Y) + P(V_5 \mid R) P(V_1 \mid Y) &= \frac{3}{8} \cdot \frac{2}{6} + \frac{1}{8} \cdot \frac{2}{6} \\
+    &= \frac{1}{6}.
+\end{align*}
+
+
+\section*{Answer 2}
+
+\subsection*{a)}
+$P(A = 0, I = 2) = 0.17$, by the table.
+
+\subsection*{b)}
+$P(A = 2, I = 0) = 0$, since the table has no $A = 2$ data.
+
+\subsection*{c)}
+$P(A = 0, I = 2) + P(A = 1, I = 1) = 0.17 + 0.11 = 0.28$, since they are mutually exclusive. 
+% \\ $P_{(A, I)}(0, 2) + P_{(A, I)}(1, 1) = 0.17 + 0.11 = 0.28$, by the table.
+
+\subsection*{d)}
+All rows are exhaustive and mutually exclusive. By addition rule,
+\begin{align*}
+    P_A(1) &= \sum_{i} P_{(A, I)}(1, i) \\
+             &= P_{(A, I)}(1, 0) + P_{(A, I)}(1, 1) + P_{(A, I)}(1, 2) + P_{(A, I)}(1, 3) \\
+             &= 0.12 + 0.11 + 0.22 + 0.15 \\
+             &= 0.6
+\end{align*}
+
+\subsection*{e)}
+Let $X = A + I$ be the total number of electric outages.
+\begin{align*}
+    P_X(0) &= P_{(A, I)}(0, 0) = 0.08 \\
+    P_X(1) &= P_{(A, I)}(0, 1) + P_{(A, I)}(1, 0) = 0.25 \\
+    P_X(2) &= P_{(A, I)}(0, 2) + P_{(A, I)}(1, 1) = 0.28 \\
+    P_X(3) &= P_{(A, I)}(0, 3) + P_{(A, I)}(1, 2) = 0.24 \\
+    P_X(4) &= P_{(A, I)}(1, 3) = 0.15
+\end{align*}
+Then, the distribution of $X$ is as follows.
+\begin{center}
+\begin{tabular}{c|c}
+    $x$ & $P_X(x)$ \\
+    \hline
+    0 & 0.08 \\
+    1 & 0.25 \\
+    2 & 0.28 \\
+    3 & 0.24 \\
+    4 & 0.15
+\end{tabular}
+\end{center}
+
+\subsection*{f)}
+Assume they are independent. Then, for every $a$ and $i$, we should have $P(A) = P(A \mid I)$ and $P(I) = P(I \mid A)$. However, this does not hold when, for example, $A = 1$ and $I = 1$.
+\begin{align*}
+    P(A = 1 \mid I = 1) &= \frac{P_{(A, I)}(1, 1)}{P_{I}(1)} \\
+    &= \frac{P_{(A, I)}(1, 1)}{P_{(A, I)}(0, 1) + P_{(A, I)}(1, 1)} \\
+    &= \frac{0.11}{0.13 + 0.11} \\
+    &= \frac{0.11}{0.24} \\
+    &= 0.458,
+\end{align*}
+which is not equal to $P_{A}(1) = 0.6$ as calculated in part d. This contradicts with our assumption; thus, they are not independent.
+
+\end{document}

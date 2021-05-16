@@ -1,0 +1,149 @@
+\documentclass[12pt]{article}
+\usepackage[utf8]{inputenc}
+\usepackage{float}
+\usepackage{amsmath}
+
+
+\usepackage[hmargin=3cm,vmargin=6.0cm]{geometry}
+\topmargin=-2cm
+\addtolength{\textheight}{6.5cm}
+\addtolength{\textwidth}{2.0cm}
+\setlength{\oddsidemargin}{0.0cm}
+\setlength{\evensidemargin}{0.0cm}
+\usepackage{indentfirst}
+\usepackage{amsfonts}
+
+\begin{document}
+
+\section*{Student Information}
+
+Name : Mustafa Sezgin \\
+
+ID : 2380863 \\
+
+
+\section*{Answer 1}
+\subsection*{a)}
+\[
+    f(x) =
+    \begin{cases}
+        \frac{1}{120} & 60 \leq x \leq 180 \\
+        0 & \text{otherwise}
+    \end{cases}
+\]
+
+\subsection*{b)}
+\noindent The expected value is
+\begin{align*}
+    \mu = E(X)
+    &= \int_{-\infty}^{\infty} x f(x) \, dx \\
+    &= \int_{60}^{180} \frac{x}{120} \, dx
+    = \frac{x^2}{240} \bigg|_{60}^{180}
+    = 120,
+\end{align*}
+the variance is
+\begin{align*}
+    \sigma^2 = Var(X)
+    = E(X^2) - \mu^2
+    &= \int_{-\infty}^{\infty} x^2 f(x) \, dx - \mu^2 \\
+    &= \int_{60}^{180} \frac{x^2}{120} \, dx - 120^2
+    = \frac{x^3}{360} \bigg|_{60}^{180} - 120^2
+    = 1200,
+\end{align*}
+and the standard deviation is
+\[
+    \sigma = \sqrt{1200} = 36.641.
+\]
+
+\subsection*{c)}
+\[
+    P(90 \leq X \leq 120) = \int_{90}^{120} \frac{1}{120} \, dx
+    = \frac{x}{120} \bigg|_{90}^{120}
+    = 0.25
+\]
+
+\subsection*{d)}
+\noindent Let $A$ and $B$ be the events that $X \geq 150$ and $X \geq 120$, respectively. $A \cap B = A$ since $A \subseteq B$. We are asked to find
+\[
+    P(A \mid B) = \frac{P(A \cap B)}{P(B)} = \frac{P(A)}{P(B)},
+\]
+where
+\begin{align*}
+    P(A) = P(X \geq 150)
+    &= \int_{150}^{\infty} f(x) \, dx \\
+    &= \int_{150}^{180} \frac{1}{120} \, dx
+    = \frac{x}{120} \bigg|_{150}^{180}
+    = 0.25,
+\end{align*}
+and
+\begin{align*}
+    P(B) = P(X \geq 120)
+    &= \int_{120}^{\infty} f(x) \, dx \\
+    &= \int_{120}^{180} \frac{1}{120} \, dx
+    = \frac{x}{120} \bigg|_{120}^{180}
+    = 0.5.
+\end{align*}
+Therefore, $P(A \mid B) = \dfrac{0.25}{0.5} = 0.5$.
+
+\section*{Answer 2}
+\subsection*{a)}
+\noindent We have a binomial distribution with $n = 500$ and $p = 0.02$. Then, the mean is
+\[
+    \mu = n p = 500 \cdot 0.02 = 10,
+\]
+and the standard deviation is
+\[
+    \sigma = \sqrt{n p (1 - p)} = \sqrt{500 \cdot 0.02 \cdot 0.98} = 3.130.
+\]
+We can use the approximation: $Binomial(n, p) \approx Normal(\mu, \sigma)$.
+
+\subsection*{b)}
+\noindent We are asked to find $P(X \leq 7) = F(7)$. By normal approximation, this is approximately equal to
+\begin{align*}
+    F(7.5) &= P(X \leq 7.5)
+    = P \left(\frac{X - 10}{3.130} \leq \frac{7.5 - 10}{3.130} \right) \\
+    &= \Phi(-0.799)
+    = 0.212.
+\end{align*}
+
+\subsection*{c)}
+\noindent We are asked to find $P(X > 15) = 1 - P(X \leq 15) = 1 - F(15)$. By normal approximation, this is approximately equal to
+\begin{align*}
+    1 - F(15.5) &= 1 - P(X \leq 15.5)
+    = 1 - P \left(\frac{X - 10}{3.130} \leq \frac{15.5 - 10}{3.130} \right) \\
+    &= 1 - \Phi(1.757)
+    = 0.039.
+\end{align*}
+
+\subsection*{d)}
+\noindent We are asked to find $P(7 \leq X \leq 14) = F(14) - F(6)$. By normal approximation, this is approximately equal to
+\begin{align*}
+    F(14.5) - F(6.5) &= P(X \leq 14.5) - P(X \leq 6.5) \\
+    &= P \left(\frac{X - 10}{3.130} \leq \frac{14.5 - 10}{3.130} \right) - P \left(\frac{X - 10}{3.130} \leq \frac{6.5 - 10}{3.130} \right) \\
+    &= \Phi(1.437) - \Phi(-1.118)
+    = 0.793.
+\end{align*}
+
+\section*{Answer 3}
+\subsection*{a)}
+\noindent The time $T$ between strikes has exponential distribution with $\lambda = 1$. By the \textit{memoryless property} of exponential distribution, previous strikes does not affect the waiting time for the future ones. We are asked to find
+\[
+    P(T > 1) = 1 - F(1)
+    = e^{-1 \cdot 1}
+    = 0.368.
+\]
+
+\subsection*{b)}
+\noindent By the \textit{memoryless property} of exponential distribution
+\[
+    P(T > t + x \mid T > t) = P(T > x).
+\]
+In our case, $t = 1$ and $x = 1$. Therefore, the probability of waiting one more year for the next strike given that no strike has occurred in one year is the same as the probability of waiting one year for the next strike, that is,
+\[
+    P(T > 2 \mid T > 1) = P(T > 1)
+    = 1 - F(1)
+    = e^{-1 \cdot 1}
+    = 0.368.
+\]
+
+\end{document}
