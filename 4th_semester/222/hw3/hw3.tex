@@ -1,0 +1,73 @@
+\documentclass[12pt]{article}
+\usepackage[utf8]{inputenc}
+\usepackage{float}
+\usepackage{amsmath}
+
+
+\usepackage[hmargin=3cm,vmargin=6.0cm]{geometry}
+\topmargin=-2cm
+\addtolength{\textheight}{6.5cm}
+\addtolength{\textwidth}{2.0cm}
+\setlength{\oddsidemargin}{0.0cm}
+\setlength{\evensidemargin}{0.0cm}
+\usepackage{indentfirst}
+\usepackage{amsfonts}
+
+\begin{document}
+
+\section*{Student Information}
+
+Name : Mustafa Sezgin \\
+
+ID : 2380863 \\
+
+
+\section*{Answer 1}
+\subsection*{a)}
+\noindent $H_0: \mu = 7$ and $H_A: \mu > 7$, a right-tail alternative hypothesis. Since the population is normally distributed, $\Bar{X}$ has normal distribution regardless of the sample size, and we will be using Z-test. We have $\mu_0 = 7$, $\sigma = 1.4$, $n = 17$, and $\Bar{X} = 7.8$. The sample mean have a Z-score
+\[ Z = \frac{\Bar{X} - \mu_0}{\frac{\sigma}{\sqrt{n}}} = \frac{7.8 - 7}{\frac{1.4}{\sqrt{17}}} = 2.356. \]
+This is greater than $z_{\alpha} = z_{0.05} = 1.645$. Hence, we reject null hypothesis and say, at the 5\% level of significance, that customer service is successful.
+
+\subsection*{b)}
+\noindent If a customer gives 1 instead of 10, the sample mean decreases by $\dfrac{9}{17} = 0.529$. $\Bar{X}$ becomes 7.271, and the new Z-score is
+\[ Z = \frac{\Bar{X} - \mu_0}{\frac{\sigma}{\sqrt{n}}} = \frac{7.271 - 7}{\frac{1.4}{\sqrt{17}}} = 0.797. \]
+This is less than $z_{0.05} = 1.645$. In this case, we accept null hypothesis with 95\% confidence, and the customer service cannot be regarded as successful.
+
+\subsection*{c)}
+\noindent If the sample size were 45, then in the first part where no mistakes were made, the sample mean would have a Z-score
+\[ Z = \frac{\Bar{X} - \mu_0}{\frac{\sigma}{\sqrt{n}}} = \frac{7.8 - 7}{\frac{1.4}{\sqrt{45}}} = 3.833. \]
+This would be greater than $z_{0.05} = 1.645$, and the customer service would be regard as successful. \vspace{2mm} \\
+However, if a customer gave 1 instead of 10, the sample mean would decrease by $\dfrac{9}{45} = 0.2$. $\Bar{X}$ would become 7.6, and the new Z-score would be
+\[ Z = \frac{\Bar{X} - \mu_0}{\frac{\sigma}{\sqrt{n}}} = \frac{7.6 - 7}{\frac{1.4}{\sqrt{45}}} = 2.875. \]
+This would still be greater than $z_{0.05} = 1.645$, and the customer service would still be regarded as successful. This is something we might expect since the mean gets less sensitive to changes as the sample gets larger.
+
+\subsection*{d)}
+\noindent In this case, the sample mean, which is 7.8, can never be ``significantly higher than 8'' since it is already less than 8. Therefore, the customer service can not be regarded as successful.
+
+\section*{Answer 2}
+\noindent $H_0: \mu_x - \mu_y = 0$ and $H_A: \mu_x - \mu_y > 0$, a right-tail alternative hypothesis. Since the population standard deviations are unknown, we will be using T-test. We have $n = 55$, $\Bar{X} = 6.2$, and $s_x = 1.5$ for the new vaccine sample, and $m = 55$, $\Bar{Y} = 5.8$, and $s_y = 1.1$ for the old vaccine sample. The difference between the means of two samples have a t-score
+\[ t = \frac{\Bar{X} - \Bar{Y} - D}{\sqrt{\dfrac{s_x^2}{n} + \dfrac{s_y^2}{m}}} = \frac{6.2 - 5.8 - 0}{\sqrt{\dfrac{1.5^2}{55} + \dfrac{1.1^2}{55}}} = 1.595. \]
+We assume that the population variances are unequal, so the degrees of freedom is calculated by Satterthwaite approximation:
+\[ \nu = \frac{\left( \dfrac{s_x^2}{n} + \dfrac{s_y^2}{m} \right)^2}{\dfrac{s_x^4}{n^2 (n - 1)} + \dfrac{s_y^4}{m^2 (m - 1)}} = \frac{\left( \dfrac{1.5^2}{55} + \dfrac{1.1^2}{55} \right)^2}{\dfrac{1.5^4}{55^2 \cdot 54} + \dfrac{1.1^4}{55^2 \cdot 54}} = 99.051 \]
+Since $t_{\alpha} = t_{0.05} = 1.660$ with $\nu = 99$, and $1.595 < 1.660$, we accept null hypothesis. The new vaccine does not last longer than the old one.
+
+\section*{Answer 3}
+\subsection*{a)}
+\noindent Proportion has approximately normal distribution since the sample is large, and we can use the estimator of standard deviation. The critical value is $z_{\alpha / 2} = z_{0.025} = 1.960$. Confidence interval is calculated as
+\[ \hat{p} \pm z_{\alpha / 2} \cdot \sqrt{\frac{\hat{p} (1 - \hat{p})}{n}} = \hat{p} \pm margin. \]
+For the Red's candidate, margin of error is
+\[ z_{\alpha / 2} \cdot \sqrt{\frac{\hat{p}_{r} (1 - \hat{p}_{r})}{n}} = 1.960 \cdot \sqrt{\frac{0.48 \cdot 0.52}{400}} = 0.049 = 4.896\%, \]
+and for the Blue's candidate, it is
+\[ z_{\alpha / 2} \cdot \sqrt{\frac{\hat{p}_{b} (1 - \hat{p}_{b})}{n}} = 1.960 \cdot \sqrt{\frac{0.37 \cdot 0.63}{400}} = 0.047 = 4.731\%. \]
+
+\subsection*{b)}
+\noindent For the difference between the candidates of Reds and Blues, margin of error is
+\[ z_{\alpha / 2} \cdot \sqrt{\frac{\hat{p}_{r} (1 - \hat{p}_{r})}{n} + \frac{\hat{p}_{b} (1 - \hat{p}_{b})}{n}} = 1.960 \cdot \sqrt{\frac{0.48 \cdot 0.52}{400} + \frac{0.37 \cdot 0.63}{400}} = 0.068 = 6.809\%. \]
+
+\subsection*{c)}
+\noindent Bernoulli trials have the maximum variance when $p = 0.5$. We know that the margin of error depends on variance. For this reason, the margin is larger for the candidate of Reds, whose proportion is closer to 0.5. Sample size and confidence level are the same for both candidates.
+
+\subsection*{d)}
+\noindent The margin of error also depends on the sample size, but inversely. If the sample size were 1800, which is 9/2 times 400, then the margins would decrease to $\sqrt{2/9}$ times their values.
+
+\end{document}
