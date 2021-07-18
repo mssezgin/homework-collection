@@ -13,8 +13,6 @@
 \usepackage{indentfirst}
 \usepackage{amsfonts}
 \usepackage{parskip}
-%\usepackage[T1]{fontenc}
-%\usepackage{palatino}
 
 \begin{document}
 
@@ -32,7 +30,7 @@ ID : 2380863 \\
 \end{align*}
 Result of the simulation is $\hat{p} = 0.1259$; thus, $p \in [0.1179, 0.1339]$. \\
 
-\textbf{b.} The expected value of the total weights is 599.0387 tons. \\ % Thus, we can expect the total weight of the plastics to not exceed 640 tons. \\ % The result of the simulation shows that the expected value of the total weight is $E(X) = 599.0387$. \\
+\textbf{b.} The expected value of the total weights is 599.0387 tons. \\
 
 \textbf{c.} The standard deviation of the total weights is 35.7356. \\
 
@@ -41,85 +39,5 @@ The random variable $W$ for the total weights has normal approximation. The prob
     P(W > 640) = P\left( \frac{W - 599.0387}{35.7356} > \frac{640 - 599.0387}{35.7356} \right) = 1 - \Phi(1.1462) = 0.1259.
 \]
 This is consistent with the findings in part a.
-
-% The null hypothesis is $H_0: \mu = 640$, and the alternative hypothesis is $H_A: \mu > 640$. We obtained from this simulation that $\bar{X} = 599.0387$ and $\sigma(\bar{X}) = 35.7356$.
-% \[
-%     \frac{\bar{X} - \mu_0}{\sigma(\bar{X})} = \frac{599.0387 - 640}{35.7356} = -1.146232773
-% \]
-% 640 has a $Z$-value $-1.146232773$ in a normal distribution with $\mu = 599.0387$ and $\sigma = 35.7356$. This implies that the total weight exceeds 640 tons with probability $1 - \Phi(-1.146232773) = 1 - 0.125855 = 0.87415$, which is consistent with the findings in part a. \\ % The result of the simulation shows that the standard deviation $\sigma(X) = 35.7356$.
-
-
-% octave:1> hw4
-% Estimated probability = 0.130126
-% Expected weight = 599.464502
-% Standard deviation = 35.786116
-% octave:2> hw4
-% Estimated probability = 0.123693
-% Expected weight = 599.037257
-% Standard deviation = 35.598410
-% octave:3> hw4
-% Estimated probability = 0.124923
-% Expected weight = 598.917299
-% Standard deviation = 35.755980
-% octave:4> hw4
-% Estimated probability = 0.123220
-% Expected weight = 598.614722
-% Standard deviation = 35.643664
-% octave:5> hw4
-% Estimated probability = 0.124024
-% Expected weight = 599.089480
-% Standard deviation = 35.318577
-% octave:6> hw4
-% Estimated probability = 0.128187
-% Expected weight = 599.149782
-% Standard deviation = 35.994593
-% octave:7> hw4
-% Estimated probability = 0.127430
-% Expected weight = 598.997766
-% Standard deviation = 36.051843
-% 
-% 0.1259432857, 599.0386869, 35.73559757
-% 
-% --------------------------------------
-% 
-% N = 21140.2126213060
-% 
-% N = 21140
-% octave:3> hw4
-% Estimated probability = 0.130747
-% Expected weight = 599.118230
-% Standard deviation = 36.006134
-% 
-% N = 21141
-% octave:1> hw4
-% Estimated probability = 0.126295
-% Expected weight = 599.112537
-% Standard deviation = 35.878687
-% octave:2> hw4
-% Estimated probability = 0.125018
-% Expected weight = 598.980901
-% Standard deviation = 35.614077
-% octave:3> hw4
-% Estimated probability = 0.124308
-% Expected weight = 599.198870
-% Standard deviation = 35.605182
-%
-% 0.125207, 599.097436, 35.69931533
-%
-% N = 21141 opt
-% octave:5> opthw4
-% Estimated probability = 0.123741
-% Expected weight = 599.028994
-% Standard deviation = 35.617563
-% octave:6> opthw4
-% Estimated probability = 0.125112
-% Expected weight = 599.163494
-% Standard deviation = 35.435826
-% octave:7> opthw4
-% Estimated probability = 0.128660
-% Expected weight = 599.072737
-% Standard deviation = 36.030737
-%
-% 0.1258376667, 599.0884083, 35.69470867
 
 \end{document}
