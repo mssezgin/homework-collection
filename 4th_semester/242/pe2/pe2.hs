@@ -9,6 +9,7 @@ module PE2 where
 -- Note: undefined is a value that causes an error when evaluated. Replace it with
 -- a viable definition! Name your arguments as you like by changing the holes: _
 
+
 --------------------------
 -- Part I: Time to inf up!
 
@@ -26,13 +27,13 @@ interleave (x:xs) (y:ys) = x:y:(interleave xs ys)
 integers :: [Integer]
 integers = interleave [0..] [-1,-2..]
 
+
 --------------------------------
 -- Part II: SJSON Prettification
 
 -- splitOn: Split string on first occurence of character.
 splitOn :: Char -> String -> (String, String)
 splitOn _ "" = ("", "")
--- splitOn '' x = (x, "")
 splitOn c (x:xs) | c == x = ("", xs)
                  | otherwise = (x:(fst rest), snd rest)
                                 where rest = splitOn c xs
@@ -55,11 +56,8 @@ tokenizeIndex (j:js) x = case j of ' '  -> tokenizeIndex js x
 
 -- prettifyS: Prettify SJSON, better tokenize first!
 prettifyS :: String -> String
--- prettifyS [] = ""
 prettifyS sjson = prettifyIndent (tokenizeS sjson) 0
 
--- prettifyStart (j:js) i = case j of "{" -> (prettifyIndent (j:js) (i+1))
---                                    "}" ->
 
 prettifyIndent [] i = ""
 prettifyIndent (j:js) i = case j of "{" -> '{':'\n':(take (4 * (i + 1)) (repeat ' ')) ++ (prettifyIndent js (i + 1))
@@ -68,11 +66,5 @@ prettifyIndent (j:js) i = case j of "{" -> '{':'\n':(take (4 * (i + 1)) (repeat 
                                     "," -> ',':'\n':(take (4 * i) (repeat ' ')) ++ (prettifyIndent js i)
                                     j   -> '\'':j ++ '\'':(prettifyIndent js i)
  
--- prettifyIndent (j:js) i | j == "{" = '{':'\n':(take (4 * (i + 1)) (repeat ' ')) ++ (prettifyIndent js (i + 1))
---                         | j == "}" = '\n':(take (4 * (i - 1)) (repeat ' ')) ++ '}':(prettifyIndent js (i - 1))
---                         | j == ":" = ':':' ':(prettifyIndent js i)
---                         | j == "," = ',':'\n':(take (4 * i) (repeat ' ')) ++ (prettifyIndent js i)
---                         | otherwise = '\'':j ++ '\'':(prettifyIndent js i)
-
 
 -- Good luck to you, friend and colleague!

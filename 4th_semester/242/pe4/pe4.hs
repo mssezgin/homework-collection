@@ -50,15 +50,6 @@ toDigits (d:ds) =   let
                                 else
                                     Just ((Digit d):(fromJust restPN))
 
--- toDigits (d:[]) = if (toDigit d) == Nothing then Nothing
---                                             else Just ([Digit d])
--- toDigits (d:ds) = let
---                     firstPN = toDigit d
---                     restPN = toDigits ds
---                   in
---                     if (firstPN == Nothing || restPN == Nothing) then Nothing
---                                                                  else Just ((Digit d):(fromJust restPN))
-
 
 -----------
 -- Part II:
@@ -70,11 +61,8 @@ numContacts (Leaf _) = 1
 numContacts (Node nodes) =  foldl (+) 0 (map sumOfNode nodes)
                                 where
                                     sumOfNode node = numContacts (snd node)
---                         foldl (+) 0 sumOfNodes
---                          where
---                              sumOfNodes = [numContacts (snd node) | node <- nodes]
 
-    
+
 -- getContacts: Generate the contacts and their phone numbers in order given a tree. 
 getContacts :: DigitTree -> [(PhoneNumber, String)]
 getContacts book = preGetContacts [] book
@@ -145,4 +133,3 @@ areaCodes = Node [
     (Digit '4', Node [
         (Digit '6', Node [
             (Digit '6', Leaf "Artvin")])])]
-
