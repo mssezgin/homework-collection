@@ -1,4 +1,5 @@
 `timescale 1ns / 1ps
+
 module kb(
     input K,
     input B,
@@ -9,9 +10,7 @@ module kb(
     initial begin
         Q = 0;
     end
-    
-    // write your code here
-    
+
     always@(posedge clk)
     begin
         if (K == 1'b0 && B == 1'b0)
@@ -37,14 +36,12 @@ module ic232(
     output Z
     );
 
-    // write your code here
-    
     wire K0, B1;
-    
+
     assign K0 = ~(A0 | A1) & (~A2);
     assign B1 = (~A0 | A1) ^ A2;
     kb kb_0(K0, A1, clk, Q0);
     kb kb_1(~A2, B1, clk, Q1);
     assign Z = ~(Q0 ^ Q1);
-    
+
 endmodule

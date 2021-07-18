@@ -17,8 +17,7 @@ module IntersectionSimulator(
     output reg [6:0]  remainingTime,
     output reg [4:0]  blackListDisplay
     );
-    
-    // You may write your code anywhere
+
     integer i;
     reg greenWasAorB; // 0:A, 1:B
     reg [6:0] redDurationForA;
@@ -29,7 +28,7 @@ module IntersectionSimulator(
     reg [4:0] carsOnRoadB [0:29];
     reg [4:0] blackListItr [0:1];   // [0]: current, [1]: tail
     reg [4:0] blackList [0:29];
-    
+
     // initialization
     initial begin
         greenForA = 1;
@@ -43,7 +42,7 @@ module IntersectionSimulator(
         numOfCarsB = 0;
         remainingTime = 50;
         blackListDisplay = 0;
-        
+
         // local variables
         greenWasAorB = 0;
         redDurationForA = 7'd40;
@@ -65,9 +64,9 @@ module IntersectionSimulator(
     // action
     always@(posedge action)
     begin
-    
+
         case (mode)
-            
+
             3'b000  : begin
                 if (greenForA == 0) begin
                     blackList [blackListItr [1]] <= carsOnRoadA [carsOnRoadAItr [0]];
@@ -77,7 +76,7 @@ module IntersectionSimulator(
                 carsOnRoadAItr [0] <= (carsOnRoadAItr [0] == 5'd29) ? 5'd0 : carsOnRoadAItr [0] + 1;
                 numOfCarsA <= numOfCarsA - 1;
             end
-            
+
             3'b001  : begin
                 if (greenForB == 0) begin
                     blackList [blackListItr [1]] <= carsOnRoadB [carsOnRoadBItr [0]];
@@ -87,50 +86,50 @@ module IntersectionSimulator(
                 carsOnRoadBItr [0] <= (carsOnRoadBItr [0] == 5'd29) ? 5'd0 : carsOnRoadBItr [0] + 1;
                 numOfCarsB <= numOfCarsB - 1;
             end
-            
+
             3'b010  : begin
                 carsOnRoadA [carsOnRoadAItr [1]] <= plateIn;
                 carsOnRoadAItr [1] <= (carsOnRoadAItr [1] == 5'd29) ? 5'd0 : carsOnRoadAItr [1] + 1;
                 numOfCarsA <= numOfCarsA + 1;
             end
-            
+
             3'b011  : begin
                 carsOnRoadB [carsOnRoadBItr [1]] <= plateIn;
                 carsOnRoadBItr [1] <= (carsOnRoadBItr [1] == 5'd29) ? 5'd0 : carsOnRoadBItr [1] + 1;
                 numOfCarsB <= numOfCarsB + 1;
             end
-            
+
             default : ;
-            
+
         endcase
-        
+
     end
 
 
     // clk
     always@(posedge clk)
     begin
-        
+
         // if (mode == 0xx)
         if ((mode & 3'b100) == 3'b000) begin
-            
+
             blackListItr [0] <= 5'd0;
 
             // 12 hour clock
             if (second == 6'd59) begin
                 second <= 6'd0;
-                
+
                 if (minute == 6'd59) begin
                     minute <= 6'd0;
-                    
+
                     if (hour == 4'd12)
                         hour <= 4'd1;
                     else
                         hour <= hour + 1;
-                    
+
                     if (hour == 4'd11) begin
                         am_pm <= ~am_pm;
-                        
+
                         if (am_pm == 1) begin // 11:59:59 pm, reset black list
                             blackListDisplay <= 5'd0;
                             blackListItr [0] <= 5'd0;
@@ -145,14 +144,14 @@ module IntersectionSimulator(
             end
             else
                 second <= second + 1;
-            
+
             // remaining time
             if (remainingTime == 7'd0) begin
-                
+
                 if (greenWasAorB == 0) begin // A
                     remainingTime <= redDurationForA;
                     greenForB <= 1;
-                    
+
                     if (numOfCarsB < 5'd11) begin
                         redDurationForB <= (rushHourWarning == 0) ?
                             ((redDurationForB + 5 < 7'd80) ? redDurationForB + 5 : 7'd80):
@@ -172,7 +171,7 @@ module IntersectionSimulator(
                 else if (greenWasAorB == 1) begin // B
                     remainingTime <= redDurationForB;
                     greenForA <= 1;
-                    
+
                     if (numOfCarsA < 5'd11) begin
                         redDurationForA <= (rushHourWarning == 0) ?
                             ((redDurationForA + 5 < 7'd70) ? redDurationForA + 5 : 7'd70):
@@ -193,28 +192,28 @@ module IntersectionSimulator(
             end
             else
                 remainingTime <= remainingTime - 1;
-            
+
             if (remainingTime == 7'd1) begin
                 if (greenForA == 1)
                     greenForA <= 0;
                 else if (greenForB == 1)
                     greenForB <= 0;
             end
-            
+
         end
-        
+
         // if (mode == 1xx)
         else if ((mode & 3'b100) == 3'b100)
         begin
-            
+
             blackListDisplay <= blackList [blackListItr [0]];
             blackListItr [0] <= (blackListItr [0] + 1 < blackListItr [1]) ? blackListItr [0] + 1: 5'd0;
-            
+
         end
-        
+
     end
-    
-    
+
+
     // rush hour warning
     always@(*) rushHourWarning <= ((am_pm == 0 && (hour == 4'd7 || hour == 4'd8)) || (am_pm == 1 && (hour == 4'd5 || hour == 4'd6))) ? 1 : 0;
 
