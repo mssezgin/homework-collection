@@ -12,31 +12,30 @@
 
 using namespace std;
 
-void randomFill(int*& arr, int size, int minval, int interval)
-{
+void randomFill(int*& arr, int size, int minval, int interval) {
+
 	arr = new int [size];
-	for (int i=0; i <size; i++)
-	{
-		arr[i] = minval + (random() % interval);
+	for (int i=0; i <size; i++) {
+
+		arr[i] = minval + (rand() % interval);
 	}
 }
 
-void print_to_file(int* arr, int size)
-{
+void print_to_file(int* arr, int size, string file) {
+
 	ofstream ofile;
-	ofile.open("sorted.txt");
+	ofile.open(file);
 	for(int i=0;i<size; i++) 
 		ofile<<arr[i]<<endl;
+	ofile.close();
 }
 
-void read_from_file(int*& arr, int& size)
-{
+void read_from_file(int*& arr, int& size) {
 
 	char addr[]= "input01.txt";
 	ifstream infile (addr);
 	
-	if (!infile.is_open())
-	{
+	if (!infile.is_open()) {
 		cout << "File \'"<< addr 
 			<< "\' can not be opened. Make sure that this file exists." <<endl;
 		return;
@@ -52,8 +51,7 @@ void read_from_file(int*& arr, int& size)
 }
 	
 
-void test()
-{
+void test() {
 	
 	clock_t begin, end;
 	double duration;
@@ -69,6 +67,7 @@ void test()
 	
 	//Randomly generate initial array:
 	randomFill(arr, size, minval, interval);
+	print_to_file(arr,size,"unsorted.txt");
 	
 	//Read the test inputs. input01.txt through input04.txt exists.
 	//read_from_file(arr, size);
@@ -80,7 +79,7 @@ void test()
 	
 	//Function call for the solution
 	
-	//num_of_calls=sillySort(arr, comparison, swap, size) ;
+	// num_of_calls=sillySort(arr, comparison, swap, size) ;
 	
 	num_of_calls=crossMergeSort(arr, comparison, size);
 	
@@ -93,19 +92,18 @@ void test()
 	
 	duration = ((double) end - begin) / CLOCKS_PER_SEC;
 	cout << "Duration: " << duration << " seconds." <<endl;
+	cout << "Size: " << size <<endl;
 	cout<<"Number of Comparisons: " << comparison <<endl;
 	cout<<"Number of sillySort or crossMergeSort calls: " << num_of_calls <<endl;
 	cout<<"Number of Swaps(0 for crossMergeSort): " << swap <<endl;
-	print_to_file(arr,size);
+	print_to_file(arr,size,"sorted.txt");
 	//Calculation and output end
 	
 }
 
-int main()
-{
-	srandom(time(0));
+int main() {
+
+	srand(time(0));
 	test();
 	return 0;
 }
-	
-	
