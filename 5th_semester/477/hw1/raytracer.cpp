@@ -1,4 +1,85 @@
 #include <iostream>
+#include "ppm.h"
+#include "models.h"
+
+#define IS_DEVELOPMENT 1
+
+#if IS_DEVELOPMENT
+#include <ctime>
+#endif
+
+
+int main(int argc, char* argv[]) {
+
+
+    #if IS_DEVELOPMENT
+        clock_t begin, end;
+        std::cout << "\n";
+        if ((begin = clock()) == -1)
+            std::cout << "\x1b[31mClock error occurred while calculating the total start time.\x1b[0m\n";
+        std::cout << argv[1] << "\n\n";
+    #endif
+
+
+    Scene scene(argv[1]);
+
+    for (auto itr = scene.cameras.begin(); itr != scene.cameras.end(); ++itr) {
+
+        Camera &camera = *itr;
+        int width = camera.imageWidth;
+        int height = camera.imageHeight;
+        
+
+        #if IS_DEVELOPMENT
+            clock_t begin_camera, begin_write, end_camera;
+            std::cout << "\t" << camera.imageName << " (" << width << "x" << height << ")\n";
+            if ((begin_camera = clock()) == -1)
+                std::cout << "\t\x1b[31mClock error occurred while calculating the camera start time.\x1b[0m\n";
+        #endif
+
+
+        unsigned char *data = new unsigned char[width * height * 3];
+        int index = 0;
+
+        for (int j = 0; j < height; ++j) {
+            for (int i = 0; i < width; ++i) {
+
+                data[index++] = scene.backgroundColor.r;
+                data[index++] = scene.backgroundColor.g;
+                data[index++] = scene.backgroundColor.b;
+            }
+        }
+
+
+        #if IS_DEVELOPMENT
+            if ((begin_write = clock()) == -1)
+                std::cout << "\t\x1b[31mClock error occurred while calculating the write start time.\x1b[0m\n";
+            std::cout << "\tRendered the image in " << (double) (begin_write - begin_camera) / CLOCKS_PER_SEC << " seconds\n";
+        #endif
+
+
+        write_ppm(camera.imageName.c_str(), data, width, height);
+        delete[] data;
+
+
+        #if IS_DEVELOPMENT
+            if ((end_camera = clock()) == -1)
+                std::cout << "\t\x1b[31mClock error occurred while calculating the camera end time.\x1b[0m\n";
+            std::cout << "\tWrote to the file in " << (double) (end_camera - begin_write) / CLOCKS_PER_SEC << " seconds\n";
+            std::cout << "\t\x1b[32mCamera execution time: " << (double) (end_camera - begin_camera) / CLOCKS_PER_SEC << " seconds\x1b[0m\n\n";
+        #endif
+    }
+
+
+    #if IS_DEVELOPMENT
+        if ((end = clock()) == -1)
+            std::cout << "\x1b[31mClock error occurred while calculating the total end time.\x1b[0m\n";
+        std::cout << "\x1b[42mTotal execution time: " << (double) (end - begin) / CLOCKS_PER_SEC << " seconds\x1b[0m\n" << std::endl;
+    #endif
+}
+
+/*
+#include <iostream>
 #include "parser.h"
 #include "ppm.h"
 
@@ -50,3 +131,4 @@ int main(int argc, char* argv[])
     write_ppm("test.ppm", image, width, height);
 
 }
+*/
