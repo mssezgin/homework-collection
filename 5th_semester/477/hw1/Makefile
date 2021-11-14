@@ -1,14 +1,15 @@
 CC=g++
 CFLAGS=-std=c++11 # -O3
 EXENAME=raytracer
-SCENESPATH=/mnt/d/metu/2021-1/CENG477/hw1/sample_scenes/inputs
-SCENE=simple
+FILEPATH=./sample_scenes_v2/inputs
+FILE=simple.xml
 
-all: parser.cpp parser.h ppm.cpp ppm.h raytracer.cpp tinyxml2.cpp tinyxml2.h
-	$(CC) $(CFLAGS) -o $(EXENAME) parser.cpp parser.h ppm.cpp ppm.h raytracer.cpp tinyxml2.cpp tinyxml2.h
+all: parser.cpp parser.h ppm.cpp ppm.h raytracer.cpp tinyxml2.cpp tinyxml2.h models.cpp models.h
+	$(CC) $(CFLAGS) -o $(EXENAME) parser.cpp ppm.cpp raytracer.cpp tinyxml2.cpp models.cpp
 
 run:
-	./$(EXENAME) $(SCENESPATH)/$(SCENE).xml
+	./$(EXENAME) $(FILEPATH)/$(FILE)
 
 clean:
 	rm $(EXENAME)
+	rm *.ppm
