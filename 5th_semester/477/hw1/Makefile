@@ -1,7 +1,7 @@
 CC=g++
-CFLAGS=-std=c++11 # -O3
+CFLAGS=-std=c++11 -O3
 EXENAME=raytracer
-FILEPATH=./sample_scenes_v2/inputs
+FILEPATH=./sample_scenes_v3/inputs
 FILE=simple.xml
 
 all: parser.cpp parser.h ppm.cpp ppm.h raytracer.cpp tinyxml2.cpp tinyxml2.h models.cpp models.h
