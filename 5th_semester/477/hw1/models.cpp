@@ -1,6 +1,21 @@
 #include "models.h"
 
 
+// class Scene static varibles
+
+RGBColor Scene::backgroundColor;
+real Scene::shadowRayEpsilon;
+int Scene::maxRecursionDepth;
+std::vector<Camera> Scene::cameras;
+Vec3real Scene::ambientLight;
+std::vector<PointLight> Scene::pointLights;
+std::vector<Material> Scene::materials;
+std::vector<Vec3real> Scene::vertexData;
+std::vector<Mesh> Scene::meshes;
+std::vector<Triangle> Scene::triangles;
+std::vector<Sphere> Scene::spheres;
+
+
 // class Vec3i
 
 Vec3i::Vec3i(int _x, int _y, int _z) :
@@ -111,11 +126,17 @@ void Vector::normalize() {
 
 // class Ray
 
-Ray::Ray(const Vector &_origin, const Vector &_direction) :
+Ray::Ray(const Point &_origin, const Vector &_direction) :
     origin(_origin), direction(_direction) { }
 
-Vector Ray::operator[](real t) const {
+Point Ray::operator[](real t) const {
     return origin + (direction * t);
+}
+
+void Ray::intersectWith(const Sphere &sphere) const {
+    // real A = this->direction.dot(this->direction);
+    // Vector vCO = this->origin - sphere.
+    // real halfB = this->direction.dot()
 }
 
 
@@ -166,8 +187,8 @@ void Camera::initPositionTopLeftPixel() {
 Ray Camera::createRay(int i, int j) {
     // TODO: float precision error: e.g. (400,400) 0.00125003 -0.00125003 -1
     return Ray(
-        Vector(position),
-        (nearPlane.positionTopLeftPixel + (u * (i * nearPlane.pixelWidth)) + (v * (-j * nearPlane.pixelHeight))) - position
+        Point(position),
+        Vector(nearPlane.positionTopLeftPixel + (u * (i * nearPlane.pixelWidth)) + (v * (-j * nearPlane.pixelHeight)), position)
     );
 }
 
@@ -236,39 +257,39 @@ Sphere::Sphere(const parser::Sphere &_sphere) :
 
 // class Scene
 
-Scene::Scene(char filePath[]) {
+void Scene::loadFromXml(const std::string &filePath) {
     parser::Scene _scene;
     _scene.loadFromXml(filePath);
 
-    this->backgroundColor.r = _scene.background_color.x;
-    this->backgroundColor.g = _scene.background_color.y;
-    this->backgroundColor.b = _scene.background_color.z;
-    this->shadowRayEpsilon = _scene.shadow_ray_epsilon;
-    this->maxRecursionDepth = _scene.max_recursion_depth;
+    Scene::backgroundColor.r = _scene.background_color.x;
+    Scene::backgroundColor.g = _scene.background_color.y;
+    Scene::backgroundColor.b = _scene.background_color.z;
+    Scene::shadowRayEpsilon = _scene.shadow_ray_epsilon;
+    Scene::maxRecursionDepth = _scene.max_recursion_depth;
     for (auto itr = _scene.cameras.begin(); itr != _scene.cameras.end(); ++itr) {
-        this->cameras.push_back(Camera(*itr));
+        Scene::cameras.push_back(Camera(*itr));
     }
-    this->ambientLight = Vec3real(
+    Scene::ambientLight = Vec3real(
         _scene.ambient_light.x,
         _scene.ambient_light.y,
         _scene.ambient_light.z
     );
     for (auto itr = _scene.point_lights.begin(); itr != _scene.point_lights.end(); ++itr) {
-        this->pointLights.push_back(*itr);
+        Scene::pointLights.push_back(*itr);
     }
     for (auto itr = _scene.materials.begin(); itr != _scene.materials.end(); ++itr) {
-        this->materials.push_back(*itr);
+        Scene::materials.push_back(*itr);
     }
     for (auto itr = _scene.vertex_data.begin(); itr != _scene.vertex_data.end(); ++itr) {
-        this->vertexData.push_back(*itr);
+        Scene::vertexData.push_back(*itr);
     }
     for (auto itr = _scene.meshes.begin(); itr != _scene.meshes.end(); ++itr) {
-        this->meshes.push_back(*itr);
+        Scene::meshes.push_back(*itr);
     }
     for (auto itr = _scene.triangles.begin(); itr != _scene.triangles.end(); ++itr) {
-        this->triangles.push_back(*itr);
+        Scene::triangles.push_back(*itr);
     }
     for (auto itr = _scene.spheres.begin(); itr != _scene.spheres.end(); ++itr) {
-        this->spheres.push_back(*itr);
+        Scene::spheres.push_back(*itr);
     }
 }

@@ -8,6 +8,22 @@
 
 
 typedef double real;
+class Vec3i;
+class Vec3real;
+class Point;
+class Vector;
+class Ray;
+struct RGBColor;
+struct ImagePlane;
+class Camera;
+class PointLight;
+class Material;
+class Face;
+class Object;
+class Mesh;
+class Triangle;
+class Sphere;
+class Scene;
 
 
 class Vec3i {
@@ -26,9 +42,6 @@ public:
     Vec3real(real _x = 0.0, real _y = 0.0, real _z = 0.0);
     Vec3real(const parser::Vec3f &_vec3f);
 };
-
-
-class Vector;
 
 
 class Point : public Vec3real {
@@ -59,10 +72,12 @@ public:
 
 class Ray {
 public:
-    Vector origin, direction;
+    Point origin;
+    Vector direction;
 
-    Ray(const Vector &_origin, const Vector &_direction);
-    Vector operator[](real t) const;
+    Ray(const Point &_origin, const Vector &_direction);
+    Point operator[](real t) const;
+    void intersectWith(const Sphere &sphere) const;
 };
 
 
@@ -161,19 +176,19 @@ public:
 
 class Scene {
 public:
-    RGBColor backgroundColor;
-    real shadowRayEpsilon;
-    int maxRecursionDepth;
-    std::vector<Camera> cameras;
-    Vec3real ambientLight;
-    std::vector<PointLight> pointLights;
-    std::vector<Material> materials;
-    std::vector<Vec3real> vertexData;
-    std::vector<Mesh> meshes;
-    std::vector<Triangle> triangles;
-    std::vector<Sphere> spheres;
+    static RGBColor backgroundColor;
+    static real shadowRayEpsilon;
+    static int maxRecursionDepth;
+    static std::vector<Camera> cameras;
+    static Vec3real ambientLight;
+    static std::vector<PointLight> pointLights;
+    static std::vector<Material> materials;
+    static std::vector<Vec3real> vertexData;
+    static std::vector<Mesh> meshes;
+    static std::vector<Triangle> triangles;
+    static std::vector<Sphere> spheres;
 
-    Scene(char filePath[]);
+    static void loadFromXml(const std::string &filePath);
 };
 
 
