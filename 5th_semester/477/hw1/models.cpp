@@ -10,22 +10,30 @@ Vec3i::Vec3i(const parser::Vec3i &_vec3i) :
     x(_vec3i.x), y(_vec3i.y), z(_vec3i.z) { }
 
 
-// class Vec3f
+// class Vec3real
 
-Vec3f::Vec3f(float _x, float _y, float _z) :
+Vec3real::Vec3real(real _x, real _y, real _z) :
     x(_x), y(_y), z(_z) { }
 
-Vec3f::Vec3f(const parser::Vec3f &_vec3f) :
+Vec3real::Vec3real(const parser::Vec3f &_vec3f) :
     x(_vec3f.x), y(_vec3f.y), z(_vec3f.z) { }
 
 
 // class Point
 
-Point::Point(float _x, float _y, float _z) :
-    Vec3f(_x, _y, _z) { }
+Point::Point(real _x, real _y, real _z) :
+    Vec3real(_x, _y, _z) { }
 
 // Point::Point(parser::Vec3f _vec3f) :
-//     Vec3f(_vec3f) { }
+//     Vec3real(_vec3f) { }
+
+Point Point::operator+(const Vector &vector) const {
+    return Point(
+        this->x + vector.x,
+        this->y + vector.y,
+        this->z + vector.z
+    );
+}
 
 Vector Point::operator-(const Point &second) const {
     return Vector(this->x - second.x, this->y - second.y, this->z - second.z);
@@ -34,11 +42,11 @@ Vector Point::operator-(const Point &second) const {
 
 // class Vector
 
-Vector::Vector(float _x, float _y, float _z) :
-    Vec3f(_x, _y, _z) { }
+Vector::Vector(real _x, real _y, real _z) :
+    Vec3real(_x, _y, _z) { }
 
 // Vector::Vector(parser::Vec3f _vec3f) :
-//     Vec3f(_vec3f) { }
+//     Vec3real(_vec3f) { }
 
 Vector::Vector(Point end, Point start) {
     *this = end - start;
@@ -60,7 +68,7 @@ Vector Vector::operator-(const Vector &second) const {
     );
 }
 
-Vector Vector::operator*(float scalar) const {
+Vector Vector::operator*(real scalar) const {
     return Vector(
         this->x * scalar,
         this->y * scalar,
@@ -68,7 +76,7 @@ Vector Vector::operator*(float scalar) const {
     );
 }
 
-Vector Vector::operator/(float scalar) const {
+Vector Vector::operator/(real scalar) const {
     return Vector(
         this->x / scalar,
         this->y / scalar,
@@ -76,7 +84,7 @@ Vector Vector::operator/(float scalar) const {
     );
 }
 
-float Vector::dot(const Vector &second) const {
+real Vector::dot(const Vector &second) const {
     return this->x * second.x + this->y * second.y + this->z * second.z;
 }
 
@@ -88,7 +96,7 @@ Vector Vector::cross(const Vector &second) const {
     );
 }
 
-float Vector::length() const {
+real Vector::length() const {
     return sqrt(this->dot(*this));
 }
 
@@ -98,6 +106,16 @@ Vector Vector::normal() const {
 
 void Vector::normalize() {
     *this = this->normal();
+}
+
+
+// class Ray
+
+Ray::Ray(const Vector &_origin, const Vector &_direction) :
+    origin(_origin), direction(_direction) { }
+
+Vector Ray::operator[](real t) const {
+    return origin + (direction * t);
 }
 
 
@@ -134,6 +152,23 @@ Camera::Camera(const parser::Camera &_camera) {
     this->imageWidth       = _camera.image_width;
     this->imageHeight      = _camera.image_height;
     this->imageName        = _camera.image_name;
+    this->initPositionTopLeftPixel();
+}
+
+void Camera::initPositionTopLeftPixel() {
+    Point imageCenter = position + (gaze * nearDistance);
+    Point positionTopLeft = imageCenter + (u * nearPlane.left) + (v * nearPlane.top);
+    nearPlane.pixelWidth = (nearPlane.right - nearPlane.left) / imageWidth;
+    nearPlane.pixelHeight = (nearPlane.top - nearPlane.bottom) / imageHeight;
+    nearPlane.positionTopLeftPixel = positionTopLeft + (u * (nearPlane.pixelWidth / 2)) + (v * (-1 * nearPlane.pixelHeight / 2));
+}
+
+Ray Camera::createRay(int i, int j) {
+    // TODO: float precision error: e.g. (400,400) 0.00125003 -0.00125003 -1
+    return Ray(
+        Vector(position),
+        (nearPlane.positionTopLeftPixel + (u * (i * nearPlane.pixelWidth)) + (v * (-j * nearPlane.pixelHeight))) - position
+    );
 }
 
 
@@ -213,7 +248,7 @@ Scene::Scene(char filePath[]) {
     for (auto itr = _scene.cameras.begin(); itr != _scene.cameras.end(); ++itr) {
         this->cameras.push_back(Camera(*itr));
     }
-    this->ambientLight = Vec3f(
+    this->ambientLight = Vec3real(
         _scene.ambient_light.x,
         _scene.ambient_light.y,
         _scene.ambient_light.z
