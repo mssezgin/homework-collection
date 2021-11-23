@@ -20,6 +20,12 @@ int main(int argc, char* argv[]) {
         std::cout << argv[1] << "\n\n";
     #endif
 
+    /* std::cout
+        << "sizeof(int *) = " << sizeof(int *)
+        << "sizeof(int) = " << sizeof(int)
+        << "sizeof(long) = " << sizeof(long)
+        << "sizeof(long long) = " << sizeof(long long)
+        << "\n"; */
 
     Scene::loadFromXml(argv[1]);
 

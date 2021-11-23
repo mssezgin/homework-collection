@@ -7,7 +7,7 @@ RGBColor Scene::backgroundColor;
 real Scene::shadowRayEpsilon;
 int Scene::maxRecursionDepth;
 std::vector<Camera> Scene::cameras;
-Vec3real Scene::ambientLight;
+ColorVector Scene::ambientLight;
 std::vector<PointLight> Scene::pointLights;
 std::vector<Material> Scene::materials;
 std::vector<Point> Scene::vertexData;
@@ -32,6 +32,14 @@ Vec3real::Vec3real(real _x, real _y, real _z) :
 
 Vec3real::Vec3real(const parser::Vec3f &_vec3f) :
     x(_vec3f.x), y(_vec3f.y), z(_vec3f.z) { }
+
+Vec3real Vec3real::operator*(real scalar) const {
+    return Vec3real(
+        this->x * scalar,
+        this->y * scalar,
+        this->z * scalar
+    );
+}
 
 
 // class Point
@@ -187,6 +195,101 @@ real Ray::intersectWith(const Face &face) const {
 
 RGBColor Ray::computeColor() const {
 
+    const Ray &thisRay = *this;
+    real tMin = DBL_MAX;
+    long long closestSphereIndex = -1;
+    long long closestTriangleIndex = -1;
+    long long closestMeshIndex = -1;
+    long long closestFaceIndex = -1;
+    Sphere *closestSphere = nullptr;
+    Triangle *closestTriangle = nullptr;
+    Mesh *closestMesh = nullptr;
+    Face *closestFace = nullptr;
+    int closestObject = 0; // 1: Sphere, 2: Triangle, 3: Mesh and Face
+
+    // intersect with spheres
+    for (long long i = 0, size = Scene::spheres.size(); i < size; i++) {
+        real t = thisRay.intersectWith(Scene::spheres[i]);
+        if (t < tMin && t >= 1) {
+            tMin = t;
+            closestSphereIndex = i;
+            closestSphere = &(Scene::spheres[i]);
+            closestObject = 1;
+        }
+    }
+
+    // intersect with triangles
+    for (long long i = 0, size = Scene::triangles.size(); i < size; i++) {
+        real t = thisRay.intersectWith(Scene::triangles[i].face);
+        if (t < tMin && t >= 1) {
+            tMin = t;
+            closestTriangleIndex = i;
+            closestTriangle = &(Scene::triangles[i]);
+            closestObject = 2;
+        }
+    }
+
+    // intersect with meshes
+    for (long long i = 0, size = Scene::meshes.size(); i < size; i++) {
+        std::vector<Face> &faces = Scene::meshes[i].faces;
+
+        for (long long j = 0, size = faces.size(); j < size; j++) {
+            real t = thisRay.intersectWith(faces[j]);
+            if (t < tMin && t >= 1) {
+                tMin = t;
+                closestMeshIndex = i;
+                closestFaceIndex = j;
+                closestMesh = &(Scene::meshes[i]);
+                closestFace = &(faces[j]);
+                closestObject = 3;
+            }
+        }
+    }
+
+
+    // compute color
+    if (closestObject == 1) {
+        
+        Material &material = Scene::materials[closestSphere->materialId - 1];
+        Point p = thisRay[tMin];
+        ColorVector colorv(0.0, 0.0, 0.0);
+        colorv.increment(Scene::ambientLight, material.ambientReflectance);
+
+        for (long long i = 0, size = Scene::pointLights.size(); i < size; i++) {
+
+            PointLight &pointLight = Scene::pointLights[i];
+            Vector toLight = (pointLight.position - p);
+            // TODO: radiance, intensity, divide by square of distance
+            ColorVector intensity = pointLight.intensity / pow(toLight.length(), 2);
+
+            // calculate diffuse shading
+            real cosTheta = closestSphere->normal(p).dot(toLight.normalized());
+            if (cosTheta < 0) {
+                cosTheta = 0;
+            }
+            colorv.increment(intensity, material.diffuseReflectance * cosTheta);
+
+            // calculate specular shading
+            Vector halfVector = (toLight.normalized() - thisRay.direction).normalized();
+            real cosAlpha = closestSphere->normal(p).dot(halfVector);
+            if (cosAlpha < 0) {
+                cosAlpha = 0;
+            }
+            cosAlpha = pow(cosAlpha, material.phongExponent);
+            colorv.increment(intensity, material.specularReflectance * cosAlpha);
+        }
+
+        return colorv.toRGBColor();
+
+    } else if (closestObject == 2) {
+        return Scene::backgroundColor;
+    } else if (closestObject == 3) {
+        return Scene::backgroundColor;
+    } else {
+        return Scene::backgroundColor;
+    }
+
+
     /* real minT = DBL_MAX;
     int closestSphereIndex = -1;
     
@@ -195,8 +298,6 @@ RGBColor Ray::computeColor() const {
         real t = this->intersectWith(Scene::spheres[i]);
         // TODO: t >= 1.0 may be a problem for reflected rays (recursion)
         if (t >= 1.0 && t < minT) {
-            // std::cout << " currDist " << minT << " currIndex " << closestSphereIndex
-            //           << " newDist " << t << " newIndex " << i << "\n";
             minT = t;
             closestSphereIndex = i;
         }
@@ -233,7 +334,7 @@ RGBColor Ray::computeColor() const {
         );
     } else {
         return Scene::backgroundColor;
-    } */
+    }
 
     real minT = DBL_MAX;
     int closestMeshIndex = -1;
@@ -246,8 +347,6 @@ RGBColor Ray::computeColor() const {
             real t = this->intersectWith(Scene::meshes[i].faces[j]);
             // TODO: t >= 1.0 may be a problem for reflected rays (recursion)
             if (t >= 1.0 && t < minT) {
-                // std::cout << " currDist " << minT << " currIndex " << closestMeshIndex
-                //           << " newDist " << t << " newIndex " << i << "\n";
                 minT = t;
                 closestMeshIndex = i;
                 closestFace = &(Scene::meshes[i].faces[j]);
@@ -284,19 +383,49 @@ RGBColor Ray::computeColor() const {
             (unsigned char) (255 * scaledDiffuseReflectance.y + 0.5),
             (unsigned char) (255 * scaledDiffuseReflectance.z + 0.5)
         );
-
-        /* return RGBColor(
-            (unsigned char) (255 * material.diffuseReflectance.x + 0.5),
-            (unsigned char) (255 * material.diffuseReflectance.y + 0.5),
-            (unsigned char) (255 * material.diffuseReflectance.z + 0.5)
-        ); */
     } else {
         return Scene::backgroundColor;
-    }
+    } */
 }
 
 
-// class Camera
+// class ColorVector
+
+ColorVector::ColorVector(real _x, real _y, real _z) :
+    Vec3real(_x, _y, _z) { }
+
+void ColorVector::increment(ColorVector intensity, Vec3real reflectanceCoefficient) {
+    x += intensity.x * reflectanceCoefficient.x;
+    y += intensity.y * reflectanceCoefficient.y;
+    z += intensity.z * reflectanceCoefficient.z;
+}
+
+ColorVector ColorVector::operator/(real scalar) const {
+    return ColorVector(
+        this->x / scalar,
+        this->y / scalar,
+        this->z / scalar
+    );
+}
+
+RGBColor ColorVector::toRGBColor() const {
+    unsigned char r = (unsigned char) (x + 0.5);
+    unsigned char g = (unsigned char) (y + 0.5);
+    unsigned char b = (unsigned char) (z + 0.5);
+    if (((int) (x + 0.5)) > 255) {
+        r = 255;
+    }
+    if (((int) (y + 0.5)) > 255) {
+        g = 255;
+    }
+    if (((int) (z + 0.5)) > 255) {
+        b = 255;
+    }
+    return RGBColor(r, g, b);
+}
+
+
+// class RGBColor
 
 RGBColor::RGBColor(unsigned char _r, unsigned char _g, unsigned char _b) :
     r(_r), g(_g), b(_b) { }
@@ -363,7 +492,11 @@ PointLight::PointLight(const parser::PointLight &_pointLight) :
         _pointLight.position.y,
         _pointLight.position.z
     )),
-    intensity(_pointLight.intensity) { }
+    intensity(ColorVector(
+        _pointLight.intensity.x,
+        _pointLight.intensity.y,
+        _pointLight.intensity.z
+    )) { }
 
 
 // class Material
@@ -414,7 +547,7 @@ Mesh::Mesh(const parser::Mesh &_mesh) :
 
 Triangle::Triangle(const parser::Triangle &_triangle) :
     Object(_triangle.material_id),
-    indices(_triangle.indices) { }
+    face(_triangle.face) { }
 
 
 // class Sphere
@@ -440,7 +573,7 @@ Mesh::Mesh(const parser::Mesh &_mesh) :
 
 Triangle::Triangle(const parser::Triangle &_triangle) :
     materialId(_triangle.material_id),
-    indices(_triangle.indices) { }
+    face(_triangle.indices) { }
 
 
 // class Sphere
@@ -471,7 +604,7 @@ void Scene::loadFromXml(const std::string &filePath) {
     for (auto itr = _scene.cameras.begin(); itr != _scene.cameras.end(); ++itr) {
         Scene::cameras.push_back(Camera(*itr));
     }
-    Scene::ambientLight = Vec3real(
+    Scene::ambientLight = ColorVector(
         _scene.ambient_light.x,
         _scene.ambient_light.y,
         _scene.ambient_light.z

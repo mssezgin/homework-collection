@@ -43,6 +43,7 @@ public:
 
     Vec3real(real _x = 0.0, real _y = 0.0, real _z = 0.0);
     Vec3real(const parser::Vec3f &_vec3f);
+    Vec3real operator*(real scalar) const;
 };
 
 
@@ -57,9 +58,9 @@ public:
 
 class Vector : public Vec3real {
 public:
-    Vector(real _x = 0.f, real _y = 0.f, real _z = 0.f);
+    Vector(real _x = 0.0, real _y = 0.0, real _z = 0.0);
     // Vector(parser::Vec3f _vec3f);
-    Vector(Point end, Point start = Point(0.f, 0.f, 0.f));
+    Vector(Point end, Point start = Point(0.0, 0.0, 0.0));
     Vector operator+(const Vector &second) const;
     Vector operator-(const Vector &second) const;
     Vector operator*(real scalar) const;
@@ -80,9 +81,18 @@ public:
 
     Ray(const Point &_origin, const Vector &_direction);
     Point operator[](real t) const;
-    real intersectWith(const Sphere &sphere) const;
     real intersectWith(const Face &face) const;
+    real intersectWith(const Sphere &sphere) const;
     RGBColor computeColor() const;
+};
+
+
+class ColorVector : public Vec3real {
+public:
+    ColorVector(real _x = 0.0, real _y = 0.0, real _z = 0.0);
+    void increment(ColorVector intensity, Vec3real reflectanceCoefficient);
+    ColorVector operator/(real scalar) const;
+    RGBColor toRGBColor() const;
 };
 
 
@@ -90,7 +100,7 @@ class RGBColor {
 public:
     unsigned char r, g, b;
 
-    RGBColor(unsigned char _r = 255U, unsigned char _g = 255U, unsigned char _b = 255U);
+    RGBColor(unsigned char _r = 0, unsigned char _g = 0, unsigned char _b = 0);
 };
 
 
@@ -120,7 +130,7 @@ public:
 class PointLight {
 public:
     Point position;
-    Vec3real intensity;
+    ColorVector intensity;
 
     PointLight(const parser::PointLight &_pointLight);
 };
@@ -168,7 +178,7 @@ public:
 
 class Triangle : public Object {
 public:
-    Face indices;
+    Face face;
 
     Triangle(const parser::Triangle &_triangle);
 };
@@ -195,7 +205,7 @@ public:
 class Triangle {
 public:
     int materialId;
-    Face indices;
+    Face face;
 
     Triangle(const parser::Triangle &_triangle);
 };
@@ -218,7 +228,7 @@ public:
     static real shadowRayEpsilon;
     static int maxRecursionDepth;
     static std::vector<Camera> cameras;
-    static Vec3real ambientLight;
+    static ColorVector ambientLight;
     static std::vector<PointLight> pointLights;
     static std::vector<Material> materials;
     static std::vector<Point> vertexData;
