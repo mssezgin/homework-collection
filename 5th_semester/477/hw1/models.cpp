@@ -115,12 +115,12 @@ real Vector::length() const {
     return sqrt(this->dot(*this));
 }
 
-Vector Vector::normal() const {
+Vector Vector::normalized() const {
     return *this / this->length();
 }
 
 void Vector::normalize() {
-    *this = this->normal();
+    *this = this->normalized();
 }
 
 
@@ -150,6 +150,71 @@ real Ray::intersectWith(const Sphere &sphere) const {
         return DBL_MAX;
     } else {
         return (-halfB - sqrt(delta)) / A;
+    }
+}
+
+RGBColor Ray::computeColor() const {
+
+    real minT = DBL_MAX;
+    int closestSphereIndex = -1;
+    
+    for (int i = 0, size = Scene::spheres.size(); i < size; i++) {
+
+        real t = this->intersectWith(Scene::spheres[i]);
+        // TODO: t >= 1.0 may be a problem for reflected rays (recursion)
+        if (t >= 1.0 && t < minT) {
+            std::cout << " currDist " << minT << " currIndex " << closestSphereIndex
+                      << " newDist " << t << " newIndex " << i << "\n";
+            minT = t;
+            closestSphereIndex = i;
+        }
+    }
+
+    if (closestSphereIndex != -1) {
+
+        Sphere sphere = Scene::spheres[closestSphereIndex];
+        Material &material = Scene::materials[sphere.materialId - 1];
+        
+        /* std::cout << "\t\treturn "
+            << (255 * material.diffuseReflectance.x + 0.5) << " "
+            << (255 * material.diffuseReflectance.y + 0.5) << " "
+            << (255 * material.diffuseReflectance.z + 0.5) << "\n";
+        
+        return RGBColor(
+            (unsigned char) (255 * material.diffuseReflectance.x + 0.5),
+            (unsigned char) (255 * material.diffuseReflectance.y + 0.5),
+            (unsigned char) (255 * material.diffuseReflectance.z + 0.5)
+        ); */
+
+        Point intersectionPoint = (*this)[minT];
+        real diffuseScale = 0;
+
+        for (auto itr = Scene::pointLights.begin(); itr != Scene::pointLights.end(); ++itr) {
+            Vector L = ((*itr).position - intersectionPoint).normalized();
+            real d = sphere.normal(intersectionPoint).dot(L);
+            // Vector L = (*itr).position - intersectionPoint;
+            // real d = sphere.normal(intersectionPoint).dot(L.normalized());
+            if (d > 0) {
+                diffuseScale += d;
+            }
+        }
+
+        if (diffuseScale > 1.0) {
+            diffuseScale = 1.0;
+        }
+        Vec3real scaledDiffuseReflectance;
+        scaledDiffuseReflectance.x = material.diffuseReflectance.x * diffuseScale;
+        scaledDiffuseReflectance.y = material.diffuseReflectance.y * diffuseScale;
+        scaledDiffuseReflectance.z = material.diffuseReflectance.z * diffuseScale;
+        
+        return RGBColor(
+            (unsigned char) (255 * scaledDiffuseReflectance.x + 0.5),
+            (unsigned char) (255 * scaledDiffuseReflectance.y + 0.5),
+            (unsigned char) (255 * scaledDiffuseReflectance.z + 0.5)
+        );
+    } else {
+        // std::cout << "\t\treturn background\n";
+        return Scene::backgroundColor;
     }
 }
 
@@ -204,8 +269,8 @@ void Camera::initPositionTopLeftPixel() {
     nearPlane.positionTopLeftPixel = positionTopLeft + (u * (nearPlane.pixelWidth / 2)) + (v * (-1 * nearPlane.pixelHeight / 2));
 }
 
+// TODO: float precision error: e.g. (400,400) 0.00125003 -0.00125003 -1
 Ray Camera::createRay(int i, int j) {
-    // TODO: float precision error: e.g. (400,400) 0.00125003 -0.00125003 -1
     return Ray(
         Point(position),
         Vector(nearPlane.positionTopLeftPixel + (u * (i * nearPlane.pixelWidth)) + (v * (-j * nearPlane.pixelHeight)), position)
@@ -301,9 +366,9 @@ Sphere::Sphere(const parser::Sphere &_sphere) :
     radius(_sphere.radius) { }
 
 Vector Sphere::normal(const Point &point) const {
-    // return Vector(point, Scene::vertexData[centerVertexId]).normal();
-    Vector n(point, Scene::vertexData[centerVertexId]);
-    return n.normal();
+    // Vector n(point, Scene::vertexData[centerVertexId]);
+    // return n.normalized();
+    return Vector(point, Scene::vertexData[centerVertexId - 1]).normalized();
 }
 
 
@@ -346,66 +411,5 @@ void Scene::loadFromXml(const std::string &filePath) {
     }
 }
 
-RGBColor computeColor(const Ray &ray) {
 
-    real minT = DBL_MAX;
-    int closestSphereIndex = -1;
-    
-    for (int i = 0, size = Scene::spheres.size(); i < size; i++) {
-
-        real t = ray.intersectWith(Scene::spheres[i]);
-        // TODO: t >= 1.0 may be a problem for reflected rays (recursion)
-        if (t >= 1.0 && t < minT) {
-            std::cout << " currDist " << minT << " currIndex " << closestSphereIndex
-                      << " newDist " << t << " newIndex " << i << "\n";
-            minT = t;
-            closestSphereIndex = i;
-        }
-    }
-
-    if (closestSphereIndex == -1) {
-        // std::cout << "\t\treturn background\n";
-        return Scene::backgroundColor;
-    } else {
-
-        Sphere sphere = Scene::spheres[closestSphereIndex];
-        Material &material = Scene::materials[sphere.materialId - 1];
-        
-        /* std::cout << "\t\treturn "
-            << (255 * material.diffuseReflectance.x + 0.5) << " "
-            << (255 * material.diffuseReflectance.y + 0.5) << " "
-            << (255 * material.diffuseReflectance.z + 0.5) << "\n";
-        
-        return RGBColor(
-            (unsigned char) (255 * material.diffuseReflectance.x + 0.5),
-            (unsigned char) (255 * material.diffuseReflectance.y + 0.5),
-            (unsigned char) (255 * material.diffuseReflectance.z + 0.5)
-        ); */
-
-        Point intersectionPoint = ray[minT];
-        real diffuseScale = 0;
-        for (auto itr = Scene::pointLights.begin(); itr != Scene::pointLights.end(); ++itr) {
-            // Vector L = ((*itr).position - intersectionPoint).normal();
-            // real d = sphere.normal(intersectionPoint).dot(L);
-            Vector L = (*itr).position - intersectionPoint;
-            real d = sphere.normal(intersectionPoint).dot(L.normal());
-            if (d > 0) {
-                diffuseScale += d;
-            }
-        }
-
-        if (diffuseScale > 1.0) {
-            diffuseScale = 1.0;
-        }
-        Vec3real scaledDiffuseReflectance;
-        scaledDiffuseReflectance.x = material.diffuseReflectance.x * diffuseScale;
-        scaledDiffuseReflectance.y = material.diffuseReflectance.y * diffuseScale;
-        scaledDiffuseReflectance.z = material.diffuseReflectance.z * diffuseScale;
-        
-        return RGBColor(
-            (unsigned char) (255 * scaledDiffuseReflectance.x + 0.5),
-            (unsigned char) (255 * scaledDiffuseReflectance.y + 0.5),
-            (unsigned char) (255 * scaledDiffuseReflectance.z + 0.5)
-        );
-    }
-}
+// global functions

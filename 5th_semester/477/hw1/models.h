@@ -67,7 +67,7 @@ public:
     real dot(const Vector &second) const;
     Vector cross(const Vector &second) const;
     real length() const;
-    Vector normal() const;
+    Vector normalized() const;
     void normalize();
 };
 
@@ -80,6 +80,7 @@ public:
     Ray(const Point &_origin, const Vector &_direction);
     Point operator[](real t) const;
     real intersectWith(const Sphere &sphere) const;
+    RGBColor computeColor() const;
 };
 
 
@@ -227,7 +228,6 @@ public:
 
 
 // global functions
-RGBColor computeColor(const Ray &ray);
 
 
 #endif // __MODELS_H__
