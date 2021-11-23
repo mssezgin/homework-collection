@@ -4,6 +4,8 @@
 #include <string>
 #include <vector>
 #include <cmath>
+#include <cfloat>
+#include <iostream>
 #include "parser.h"
 
 
@@ -13,7 +15,7 @@ class Vec3real;
 class Point;
 class Vector;
 class Ray;
-struct RGBColor;
+class RGBColor;
 struct ImagePlane;
 class Camera;
 class PointLight;
@@ -47,7 +49,7 @@ public:
 class Point : public Vec3real {
 public:
     Point(real _x = 0.0, real _y = 0.0, real _z = 0.0);
-    // Point(parser::Vec3f _vec3f);
+    Point(parser::Vec3f _vec3f);
     Point operator+(const Vector &vector) const;
     Vector operator-(const Point &second) const;
 };
@@ -77,12 +79,15 @@ public:
 
     Ray(const Point &_origin, const Vector &_direction);
     Point operator[](real t) const;
-    void intersectWith(const Sphere &sphere) const;
+    real intersectWith(const Sphere &sphere) const;
 };
 
 
-struct RGBColor {
-    char r, g, b;
+class RGBColor {
+public:
+    unsigned char r, g, b;
+
+    RGBColor(unsigned char _r = 255U, unsigned char _g = 255U, unsigned char _b = 255U);
 };
 
 
@@ -141,7 +146,7 @@ public:
 };
 
 
-class Object {
+/* class Object {
 public:
     int materialId;
 
@@ -171,6 +176,35 @@ public:
     real radius;
 
     Sphere(const parser::Sphere &_sphere);
+}; */
+
+
+class Mesh {
+public:
+    int materialId;
+    std::vector<Face> faces;
+
+    Mesh(const parser::Mesh &_mesh);
+};
+
+
+class Triangle {
+public:
+    int materialId;
+    Face indices;
+
+    Triangle(const parser::Triangle &_triangle);
+};
+
+
+class Sphere {
+public:
+    int materialId;
+    int centerVertexId;
+    real radius;
+
+    Sphere(const parser::Sphere &_sphere);
+    Vector normal(const Point &point) const;
 };
 
 
@@ -183,13 +217,17 @@ public:
     static Vec3real ambientLight;
     static std::vector<PointLight> pointLights;
     static std::vector<Material> materials;
-    static std::vector<Vec3real> vertexData;
+    static std::vector<Point> vertexData;
     static std::vector<Mesh> meshes;
     static std::vector<Triangle> triangles;
     static std::vector<Sphere> spheres;
 
     static void loadFromXml(const std::string &filePath);
 };
+
+
+// global functions
+RGBColor computeColor(const Ray &ray);
 
 
 #endif // __MODELS_H__

@@ -10,7 +10,7 @@ std::vector<Camera> Scene::cameras;
 Vec3real Scene::ambientLight;
 std::vector<PointLight> Scene::pointLights;
 std::vector<Material> Scene::materials;
-std::vector<Vec3real> Scene::vertexData;
+std::vector<Point> Scene::vertexData;
 std::vector<Mesh> Scene::meshes;
 std::vector<Triangle> Scene::triangles;
 std::vector<Sphere> Scene::spheres;
@@ -39,8 +39,8 @@ Vec3real::Vec3real(const parser::Vec3f &_vec3f) :
 Point::Point(real _x, real _y, real _z) :
     Vec3real(_x, _y, _z) { }
 
-// Point::Point(parser::Vec3f _vec3f) :
-//     Vec3real(_vec3f) { }
+Point::Point(parser::Vec3f _vec3f) :
+    Vec3real(_vec3f) { }
 
 Point Point::operator+(const Vector &vector) const {
     return Point(
@@ -133,11 +133,31 @@ Point Ray::operator[](real t) const {
     return origin + (direction * t);
 }
 
-void Ray::intersectWith(const Sphere &sphere) const {
-    // real A = this->direction.dot(this->direction);
-    // Vector vCO = this->origin - sphere.
-    // real halfB = this->direction.dot()
+real Ray::intersectWith(const Sphere &sphere) const {
+
+    real A = this->direction.dot(this->direction);
+    Vector vCO = this->origin - Scene::vertexData[sphere.centerVertexId - 1];
+    real halfB = this->direction.dot(vCO);
+    real C = vCO.dot(vCO) - sphere.radius * sphere.radius;
+    real delta = halfB * halfB - A * C;
+    /* std::cout
+        << " A " << A
+        << " halfB " << halfB
+        << " C " << C
+        << " radius " << sphere.radius
+        << " delta " << delta << "\t\t"; */
+    if (delta < 0) {
+        return DBL_MAX;
+    } else {
+        return (-halfB - sqrt(delta)) / A;
+    }
 }
+
+
+// class Camera
+
+RGBColor::RGBColor(unsigned char _r, unsigned char _g, unsigned char _b) :
+    r(_r), g(_g), b(_b) { }
 
 
 // class Camera
@@ -223,7 +243,7 @@ Face::Face(const parser::Face &_face) :
     v2_id(_face.v2_id) { }
 
 
-// class Object
+/* // class Object
 
 Object::Object(int _materialId) :
     materialId(_materialId) { }
@@ -252,7 +272,39 @@ Triangle::Triangle(const parser::Triangle &_triangle) :
 Sphere::Sphere(const parser::Sphere &_sphere) :
     Object(_sphere.material_id),
     centerVertexId(_sphere.center_vertex_id),
+    radius(_sphere.radius) { } */
+
+
+// class Mesh
+
+Mesh::Mesh(const parser::Mesh &_mesh) :
+    materialId(_mesh.material_id) {
+
+    for (auto itr = _mesh.faces.begin(); itr != _mesh.faces.end(); ++itr) {
+        this->faces.push_back(*itr);
+    }
+}
+
+
+// class Triangle
+
+Triangle::Triangle(const parser::Triangle &_triangle) :
+    materialId(_triangle.material_id),
+    indices(_triangle.indices) { }
+
+
+// class Sphere
+
+Sphere::Sphere(const parser::Sphere &_sphere) :
+    materialId(_sphere.material_id),
+    centerVertexId(_sphere.center_vertex_id),
     radius(_sphere.radius) { }
+
+Vector Sphere::normal(const Point &point) const {
+    // return Vector(point, Scene::vertexData[centerVertexId]).normal();
+    Vector n(point, Scene::vertexData[centerVertexId]);
+    return n.normal();
+}
 
 
 // class Scene
@@ -291,5 +343,69 @@ void Scene::loadFromXml(const std::string &filePath) {
     }
     for (auto itr = _scene.spheres.begin(); itr != _scene.spheres.end(); ++itr) {
         Scene::spheres.push_back(*itr);
+    }
+}
+
+RGBColor computeColor(const Ray &ray) {
+
+    real minT = DBL_MAX;
+    int closestSphereIndex = -1;
+    
+    for (int i = 0, size = Scene::spheres.size(); i < size; i++) {
+
+        real t = ray.intersectWith(Scene::spheres[i]);
+        // TODO: t >= 1.0 may be a problem for reflected rays (recursion)
+        if (t >= 1.0 && t < minT) {
+            std::cout << " currDist " << minT << " currIndex " << closestSphereIndex
+                      << " newDist " << t << " newIndex " << i << "\n";
+            minT = t;
+            closestSphereIndex = i;
+        }
+    }
+
+    if (closestSphereIndex == -1) {
+        // std::cout << "\t\treturn background\n";
+        return Scene::backgroundColor;
+    } else {
+
+        Sphere sphere = Scene::spheres[closestSphereIndex];
+        Material &material = Scene::materials[sphere.materialId - 1];
+        
+        /* std::cout << "\t\treturn "
+            << (255 * material.diffuseReflectance.x + 0.5) << " "
+            << (255 * material.diffuseReflectance.y + 0.5) << " "
+            << (255 * material.diffuseReflectance.z + 0.5) << "\n";
+        
+        return RGBColor(
+            (unsigned char) (255 * material.diffuseReflectance.x + 0.5),
+            (unsigned char) (255 * material.diffuseReflectance.y + 0.5),
+            (unsigned char) (255 * material.diffuseReflectance.z + 0.5)
+        ); */
+
+        Point intersectionPoint = ray[minT];
+        real diffuseScale = 0;
+        for (auto itr = Scene::pointLights.begin(); itr != Scene::pointLights.end(); ++itr) {
+            // Vector L = ((*itr).position - intersectionPoint).normal();
+            // real d = sphere.normal(intersectionPoint).dot(L);
+            Vector L = (*itr).position - intersectionPoint;
+            real d = sphere.normal(intersectionPoint).dot(L.normal());
+            if (d > 0) {
+                diffuseScale += d;
+            }
+        }
+
+        if (diffuseScale > 1.0) {
+            diffuseScale = 1.0;
+        }
+        Vec3real scaledDiffuseReflectance;
+        scaledDiffuseReflectance.x = material.diffuseReflectance.x * diffuseScale;
+        scaledDiffuseReflectance.y = material.diffuseReflectance.y * diffuseScale;
+        scaledDiffuseReflectance.z = material.diffuseReflectance.z * diffuseScale;
+        
+        return RGBColor(
+            (unsigned char) (255 * scaledDiffuseReflectance.x + 0.5),
+            (unsigned char) (255 * scaledDiffuseReflectance.y + 0.5),
+            (unsigned char) (255 * scaledDiffuseReflectance.z + 0.5)
+        );
     }
 }

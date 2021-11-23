@@ -21,14 +21,14 @@ int main(int argc, char* argv[]) {
     #endif
 
 
-    Scene scene(argv[1]);
+    Scene::loadFromXml(argv[1]);
 
-    for (auto itr = scene.cameras.begin(); itr != scene.cameras.end(); ++itr) {
+    for (auto itr = Scene::cameras.begin(); itr != Scene::cameras.end(); ++itr) {
 
         Camera &camera = *itr;
         int width = camera.imageWidth;
         int height = camera.imageHeight;
-        
+
 
         #if IS_DEVELOPMENT
             clock_t begin_camera, begin_write, end_camera;
@@ -38,15 +38,24 @@ int main(int argc, char* argv[]) {
         #endif
 
 
-        unsigned char *data = new unsigned char[width * height * 3];
+        unsigned char *image = new unsigned char[width * height * 3];
         int index = 0;
+
+        Sphere &sphere = Scene::spheres[0];
+        std::cout
+            << "[0] centerID " << sphere.centerVertexId
+            << " materialID " << sphere.materialId
+            << " radius " << sphere.radius << "\n\n";
 
         for (int j = 0; j < height; ++j) {
             for (int i = 0; i < width; ++i) {
 
-                data[index++] = scene.backgroundColor.r;
-                data[index++] = scene.backgroundColor.g;
-                data[index++] = scene.backgroundColor.b;
+                /* std::cout << "i " << i << " j " << j << "\t\t\t"; */
+                Ray ray = camera.createRay(i, j);
+                RGBColor color = computeColor(ray);
+                image[index++] = color.r;
+                image[index++] = color.g;
+                image[index++] = color.b;
             }
         }
 
@@ -58,8 +67,8 @@ int main(int argc, char* argv[]) {
         #endif
 
 
-        write_ppm(camera.imageName.c_str(), data, width, height);
-        delete[] data;
+        write_ppm(camera.imageName.c_str(), image, width, height);
+        delete[] image;
 
 
         #if IS_DEVELOPMENT
@@ -69,6 +78,12 @@ int main(int argc, char* argv[]) {
             std::cout << "\t\x1b[32mCamera execution time: " << (double) (end_camera - begin_camera) / CLOCKS_PER_SEC << " seconds\x1b[0m\n\n";
         #endif
     }
+
+    /* std::cout
+        << (int) Scene::backgroundColor.r << " "
+        << (int) Scene::backgroundColor.g << " "
+        << (int) Scene::backgroundColor.b << " "
+        << Scene::shadowRayEpsilon << "\n"; */
 
 
     #if IS_DEVELOPMENT
