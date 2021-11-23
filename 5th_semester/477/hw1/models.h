@@ -69,6 +69,7 @@ public:
     real length() const;
     Vector normalized() const;
     void normalize();
+    static real determinant(const Vector &col1, const Vector &col2, const Vector &col3);
 };
 
 
@@ -80,6 +81,7 @@ public:
     Ray(const Point &_origin, const Vector &_direction);
     Point operator[](real t) const;
     real intersectWith(const Sphere &sphere) const;
+    real intersectWith(const Face &face) const;
     RGBColor computeColor() const;
 };
 
@@ -144,6 +146,7 @@ public:
     int v2_id;
 
     Face(const parser::Face &_face);
+    Vector normal() const;
 };
 
 

@@ -123,6 +123,12 @@ void Vector::normalize() {
     *this = this->normalized();
 }
 
+real Vector::determinant(const Vector &col1, const Vector &col2, const Vector &col3) {
+    return col1.x * (col2.y * col3.z - col2.z * col3.y) +
+           col1.y * (col2.z * col3.x - col2.x * col3.z) +
+           col1.z * (col2.x * col3.y - col2.y * col3.x);
+}
+
 
 // class Ray
 
@@ -153,9 +159,35 @@ real Ray::intersectWith(const Sphere &sphere) const {
     }
 }
 
+real Ray::intersectWith(const Face &face) const {
+
+    Point A = Scene::vertexData[face.v0_id - 1];
+    Point B = Scene::vertexData[face.v1_id - 1];
+    Point C = Scene::vertexData[face.v2_id - 1];
+    Vector columns[4] = { A - B, A - C, this->direction, A - this->origin };
+    real detA  = Vector::determinant(columns[0], columns[1], columns[2]);
+    real beta  = Vector::determinant(columns[3], columns[1], columns[2]) / detA;
+    real gamma = Vector::determinant(columns[0], columns[3], columns[2]) / detA;
+    real t     = Vector::determinant(columns[0], columns[1], columns[3]) / detA;
+
+    if (beta < 0) {
+        return DBL_MAX;
+    }
+    if (gamma < 0) {
+        return DBL_MAX;
+    }
+    if (beta + gamma > 1) {
+        return DBL_MAX;
+    }
+    /* if (t < 1) {
+        return DBL_MAX;
+    } */
+    return t;
+}
+
 RGBColor Ray::computeColor() const {
 
-    real minT = DBL_MAX;
+    /* real minT = DBL_MAX;
     int closestSphereIndex = -1;
     
     for (int i = 0, size = Scene::spheres.size(); i < size; i++) {
@@ -163,8 +195,8 @@ RGBColor Ray::computeColor() const {
         real t = this->intersectWith(Scene::spheres[i]);
         // TODO: t >= 1.0 may be a problem for reflected rays (recursion)
         if (t >= 1.0 && t < minT) {
-            std::cout << " currDist " << minT << " currIndex " << closestSphereIndex
-                      << " newDist " << t << " newIndex " << i << "\n";
+            // std::cout << " currDist " << minT << " currIndex " << closestSphereIndex
+            //           << " newDist " << t << " newIndex " << i << "\n";
             minT = t;
             closestSphereIndex = i;
         }
@@ -174,17 +206,6 @@ RGBColor Ray::computeColor() const {
 
         Sphere sphere = Scene::spheres[closestSphereIndex];
         Material &material = Scene::materials[sphere.materialId - 1];
-        
-        /* std::cout << "\t\treturn "
-            << (255 * material.diffuseReflectance.x + 0.5) << " "
-            << (255 * material.diffuseReflectance.y + 0.5) << " "
-            << (255 * material.diffuseReflectance.z + 0.5) << "\n";
-        
-        return RGBColor(
-            (unsigned char) (255 * material.diffuseReflectance.x + 0.5),
-            (unsigned char) (255 * material.diffuseReflectance.y + 0.5),
-            (unsigned char) (255 * material.diffuseReflectance.z + 0.5)
-        ); */
 
         Point intersectionPoint = (*this)[minT];
         real diffuseScale = 0;
@@ -192,8 +213,6 @@ RGBColor Ray::computeColor() const {
         for (auto itr = Scene::pointLights.begin(); itr != Scene::pointLights.end(); ++itr) {
             Vector L = ((*itr).position - intersectionPoint).normalized();
             real d = sphere.normal(intersectionPoint).dot(L);
-            // Vector L = (*itr).position - intersectionPoint;
-            // real d = sphere.normal(intersectionPoint).dot(L.normalized());
             if (d > 0) {
                 diffuseScale += d;
             }
@@ -213,7 +232,65 @@ RGBColor Ray::computeColor() const {
             (unsigned char) (255 * scaledDiffuseReflectance.z + 0.5)
         );
     } else {
-        // std::cout << "\t\treturn background\n";
+        return Scene::backgroundColor;
+    } */
+
+    real minT = DBL_MAX;
+    int closestMeshIndex = -1;
+    Face *closestFace = nullptr;
+
+
+    for (int i = 0, size = Scene::meshes.size(); i < size; i++) {
+        for (int j = 0, size2 = Scene::meshes[i].faces.size(); j < size2; j++) {
+
+            real t = this->intersectWith(Scene::meshes[i].faces[j]);
+            // TODO: t >= 1.0 may be a problem for reflected rays (recursion)
+            if (t >= 1.0 && t < minT) {
+                // std::cout << " currDist " << minT << " currIndex " << closestMeshIndex
+                //           << " newDist " << t << " newIndex " << i << "\n";
+                minT = t;
+                closestMeshIndex = i;
+                closestFace = &(Scene::meshes[i].faces[j]);
+            }
+        }
+    }
+
+    if (closestMeshIndex != -1) {
+
+        Mesh &mesh = Scene::meshes[closestMeshIndex];
+        Material &material = Scene::materials[mesh.materialId - 1];
+
+        Point intersectionPoint = (*this)[minT];
+        real diffuseScale = 0;
+
+        for (auto itr = Scene::pointLights.begin(); itr != Scene::pointLights.end(); ++itr) {
+            Vector L = ((*itr).position - intersectionPoint).normalized();
+            real d = closestFace->normal().dot(L);
+            if (d > 0) {
+                diffuseScale += d;
+            }
+        }
+
+        if (diffuseScale > 1.0) {
+            diffuseScale = 1.0;
+        }
+        Vec3real scaledDiffuseReflectance;
+        scaledDiffuseReflectance.x = material.diffuseReflectance.x * diffuseScale;
+        scaledDiffuseReflectance.y = material.diffuseReflectance.y * diffuseScale;
+        scaledDiffuseReflectance.z = material.diffuseReflectance.z * diffuseScale;
+        
+        return RGBColor(
+            (unsigned char) (255 * scaledDiffuseReflectance.x + 0.5),
+            (unsigned char) (255 * scaledDiffuseReflectance.y + 0.5),
+            (unsigned char) (255 * scaledDiffuseReflectance.z + 0.5)
+        );
+
+        /* return RGBColor(
+            (unsigned char) (255 * material.diffuseReflectance.x + 0.5),
+            (unsigned char) (255 * material.diffuseReflectance.y + 0.5),
+            (unsigned char) (255 * material.diffuseReflectance.z + 0.5)
+        ); */
+    } else {
         return Scene::backgroundColor;
     }
 }
@@ -306,6 +383,14 @@ Face::Face(const parser::Face &_face) :
     v0_id(_face.v0_id),
     v1_id(_face.v1_id),
     v2_id(_face.v2_id) { }
+
+// TODO: precompute normal vectors
+Vector Face::normal() const {
+    Point A = Scene::vertexData[v0_id];
+    Point B = Scene::vertexData[v1_id];
+    Point C = Scene::vertexData[v2_id];
+    return (B - A).cross(C - A).normalized();
+}
 
 
 /* // class Object

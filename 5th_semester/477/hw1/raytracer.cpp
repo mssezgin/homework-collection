@@ -41,11 +41,11 @@ int main(int argc, char* argv[]) {
         unsigned char *image = new unsigned char[width * height * 3];
         int index = 0;
 
-        Sphere &sphere = Scene::spheres[0];
+        /* Sphere &sphere = Scene::spheres[0];
         std::cout
             << "[0] centerID " << sphere.centerVertexId
             << " materialID " << sphere.materialId
-            << " radius " << sphere.radius << "\n\n";
+            << " radius " << sphere.radius << "\n\n"; */
 
         for (int j = 0; j < height; ++j) {
             for (int i = 0; i < width; ++i) {
