@@ -519,9 +519,9 @@ Face::Face(const parser::Face &_face) :
 
 // TODO: precompute normal vectors
 Vector Face::normal() const {
-    Point A = Scene::vertexData[v0_id];
-    Point B = Scene::vertexData[v1_id];
-    Point C = Scene::vertexData[v2_id];
+    Point A = Scene::vertexData[v0_id - 1];
+    Point B = Scene::vertexData[v1_id - 1];
+    Point C = Scene::vertexData[v2_id - 1];
     return (B - A).cross(C - A).normalized();
 }
 
