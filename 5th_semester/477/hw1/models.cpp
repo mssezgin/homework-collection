@@ -197,14 +197,84 @@ real Ray::intersectWith(const Face &face) const {
     return t;
 }
 
+bool Ray::isInShadow() const {
+
+    const Ray &thisRay = *this;
+
+    // intersect with spheres
+    for (long long i = 0, size = Scene::spheres.size(); i < size; i++) {
+        real t = thisRay.intersectWith(Scene::spheres[i]);
+        if (t < 1 && t > Scene::shadowRayEpsilon) {
+            return true;
+        }
+    }
+
+    // intersect with triangles
+    for (long long i = 0, size = Scene::triangles.size(); i < size; i++) {
+        real t = thisRay.intersectWith(Scene::triangles[i].face);
+        if (t < 1 && t > Scene::shadowRayEpsilon) {
+            return true;
+        }
+    }
+
+    // intersect with meshes
+    for (long long i = 0, size = Scene::meshes.size(); i < size; i++) {
+        std::vector<Face> &faces = Scene::meshes[i].faces;
+
+        for (long long j = 0, size = faces.size(); j < size; j++) {
+            real t = thisRay.intersectWith(faces[j]);
+            if (t < 1 && t > Scene::shadowRayEpsilon) {
+                return true;
+            }
+        }
+    }
+
+    return false;
+}
+
+RGBColor Ray::computeColor(const Point &p, Material *material, const Vector &closestObjectNormal) const {
+
+    ColorVector colorv(0.0, 0.0, 0.0);
+    colorv.increment(Scene::ambientLight, material->ambientReflectance);
+
+    for (long long i = 0, size = Scene::pointLights.size(); i < size; i++) {
+
+        // TODO: calculate shadow first
+        PointLight &pointLight = Scene::pointLights[i];
+        Vector toLight = (pointLight.position - p);
+        Ray shadowRay(p, toLight);
+
+        if (shadowRay.isInShadow()) {
+            continue;
+        }
+
+        ColorVector radiance = pointLight.intensity / toLight.dotItself(); // pow(toLight.length(), 2);
+
+        // calculate diffuse shading
+        real cosAngle = closestObjectNormal.dot(toLight.normalized());
+        if (cosAngle < 0) {
+            cosAngle = 0;
+        }
+        colorv.increment(radiance, material->diffuseReflectance * cosAngle);
+
+        // calculate specular shading
+        Vector halfVector = (toLight.normalized() - this->direction).normalized();
+        cosAngle = closestObjectNormal.dot(halfVector);
+        if (cosAngle < 0) {
+            cosAngle = 0;
+        } else {
+            cosAngle = pow(cosAngle, material->phongExponent);
+        }
+        colorv.increment(radiance, material->specularReflectance * cosAngle);
+    }
+
+    return colorv.toRGBColor();
+}
+
 RGBColor Ray::traceRay() const {
 
     const Ray &thisRay = *this;
     real tMin = DBL_MAX;
-    // long long closestSphereIndex = -1;
-    // long long closestTriangleIndex = -1;
-    // long long closestMeshIndex = -1;
-    // long long closestFaceIndex = -1;
     Sphere *closestSphere = nullptr;
     Triangle *closestTriangle = nullptr;
     Mesh *closestMesh = nullptr;
@@ -216,7 +286,6 @@ RGBColor Ray::traceRay() const {
         real t = thisRay.intersectWith(Scene::spheres[i]);
         if (t < tMin && t >= 1) {
             tMin = t;
-            // closestSphereIndex = i;
             closestSphere = &(Scene::spheres[i]);
             closestObject = 1;
         }
@@ -227,7 +296,6 @@ RGBColor Ray::traceRay() const {
         real t = thisRay.intersectWith(Scene::triangles[i].face);
         if (t < tMin && t >= 1) {
             tMin = t;
-            // closestTriangleIndex = i;
             closestTriangle = &(Scene::triangles[i]);
             closestObject = 2;
         }
@@ -241,8 +309,6 @@ RGBColor Ray::traceRay() const {
             real t = thisRay.intersectWith(faces[j]);
             if (t < tMin && t >= 1) {
                 tMin = t;
-                // closestMeshIndex = i;
-                // closestFaceIndex = j;
                 closestMesh = &(Scene::meshes[i]);
                 closestMeshFace = &(faces[j]);
                 closestObject = 3;
@@ -460,39 +526,6 @@ RGBColor Ray::traceRay() const {
     } else {
         return Scene::backgroundColor;
     } */
-}
-
-RGBColor Ray::computeColor(const Point &p, Material *material, const Vector &closestObjectNormal) const {
-
-    ColorVector colorv(0.0, 0.0, 0.0);
-    colorv.increment(Scene::ambientLight, material->ambientReflectance);
-
-    for (long long i = 0, size = Scene::pointLights.size(); i < size; i++) {
-
-        // TODO: calculate shadow first
-        PointLight &pointLight = Scene::pointLights[i];
-        Vector toLight = (pointLight.position - p);
-        ColorVector radiance = pointLight.intensity / toLight.dotItself(); // pow(toLight.length(), 2);
-
-        // calculate diffuse shading
-        real cosAngle = closestObjectNormal.dot(toLight.normalized());
-        if (cosAngle < 0) {
-            cosAngle = 0;
-        }
-        colorv.increment(radiance, material->diffuseReflectance * cosAngle);
-
-        // calculate specular shading
-        Vector halfVector = (toLight.normalized() - this->direction).normalized();
-        cosAngle = closestObjectNormal.dot(halfVector);
-        if (cosAngle < 0) {
-            cosAngle = 0;
-        } else {
-            cosAngle = pow(cosAngle, material->phongExponent);
-        }
-        colorv.increment(radiance, material->specularReflectance * cosAngle);
-    }
-
-    return colorv.toRGBColor();
 }
 
 

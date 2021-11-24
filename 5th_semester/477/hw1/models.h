@@ -84,8 +84,9 @@ public:
     Point operator[](real t) const;
     real intersectWith(const Face &face) const;
     real intersectWith(const Sphere &sphere) const;
-    RGBColor traceRay() const;
+    bool isInShadow() const;
     RGBColor computeColor(const Point &p, Material *material, const Vector &closestObjectNormal) const;
+    RGBColor traceRay() const;
 };
 
 
