@@ -85,6 +85,7 @@ public:
     real intersectWith(const Face &face) const;
     real intersectWith(const Sphere &sphere) const;
     RGBColor traceRay() const;
+    RGBColor computeColor(const Point &p, Material *material, const Vector &closestObjectNormal) const;
 };
 
 

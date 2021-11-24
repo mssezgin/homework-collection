@@ -20,12 +20,6 @@ int main(int argc, char* argv[]) {
         std::cout << argv[1] << "\n\n";
     #endif
 
-    /* std::cout
-        << "sizeof(int *) = " << sizeof(int *)
-        << "sizeof(int) = " << sizeof(int)
-        << "sizeof(long) = " << sizeof(long)
-        << "sizeof(long long) = " << sizeof(long long)
-        << "\n"; */
 
     Scene::loadFromXml(argv[1]);
 
@@ -47,16 +41,9 @@ int main(int argc, char* argv[]) {
         unsigned char *image = new unsigned char[width * height * 3];
         int index = 0;
 
-        /* Sphere &sphere = Scene::spheres[0];
-        std::cout
-            << "[0] centerID " << sphere.centerVertexId
-            << " materialID " << sphere.materialId
-            << " radius " << sphere.radius << "\n\n"; */
-
         for (int j = 0; j < height; ++j) {
             for (int i = 0; i < width; ++i) {
 
-                /* std::cout << "i " << i << " j " << j << "\t\t\t"; */
                 Ray ray = camera.createRay(i, j);
                 RGBColor color = ray.traceRay();
                 image[index++] = color.r;
@@ -84,12 +71,6 @@ int main(int argc, char* argv[]) {
             std::cout << "\t\x1b[32mCamera execution time: " << (double) (end_camera - begin_camera) / CLOCKS_PER_SEC << " seconds\x1b[0m\n\n";
         #endif
     }
-
-    /* std::cout
-        << (int) Scene::backgroundColor.r << " "
-        << (int) Scene::backgroundColor.g << " "
-        << (int) Scene::backgroundColor.b << " "
-        << Scene::shadowRayEpsilon << "\n"; */
 
 
     #if IS_DEVELOPMENT

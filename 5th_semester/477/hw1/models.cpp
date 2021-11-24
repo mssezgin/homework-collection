@@ -256,9 +256,8 @@ RGBColor Ray::traceRay() const {
     }
 
     // compute color
-    // TODO: create a modular function, computeColor, to calculate these 
     Point p = thisRay[tMin];
-    ColorVector colorv(0.0, 0.0, 0.0);
+    // ColorVector colorv(0.0, 0.0, 0.0);
     Material *material;
     Vector closestObjectNormal;
     switch (closestObject) {
@@ -275,7 +274,7 @@ RGBColor Ray::traceRay() const {
             closestObjectNormal = closestMeshFace->normal();
             break;
     }
-    colorv.increment(Scene::ambientLight, material->ambientReflectance);
+    /* colorv.increment(Scene::ambientLight, material->ambientReflectance);
 
     for (long long i = 0, size = Scene::pointLights.size(); i < size; i++) {
 
@@ -302,7 +301,8 @@ RGBColor Ray::traceRay() const {
         colorv.increment(radiance, material->specularReflectance * cosAngle);
     }
 
-    return colorv.toRGBColor();
+    return colorv.toRGBColor(); */
+    return thisRay.computeColor(p, material, closestObjectNormal);
 
     /* // scond try
     // compute color
@@ -462,6 +462,39 @@ RGBColor Ray::traceRay() const {
     } */
 }
 
+RGBColor Ray::computeColor(const Point &p, Material *material, const Vector &closestObjectNormal) const {
+
+    ColorVector colorv(0.0, 0.0, 0.0);
+    colorv.increment(Scene::ambientLight, material->ambientReflectance);
+
+    for (long long i = 0, size = Scene::pointLights.size(); i < size; i++) {
+
+        // TODO: calculate shadow first
+        PointLight &pointLight = Scene::pointLights[i];
+        Vector toLight = (pointLight.position - p);
+        ColorVector radiance = pointLight.intensity / toLight.dotItself(); // pow(toLight.length(), 2);
+
+        // calculate diffuse shading
+        real cosAngle = closestObjectNormal.dot(toLight.normalized());
+        if (cosAngle < 0) {
+            cosAngle = 0;
+        }
+        colorv.increment(radiance, material->diffuseReflectance * cosAngle);
+
+        // calculate specular shading
+        Vector halfVector = (toLight.normalized() - this->direction).normalized();
+        cosAngle = closestObjectNormal.dot(halfVector);
+        if (cosAngle < 0) {
+            cosAngle = 0;
+        } else {
+            cosAngle = pow(cosAngle, material->phongExponent);
+        }
+        colorv.increment(radiance, material->specularReflectance * cosAngle);
+    }
+
+    return colorv.toRGBColor();
+}
+
 
 // class ColorVector
 
@@ -552,7 +585,7 @@ void Camera::initPositionTopLeftPixel() {
 // TODO: float precision error: e.g. (400,400) 0.00125003 -0.00125003 -1
 Ray Camera::createRay(int i, int j) {
     return Ray(
-        Point(position),
+        position,
         Vector(nearPlane.positionTopLeftPixel + (u * (i * nearPlane.pixelWidth)) + (v * (-j * nearPlane.pixelHeight)), position)
     );
 }
