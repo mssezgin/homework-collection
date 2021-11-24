@@ -58,7 +58,7 @@ int main(int argc, char* argv[]) {
 
                 /* std::cout << "i " << i << " j " << j << "\t\t\t"; */
                 Ray ray = camera.createRay(i, j);
-                RGBColor color = ray.computeColor();
+                RGBColor color = ray.traceRay();
                 image[index++] = color.r;
                 image[index++] = color.g;
                 image[index++] = color.b;

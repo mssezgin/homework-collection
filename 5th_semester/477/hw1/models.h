@@ -66,6 +66,7 @@ public:
     Vector operator*(real scalar) const;
     Vector operator/(real scalar) const;
     real dot(const Vector &second) const;
+    real dotItself() const;
     Vector cross(const Vector &second) const;
     real length() const;
     Vector normalized() const;
@@ -83,14 +84,14 @@ public:
     Point operator[](real t) const;
     real intersectWith(const Face &face) const;
     real intersectWith(const Sphere &sphere) const;
-    RGBColor computeColor() const;
+    RGBColor traceRay() const;
 };
 
 
 class ColorVector : public Vec3real {
 public:
     ColorVector(real _x = 0.0, real _y = 0.0, real _z = 0.0);
-    void increment(ColorVector intensity, Vec3real reflectanceCoefficient);
+    void increment(ColorVector radiance, Vec3real reflectanceCoefficient);
     ColorVector operator/(real scalar) const;
     RGBColor toRGBColor() const;
 };
