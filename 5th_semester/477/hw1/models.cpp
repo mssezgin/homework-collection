@@ -158,12 +158,6 @@ real Ray::intersectWith(const Sphere &sphere) const {
     real halfB = this->direction.dot(vCO);
     real C = vCO.dot(vCO) - sphere.radius * sphere.radius;
     real delta = halfB * halfB - A * C;
-    /* std::cout
-        << " A " << A
-        << " halfB " << halfB
-        << " C " << C
-        << " radius " << sphere.radius
-        << " delta " << delta << "\t\t"; */
     if (delta < 0) {
         return DBL_MAX;
     } else {
@@ -191,12 +185,15 @@ real Ray::intersectWith(const Face &face) const {
     if (beta + gamma > 1) {
         return DBL_MAX;
     }
-    /* if (t < 1) {
-        return DBL_MAX;
-    } */
     return t;
 }
 
+// TODO: s(t) = (x + n*e + t*w_i) instead of checking t > e
+// TODO: origin is moved a little in the direction of the normal vector
+// TODO: not of the w_i vector
+// 
+// TODO: first, intersect with itself to see
+// TODO: whether the point is hiding behind the object
 bool Ray::isInShadow() const {
 
     const Ray &thisRay = *this;
@@ -248,14 +245,14 @@ RGBColor Ray::computeColor(const Point &p, Material *material, const Vector &clo
             continue;
         }
 
-        ColorVector radiance = pointLight.intensity / toLight.dotItself(); // pow(toLight.length(), 2);
+        ColorVector irradiance = pointLight.intensity / toLight.dotItself(); // pow(toLight.length(), 2);
 
         // calculate diffuse shading
         real cosAngle = closestObjectNormal.dot(toLight.normalized());
         if (cosAngle < 0) {
             cosAngle = 0;
         }
-        colorv.increment(radiance, material->diffuseReflectance * cosAngle);
+        colorv.increment(irradiance, material->diffuseReflectance * cosAngle);
 
         // calculate specular shading
         Vector halfVector = (toLight.normalized() - this->direction).normalized();
@@ -265,7 +262,7 @@ RGBColor Ray::computeColor(const Point &p, Material *material, const Vector &clo
         } else {
             cosAngle = pow(cosAngle, material->phongExponent);
         }
-        colorv.increment(radiance, material->specularReflectance * cosAngle);
+        colorv.increment(irradiance, material->specularReflectance * cosAngle);
     }
 
     return colorv.toRGBColor();
@@ -340,192 +337,8 @@ RGBColor Ray::traceRay() const {
             closestObjectNormal = closestMeshFace->normal();
             break;
     }
-    /* colorv.increment(Scene::ambientLight, material->ambientReflectance);
 
-    for (long long i = 0, size = Scene::pointLights.size(); i < size; i++) {
-
-        // TODO: calculate shadow first
-        PointLight &pointLight = Scene::pointLights[i];
-        Vector toLight = (pointLight.position - p);
-        ColorVector radiance = pointLight.intensity / toLight.dotItself(); // pow(toLight.length(), 2);
-
-        // calculate diffuse shading
-        real cosAngle = closestObjectNormal.dot(toLight.normalized());
-        if (cosAngle < 0) {
-            cosAngle = 0;
-        }
-        colorv.increment(radiance, material->diffuseReflectance * cosAngle);
-
-        // calculate specular shading
-        Vector halfVector = (toLight.normalized() - thisRay.direction).normalized();
-        cosAngle = closestObjectNormal.dot(halfVector);
-        if (cosAngle < 0) {
-            cosAngle = 0;
-        } else {
-            cosAngle = pow(cosAngle, material->phongExponent);
-        }
-        colorv.increment(radiance, material->specularReflectance * cosAngle);
-    }
-
-    return colorv.toRGBColor(); */
     return thisRay.computeColor(p, material, closestObjectNormal);
-
-    /* // scond try
-    // compute color
-    // TODO: create a modular function, computeColor, to calculate these
-    if (closestObject == 1) {
-
-        Material &material = Scene::materials[closestSphere->materialId - 1];
-        Point p = thisRay[tMin];
-        ColorVector colorv(0.0, 0.0, 0.0);
-        colorv.increment(Scene::ambientLight, material.ambientReflectance);
-
-        for (long long i = 0, size = Scene::pointLights.size(); i < size; i++) {
-
-            // TODO: calculate shadow first
-            PointLight &pointLight = Scene::pointLights[i];
-            Vector toLight = (pointLight.position - p);
-            ColorVector radiance = pointLight.intensity / pow(toLight.length(), 2);
-
-            // calculate diffuse shading
-            real cosTheta = closestSphere->normal(p).dot(toLight.normalized());
-            if (cosTheta < 0) {
-                cosTheta = 0;
-            }
-            colorv.increment(radiance, material.diffuseReflectance * cosTheta);
-
-            // calculate specular shading
-            Vector halfVector = (toLight.normalized() - thisRay.direction).normalized();
-            real cosAlpha = closestSphere->normal(p).dot(halfVector);
-            if (cosAlpha < 0) {
-                cosAlpha = 0;
-            }
-            cosAlpha = pow(cosAlpha, material.phongExponent);
-            colorv.increment(radiance, material.specularReflectance * cosAlpha);
-        }
-
-        return colorv.toRGBColor();
-
-    } else if (closestObject == 2) {
-        
-        Material &material = Scene::materials[closestTriangle->materialId - 1];
-        Point p = thisRay[tMin];
-        ColorVector colorv(0.0, 0.0, 0.0);
-        colorv.increment(Scene::ambientLight, material.ambientReflectance);
-
-        for (long long i = 0, size = Scene::pointLights.size(); i < size; i++) {
-
-            // TODO: calculate shadow first
-            PointLight &pointLight = Scene::pointLights[i];
-            Vector toLight = (pointLight.position - p);
-            ColorVector radiance = pointLight.intensity / pow(toLight.length(), 2);
-        }
-
-        return Scene::backgroundColor;
-
-    } else if (closestObject == 3) {
-        return Scene::backgroundColor;
-    } else {
-        return Scene::backgroundColor;
-    } */
-
-    /* // first try
-    real minT = DBL_MAX;
-    int closestSphereIndex = -1;
-    
-    for (int i = 0, size = Scene::spheres.size(); i < size; i++) {
-
-        real t = this->intersectWith(Scene::spheres[i]);
-        // TODO: t >= 1.0 may be a problem for reflected rays (recursion)
-        if (t >= 1.0 && t < minT) {
-            minT = t;
-            closestSphereIndex = i;
-        }
-    }
-
-    if (closestSphereIndex != -1) {
-
-        Sphere sphere = Scene::spheres[closestSphereIndex];
-        Material &material = Scene::materials[sphere.materialId - 1];
-
-        Point intersectionPoint = (*this)[minT];
-        real diffuseScale = 0;
-
-        for (auto itr = Scene::pointLights.begin(); itr != Scene::pointLights.end(); ++itr) {
-            Vector L = ((*itr).position - intersectionPoint).normalized();
-            real d = sphere.normal(intersectionPoint).dot(L);
-            if (d > 0) {
-                diffuseScale += d;
-            }
-        }
-
-        if (diffuseScale > 1.0) {
-            diffuseScale = 1.0;
-        }
-        Vec3real scaledDiffuseReflectance;
-        scaledDiffuseReflectance.x = material.diffuseReflectance.x * diffuseScale;
-        scaledDiffuseReflectance.y = material.diffuseReflectance.y * diffuseScale;
-        scaledDiffuseReflectance.z = material.diffuseReflectance.z * diffuseScale;
-        
-        return RGBColor(
-            (unsigned char) (255 * scaledDiffuseReflectance.x + 0.5),
-            (unsigned char) (255 * scaledDiffuseReflectance.y + 0.5),
-            (unsigned char) (255 * scaledDiffuseReflectance.z + 0.5)
-        );
-    } else {
-        return Scene::backgroundColor;
-    }
-
-    real minT = DBL_MAX;
-    int closestMeshIndex = -1;
-    Face *closestFace = nullptr;
-
-
-    for (int i = 0, size = Scene::meshes.size(); i < size; i++) {
-        for (int j = 0, size2 = Scene::meshes[i].faces.size(); j < size2; j++) {
-
-            real t = this->intersectWith(Scene::meshes[i].faces[j]);
-            // TODO: t >= 1.0 may be a problem for reflected rays (recursion)
-            if (t >= 1.0 && t < minT) {
-                minT = t;
-                closestMeshIndex = i;
-                closestFace = &(Scene::meshes[i].faces[j]);
-            }
-        }
-    }
-
-    if (closestMeshIndex != -1) {
-
-        Mesh &mesh = Scene::meshes[closestMeshIndex];
-        Material &material = Scene::materials[mesh.materialId - 1];
-
-        Point intersectionPoint = (*this)[minT];
-        real diffuseScale = 0;
-
-        for (auto itr = Scene::pointLights.begin(); itr != Scene::pointLights.end(); ++itr) {
-            Vector L = ((*itr).position - intersectionPoint).normalized();
-            real d = closestFace->normal().dot(L);
-            if (d > 0) {
-                diffuseScale += d;
-            }
-        }
-
-        if (diffuseScale > 1.0) {
-            diffuseScale = 1.0;
-        }
-        Vec3real scaledDiffuseReflectance;
-        scaledDiffuseReflectance.x = material.diffuseReflectance.x * diffuseScale;
-        scaledDiffuseReflectance.y = material.diffuseReflectance.y * diffuseScale;
-        scaledDiffuseReflectance.z = material.diffuseReflectance.z * diffuseScale;
-        
-        return RGBColor(
-            (unsigned char) (255 * scaledDiffuseReflectance.x + 0.5),
-            (unsigned char) (255 * scaledDiffuseReflectance.y + 0.5),
-            (unsigned char) (255 * scaledDiffuseReflectance.z + 0.5)
-        );
-    } else {
-        return Scene::backgroundColor;
-    } */
 }
 
 
@@ -534,10 +347,10 @@ RGBColor Ray::traceRay() const {
 ColorVector::ColorVector(real _x, real _y, real _z) :
     Vec3real(_x, _y, _z) { }
 
-void ColorVector::increment(ColorVector radiance, Vec3real reflectanceCoefficient) {
-    x += radiance.x * reflectanceCoefficient.x;
-    y += radiance.y * reflectanceCoefficient.y;
-    z += radiance.z * reflectanceCoefficient.z;
+void ColorVector::increment(ColorVector irradiance, Vec3real reflectanceCoefficient) {
+    x += irradiance.x * reflectanceCoefficient.x;
+    y += irradiance.y * reflectanceCoefficient.y;
+    z += irradiance.z * reflectanceCoefficient.z;
 }
 
 ColorVector ColorVector::operator/(real scalar) const {
@@ -664,38 +477,6 @@ Vector Face::normal() const {
     Point C = Scene::vertexData[v2_id - 1];
     return (B - A).cross(C - A).normalized();
 }
-
-
-/* // class Object
-
-Object::Object(int _materialId) :
-    materialId(_materialId) { }
-
-
-// class Mesh
-
-Mesh::Mesh(const parser::Mesh &_mesh) :
-    Object(_mesh.material_id) {
-    
-    for (auto itr = _mesh.faces.begin(); itr != _mesh.faces.end(); ++itr) {
-        this->faces.push_back(*itr);
-    }
-}
-
-
-// class Triangle
-
-Triangle::Triangle(const parser::Triangle &_triangle) :
-    Object(_triangle.material_id),
-    face(_triangle.face) { }
-
-
-// class Sphere
-
-Sphere::Sphere(const parser::Sphere &_sphere) :
-    Object(_sphere.material_id),
-    centerVertexId(_sphere.center_vertex_id),
-    radius(_sphere.radius) { } */
 
 
 // class Mesh

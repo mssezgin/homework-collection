@@ -93,7 +93,7 @@ public:
 class ColorVector : public Vec3real {
 public:
     ColorVector(real _x = 0.0, real _y = 0.0, real _z = 0.0);
-    void increment(ColorVector radiance, Vec3real reflectanceCoefficient);
+    void increment(ColorVector irradiance, Vec3real reflectanceCoefficient);
     ColorVector operator/(real scalar) const;
     RGBColor toRGBColor() const;
 };
@@ -161,39 +161,6 @@ public:
     Face(const parser::Face &_face);
     Vector normal() const;
 };
-
-
-/* class Object {
-public:
-    int materialId;
-
-    Object(int _materialId);
-};
-
-
-class Mesh : public Object {
-public:
-    std::vector<Face> faces;
-
-    Mesh(const parser::Mesh &_mesh);
-};
-
-
-class Triangle : public Object {
-public:
-    Face face;
-
-    Triangle(const parser::Triangle &_triangle);
-};
-
-
-class Sphere : public Object {
-public:
-    int centerVertexId;
-    real radius;
-
-    Sphere(const parser::Sphere &_sphere);
-}; */
 
 
 class Mesh {
