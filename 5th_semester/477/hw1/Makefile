@@ -14,6 +14,7 @@ run:
 convert:
 	for PPM in $(PPMS) ; do \
 		convert $$PPM.ppm $$PPM.png ; \
+		rm $$PPM.ppm ; \
 	done
 
 clean:

@@ -188,20 +188,19 @@ real Ray::intersectWith(const Face &face) const {
     return t;
 }
 
-// TODO: s(t) = (x + n*e + t*w_i) instead of checking t > e
-// TODO: origin is moved a little in the direction of the normal vector
-// TODO: not of the w_i vector
-// 
-// TODO: first, intersect with itself to see
-// TODO: whether the point is hiding behind the object
-bool Ray::isInShadow() const {
+bool Ray::isInShadow(const Vector &objectNormal) const {
 
     const Ray &thisRay = *this;
+
+    // intersect with itself to check whether the point is hiding behind the object
+    if (thisRay.direction.dot(objectNormal) < 0) {
+        return true;
+    }
 
     // intersect with spheres
     for (long long i = 0, size = Scene::spheres.size(); i < size; i++) {
         real t = thisRay.intersectWith(Scene::spheres[i]);
-        if (t < 1 && t > Scene::shadowRayEpsilon) {
+        if (t < 1 && t > 0) {
             return true;
         }
     }
@@ -209,7 +208,7 @@ bool Ray::isInShadow() const {
     // intersect with triangles
     for (long long i = 0, size = Scene::triangles.size(); i < size; i++) {
         real t = thisRay.intersectWith(Scene::triangles[i].face);
-        if (t < 1 && t > Scene::shadowRayEpsilon) {
+        if (t < 1 && t > 0) {
             return true;
         }
     }
@@ -220,7 +219,7 @@ bool Ray::isInShadow() const {
 
         for (long long j = 0, size = faces.size(); j < size; j++) {
             real t = thisRay.intersectWith(faces[j]);
-            if (t < 1 && t > Scene::shadowRayEpsilon) {
+            if (t < 1 && t > 0) {
                 return true;
             }
         }
@@ -229,26 +228,26 @@ bool Ray::isInShadow() const {
     return false;
 }
 
-RGBColor Ray::computeColor(const Point &p, Material *material, const Vector &closestObjectNormal) const {
+RGBColor Ray::computeColor(const Point &p, Material *material, const Vector &objectNormal) const {
 
     ColorVector colorv(0.0, 0.0, 0.0);
+    // calculate ambient shading
     colorv.increment(Scene::ambientLight, material->ambientReflectance);
 
     for (long long i = 0, size = Scene::pointLights.size(); i < size; i++) {
 
-        // TODO: calculate shadow first
         PointLight &pointLight = Scene::pointLights[i];
         Vector toLight = (pointLight.position - p);
-        Ray shadowRay(p, toLight);
+        Ray shadowRay(p + (objectNormal * Scene::shadowRayEpsilon), toLight);
 
-        if (shadowRay.isInShadow()) {
+        if (shadowRay.isInShadow(objectNormal)) {
             continue;
         }
 
         ColorVector irradiance = pointLight.intensity / toLight.dotItself(); // pow(toLight.length(), 2);
 
         // calculate diffuse shading
-        real cosAngle = closestObjectNormal.dot(toLight.normalized());
+        real cosAngle = objectNormal.dot(toLight.normalized());
         if (cosAngle < 0) {
             cosAngle = 0;
         }
@@ -256,7 +255,7 @@ RGBColor Ray::computeColor(const Point &p, Material *material, const Vector &clo
 
         // calculate specular shading
         Vector halfVector = (toLight.normalized() - this->direction).normalized();
-        cosAngle = closestObjectNormal.dot(halfVector);
+        cosAngle = objectNormal.dot(halfVector);
         if (cosAngle < 0) {
             cosAngle = 0;
         } else {

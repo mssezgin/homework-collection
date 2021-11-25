@@ -15,13 +15,13 @@ class Vec3real;
 class Point;
 class Vector;
 class Ray;
+class ColorVector;
 class RGBColor;
 struct ImagePlane;
 class Camera;
 class PointLight;
 class Material;
 class Face;
-class Object;
 class Mesh;
 class Triangle;
 class Sphere;
@@ -84,8 +84,8 @@ public:
     Point operator[](real t) const;
     real intersectWith(const Face &face) const;
     real intersectWith(const Sphere &sphere) const;
-    bool isInShadow() const;
-    RGBColor computeColor(const Point &p, Material *material, const Vector &closestObjectNormal) const;
+    bool isInShadow(const Vector &objectNormal) const;
+    RGBColor computeColor(const Point &p, Material *material, const Vector &objectNormal) const;
     RGBColor traceRay() const;
 };
 
