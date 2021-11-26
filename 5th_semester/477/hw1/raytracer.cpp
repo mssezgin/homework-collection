@@ -2,10 +2,10 @@
 #include "ppm.h"
 #include "models.h"
 
-#define IS_DEVELOPMENT 1
+#define IS_DEVELOPMENT true
 
 #if IS_DEVELOPMENT
-#include <ctime>
+    #include <ctime>
 #endif
 
 

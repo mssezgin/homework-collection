@@ -8,8 +8,19 @@
 #include <iostream>
 #include "parser.h"
 
+// 'f' for float, 'd' for double
+#define REAL_TYPE 'd'
 
-typedef double real;
+#if REAL_TYPE == 'f'
+    #define REAL float
+    #define REAL_MAX FLT_MAX
+#else
+    #define REAL double
+    #define REAL_MAX DBL_MAX
+#endif
+
+
+typedef REAL real;
 class Vec3i;
 class Vec3real;
 class Point;

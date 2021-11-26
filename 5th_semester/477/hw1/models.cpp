@@ -159,7 +159,7 @@ real Ray::intersectWith(const Sphere &sphere) const {
     real C = vCO.dot(vCO) - sphere.radius * sphere.radius;
     real delta = halfB * halfB - A * C;
     if (delta < 0) {
-        return DBL_MAX;
+        return REAL_MAX;
     } else {
         return (-halfB - sqrt(delta)) / A;
     }
@@ -177,13 +177,13 @@ real Ray::intersectWith(const Face &face) const {
     real t     = Vector::determinant(columns[0], columns[1], columns[3]) / detA;
 
     if (beta < 0) {
-        return DBL_MAX;
+        return REAL_MAX;
     }
     if (gamma < 0) {
-        return DBL_MAX;
+        return REAL_MAX;
     }
     if (beta + gamma > 1) {
-        return DBL_MAX;
+        return REAL_MAX;
     }
     return t;
 }
@@ -279,7 +279,7 @@ ColorVector Ray::computeColor(const Point &p, Material *material, const Vector &
 ColorVector Ray::traceRay() const {
 
     const Ray &thisRay = *this;
-    real tClosest = DBL_MAX;
+    real tClosest = REAL_MAX;
     Sphere *closestSphere = nullptr;
     Triangle *closestTriangle = nullptr;
     Mesh *closestMesh = nullptr;
