@@ -228,11 +228,11 @@ bool Ray::isInShadow(const Vector &objectNormal) const {
     return false;
 }
 
-// TODO: give epsilon added p directly as argument
 ColorVector Ray::computeColor(const Point &p, Material *material, const Vector &objectNormal) const {
 
     const Ray &thisRay = *this;
     ColorVector colorv(0.0, 0.0, 0.0);
+
     // calculate ambient shading
     colorv.increment(Scene::ambientLight, material->ambientReflectance);
 
@@ -240,7 +240,7 @@ ColorVector Ray::computeColor(const Point &p, Material *material, const Vector &
 
         PointLight &pointLight = Scene::pointLights[i];
         Vector toLight = (pointLight.position - p);
-        Ray shadowRay(p + (objectNormal * Scene::shadowRayEpsilon), toLight);
+        Ray shadowRay(p, toLight);
 
         if (shadowRay.isInShadow(objectNormal)) {
             continue;
@@ -268,9 +268,8 @@ ColorVector Ray::computeColor(const Point &p, Material *material, const Vector &
 
     // calculate reflection
     if (material->isMirror && thisRay.recursionDepth < Scene::maxRecursionDepth) {
-        // TODO: optimize direction normalization
-        Vector reflectionDirection = thisRay.direction.normalized() - (objectNormal * (2 * thisRay.direction.normalized().dot(objectNormal)));
-        Ray reflectionRay(p + (objectNormal * Scene::shadowRayEpsilon), reflectionDirection, thisRay.recursionDepth + 1);
+        Vector reflectionDirection = thisRay.direction - (objectNormal * (2 * thisRay.direction.dot(objectNormal)));
+        Ray reflectionRay(p, reflectionDirection, thisRay.recursionDepth + 1);
         colorv.increment(reflectionRay.traceRay(), material->mirrorReflectance);
     }
 
@@ -280,7 +279,6 @@ ColorVector Ray::computeColor(const Point &p, Material *material, const Vector &
 ColorVector Ray::traceRay() const {
 
     const Ray &thisRay = *this;
-    /* real tMin = (thisRay.recursionDepth == 0) ? 1 : 0; */
     real tClosest = DBL_MAX;
     Sphere *closestSphere = nullptr;
     Triangle *closestTriangle = nullptr;
@@ -341,7 +339,6 @@ ColorVector Ray::traceRay() const {
 
     // compute color
     Point p = thisRay[tClosest];
-    // ColorVector colorv(0.0, 0.0, 0.0);
     Material *material;
     Vector closestObjectNormal;
     switch (closestObject) {
@@ -359,7 +356,7 @@ ColorVector Ray::traceRay() const {
             break;
     }
 
-    return thisRay.computeColor(p, material, closestObjectNormal);
+    return thisRay.computeColor(p + (closestObjectNormal * Scene::shadowRayEpsilon), material, closestObjectNormal);
 }
 
 
@@ -451,11 +448,6 @@ void Camera::initPositionTopLeftPixel() {
 
 // TODO: float precision error: e.g. (400,400) 0.00125003 -0.00125003 -1
 Ray Camera::createRay(int i, int j) {
-    /* return Ray(
-        position,
-        Vector(nearPlane.positionTopLeftPixel + (u * (i * nearPlane.pixelWidth)) + (v * (-j * nearPlane.pixelHeight)), position),
-        0
-    ); */
     Point pixel = nearPlane.positionTopLeftPixel + (u * (i * nearPlane.pixelWidth)) + (v * (-j * nearPlane.pixelHeight));
     return Ray(pixel, Vector(pixel, this->position).normalized(), 0);
 }
