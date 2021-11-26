@@ -269,7 +269,7 @@ ColorVector Ray::computeColor(const Point &p, Material *material, const Vector &
     // calculate reflection
     if (material->isMirror && thisRay.recursionDepth < Scene::maxRecursionDepth) {
         // TODO: optimize direction normalization
-        Vector reflectionDirection = (objectNormal * thisRay.direction.normalized().dot(objectNormal)) - thisRay.direction.normalized();
+        Vector reflectionDirection = thisRay.direction.normalized() - (objectNormal * (2 * thisRay.direction.normalized().dot(objectNormal)));
         Ray reflectionRay(p + (objectNormal * Scene::shadowRayEpsilon), reflectionDirection, thisRay.recursionDepth + 1);
         colorv.increment(reflectionRay.traceRay(), material->mirrorReflectance);
     }
