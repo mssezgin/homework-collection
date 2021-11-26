@@ -280,7 +280,7 @@ ColorVector Ray::computeColor(const Point &p, Material *material, const Vector &
 ColorVector Ray::traceRay() const {
 
     const Ray &thisRay = *this;
-    real tMin = (thisRay.recursionDepth == 0) ? 1 : 0;
+    /* real tMin = (thisRay.recursionDepth == 0) ? 1 : 0; */
     real tClosest = DBL_MAX;
     Sphere *closestSphere = nullptr;
     Triangle *closestTriangle = nullptr;
@@ -291,7 +291,7 @@ ColorVector Ray::traceRay() const {
     // intersect with spheres
     for (long long i = 0, size = Scene::spheres.size(); i < size; i++) {
         real t = thisRay.intersectWith(Scene::spheres[i]);
-        if (t < tClosest && t >= tMin) {
+        if (t < tClosest && t >= 0) {
             tClosest = t;
             closestSphere = &(Scene::spheres[i]);
             // TODO: move this to the outside of the loop
@@ -302,7 +302,7 @@ ColorVector Ray::traceRay() const {
     // intersect with triangles
     for (long long i = 0, size = Scene::triangles.size(); i < size; i++) {
         real t = thisRay.intersectWith(Scene::triangles[i].face);
-        if (t < tClosest && t >= tMin) {
+        if (t < tClosest && t >= 0) {
             tClosest = t;
             closestTriangle = &(Scene::triangles[i]);
             closestObject = 2;
@@ -315,7 +315,7 @@ ColorVector Ray::traceRay() const {
 
         for (long long j = 0, size = faces.size(); j < size; j++) {
             real t = thisRay.intersectWith(faces[j]);
-            if (t < tClosest && t >= tMin) {
+            if (t < tClosest && t >= 0) {
                 tClosest = t;
                 closestMesh = &(Scene::meshes[i]);
                 closestMeshFace = &(faces[j]);
@@ -451,11 +451,13 @@ void Camera::initPositionTopLeftPixel() {
 
 // TODO: float precision error: e.g. (400,400) 0.00125003 -0.00125003 -1
 Ray Camera::createRay(int i, int j) {
-    return Ray(
+    /* return Ray(
         position,
         Vector(nearPlane.positionTopLeftPixel + (u * (i * nearPlane.pixelWidth)) + (v * (-j * nearPlane.pixelHeight)), position),
         0
-    );
+    ); */
+    Point pixel = nearPlane.positionTopLeftPixel + (u * (i * nearPlane.pixelWidth)) + (v * (-j * nearPlane.pixelHeight));
+    return Ray(pixel, Vector(pixel, this->position).normalized(), 0);
 }
 
 
