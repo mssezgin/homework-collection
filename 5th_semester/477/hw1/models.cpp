@@ -280,7 +280,8 @@ ColorVector Ray::computeColor(const Point &p, Material *material, const Vector &
 ColorVector Ray::traceRay() const {
 
     const Ray &thisRay = *this;
-    real tMin = DBL_MAX;
+    real tMin = (thisRay.recursionDepth == 0) ? 1 : 0;
+    real tClosest = DBL_MAX;
     Sphere *closestSphere = nullptr;
     Triangle *closestTriangle = nullptr;
     Mesh *closestMesh = nullptr;
@@ -290,9 +291,10 @@ ColorVector Ray::traceRay() const {
     // intersect with spheres
     for (long long i = 0, size = Scene::spheres.size(); i < size; i++) {
         real t = thisRay.intersectWith(Scene::spheres[i]);
-        if (t < tMin && t >= 1) {
-            tMin = t;
+        if (t < tClosest && t >= tMin) {
+            tClosest = t;
             closestSphere = &(Scene::spheres[i]);
+            // TODO: move this to the outside of the loop
             closestObject = 1;
         }
     }
@@ -300,8 +302,8 @@ ColorVector Ray::traceRay() const {
     // intersect with triangles
     for (long long i = 0, size = Scene::triangles.size(); i < size; i++) {
         real t = thisRay.intersectWith(Scene::triangles[i].face);
-        if (t < tMin && t >= 1) {
-            tMin = t;
+        if (t < tClosest && t >= tMin) {
+            tClosest = t;
             closestTriangle = &(Scene::triangles[i]);
             closestObject = 2;
         }
@@ -313,8 +315,8 @@ ColorVector Ray::traceRay() const {
 
         for (long long j = 0, size = faces.size(); j < size; j++) {
             real t = thisRay.intersectWith(faces[j]);
-            if (t < tMin && t >= 1) {
-                tMin = t;
+            if (t < tClosest && t >= tMin) {
+                tClosest = t;
                 closestMesh = &(Scene::meshes[i]);
                 closestMeshFace = &(faces[j]);
                 closestObject = 3;
@@ -338,7 +340,7 @@ ColorVector Ray::traceRay() const {
     }
 
     // compute color
-    Point p = thisRay[tMin];
+    Point p = thisRay[tClosest];
     // ColorVector colorv(0.0, 0.0, 0.0);
     Material *material;
     Vector closestObjectNormal;
