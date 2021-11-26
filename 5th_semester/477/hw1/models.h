@@ -79,21 +79,22 @@ class Ray {
 public:
     Point origin;
     Vector direction;
+    int recursionDepth;
 
-    Ray(const Point &_origin, const Vector &_direction);
+    Ray(const Point &_origin, const Vector &_direction, int _recursionDepth = 0);
     Point operator[](real t) const;
     real intersectWith(const Face &face) const;
     real intersectWith(const Sphere &sphere) const;
     bool isInShadow(const Vector &objectNormal) const;
-    RGBColor computeColor(const Point &p, Material *material, const Vector &objectNormal) const;
-    RGBColor traceRay() const;
+    ColorVector computeColor(const Point &p, Material *material, const Vector &objectNormal) const;
+    ColorVector traceRay() const;
 };
 
 
 class ColorVector : public Vec3real {
 public:
     ColorVector(real _x = 0.0, real _y = 0.0, real _z = 0.0);
-    void increment(ColorVector irradiance, Vec3real reflectanceCoefficient);
+    void increment(ColorVector irradiance, Vec3real coefficient);
     ColorVector operator/(real scalar) const;
     RGBColor toRGBColor() const;
 };

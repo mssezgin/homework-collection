@@ -144,8 +144,8 @@ real Vector::determinant(const Vector &col1, const Vector &col2, const Vector &c
 
 // class Ray
 
-Ray::Ray(const Point &_origin, const Vector &_direction) :
-    origin(_origin), direction(_direction) { }
+Ray::Ray(const Point &_origin, const Vector &_direction,  int _recursionDepth) :
+    origin(_origin), direction(_direction), recursionDepth(_recursionDepth) { }
 
 Point Ray::operator[](real t) const {
     return origin + (direction * t);
@@ -228,8 +228,10 @@ bool Ray::isInShadow(const Vector &objectNormal) const {
     return false;
 }
 
-RGBColor Ray::computeColor(const Point &p, Material *material, const Vector &objectNormal) const {
+// TODO: give epsilon added p directly as argument
+ColorVector Ray::computeColor(const Point &p, Material *material, const Vector &objectNormal) const {
 
+    const Ray &thisRay = *this;
     ColorVector colorv(0.0, 0.0, 0.0);
     // calculate ambient shading
     colorv.increment(Scene::ambientLight, material->ambientReflectance);
@@ -254,7 +256,7 @@ RGBColor Ray::computeColor(const Point &p, Material *material, const Vector &obj
         colorv.increment(irradiance, material->diffuseReflectance * cosAngle);
 
         // calculate specular shading
-        Vector halfVector = (toLight.normalized() - this->direction).normalized();
+        Vector halfVector = (toLight.normalized() - thisRay.direction).normalized();
         cosAngle = objectNormal.dot(halfVector);
         if (cosAngle < 0) {
             cosAngle = 0;
@@ -264,10 +266,18 @@ RGBColor Ray::computeColor(const Point &p, Material *material, const Vector &obj
         colorv.increment(irradiance, material->specularReflectance * cosAngle);
     }
 
-    return colorv.toRGBColor();
+    // calculate reflection
+    if (material->isMirror && thisRay.recursionDepth < Scene::maxRecursionDepth) {
+        // TODO: optimize direction normalization
+        Vector reflectionDirection = (objectNormal * thisRay.direction.normalized().dot(objectNormal)) - thisRay.direction.normalized();
+        Ray reflectionRay(p + (objectNormal * Scene::shadowRayEpsilon), reflectionDirection, thisRay.recursionDepth + 1);
+        colorv.increment(reflectionRay.traceRay(), material->mirrorReflectance);
+    }
+
+    return colorv;
 }
 
-RGBColor Ray::traceRay() const {
+ColorVector Ray::traceRay() const {
 
     const Ray &thisRay = *this;
     real tMin = DBL_MAX;
@@ -314,7 +324,17 @@ RGBColor Ray::traceRay() const {
 
     // no intersection
     if (closestObject == 0) {
-        return Scene::backgroundColor;
+        if (thisRay.recursionDepth == 0) {
+            // TODO: improve this
+            // return Scene::backgroundColor;
+            return ColorVector(
+                Scene::backgroundColor.r,
+                Scene::backgroundColor.g,
+                Scene::backgroundColor.b
+            );
+        } else {
+            return ColorVector(0.0, 0.0, 0.0);
+        }
     }
 
     // compute color
@@ -346,10 +366,10 @@ RGBColor Ray::traceRay() const {
 ColorVector::ColorVector(real _x, real _y, real _z) :
     Vec3real(_x, _y, _z) { }
 
-void ColorVector::increment(ColorVector irradiance, Vec3real reflectanceCoefficient) {
-    x += irradiance.x * reflectanceCoefficient.x;
-    y += irradiance.y * reflectanceCoefficient.y;
-    z += irradiance.z * reflectanceCoefficient.z;
+void ColorVector::increment(ColorVector irradiance, Vec3real coefficient) {
+    x += irradiance.x * coefficient.x;
+    y += irradiance.y * coefficient.y;
+    z += irradiance.z * coefficient.z;
 }
 
 ColorVector ColorVector::operator/(real scalar) const {
@@ -431,7 +451,8 @@ void Camera::initPositionTopLeftPixel() {
 Ray Camera::createRay(int i, int j) {
     return Ray(
         position,
-        Vector(nearPlane.positionTopLeftPixel + (u * (i * nearPlane.pixelWidth)) + (v * (-j * nearPlane.pixelHeight)), position)
+        Vector(nearPlane.positionTopLeftPixel + (u * (i * nearPlane.pixelWidth)) + (v * (-j * nearPlane.pixelHeight)), position),
+        0
     );
 }
 
@@ -504,8 +525,6 @@ Sphere::Sphere(const parser::Sphere &_sphere) :
     radius(_sphere.radius) { }
 
 Vector Sphere::normal(const Point &point) const {
-    // Vector n(point, Scene::vertexData[centerVertexId]);
-    // return n.normalized();
     return Vector(point, Scene::vertexData[centerVertexId - 1]).normalized();
 }
 

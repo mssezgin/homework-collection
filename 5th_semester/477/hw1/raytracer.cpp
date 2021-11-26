@@ -45,7 +45,7 @@ int main(int argc, char* argv[]) {
             for (int i = 0; i < width; ++i) {
 
                 Ray ray = camera.createRay(i, j);
-                RGBColor color = ray.traceRay();
+                RGBColor color = ray.traceRay().toRGBColor();
                 image[index++] = color.r;
                 image[index++] = color.g;
                 image[index++] = color.b;
