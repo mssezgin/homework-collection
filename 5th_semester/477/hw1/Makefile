@@ -19,4 +19,3 @@ convert:
 
 clean:
 	rm $(EXENAME)
-	rm *.ppm
