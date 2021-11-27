@@ -26,13 +26,13 @@ int main(int argc, char* argv[]) {
     for (auto itr = Scene::cameras.begin(); itr != Scene::cameras.end(); ++itr) {
 
         Camera &camera = *itr;
-        int width = camera.imageWidth;
-        int height = camera.imageHeight;
+        int width = camera.nearPlane.imageWidth;
+        int height = camera.nearPlane.imageHeight;
 
 
         #if IS_DEVELOPMENT
             clock_t begin_camera, begin_write, end_camera;
-            std::cout << "\t" << camera.imageName << " (" << width << "x" << height << ")\n";
+            std::cout << "\t" << camera.nearPlane.imageName << " (" << width << "x" << height << ")\n";
             if ((begin_camera = clock()) == -1)
                 std::cout << "\t\x1b[31mClock error occurred while calculating the camera start time.\x1b[0m\n";
         #endif
@@ -60,7 +60,7 @@ int main(int argc, char* argv[]) {
         #endif
 
 
-        write_ppm(camera.imageName.c_str(), image, width, height);
+        write_ppm(camera.nearPlane.imageName.c_str(), image, width, height);
         delete[] image;
 
 
@@ -79,58 +79,3 @@ int main(int argc, char* argv[]) {
         std::cout << "\x1b[42mTotal execution time: " << (double) (end - begin) / CLOCKS_PER_SEC << " seconds\x1b[0m\n" << std::endl;
     #endif
 }
-
-/*
-#include <iostream>
-#include "parser.h"
-#include "ppm.h"
-
-typedef unsigned char RGB[3];
-
-int main(int argc, char* argv[])
-{
-    // Sample usage for reading an XML scene file
-    parser::Scene scene;
-
-    scene.loadFromXml(argv[1]);
-
-    // The code below creates a test pattern and writes
-    // it to a PPM file to demonstrate the usage of the
-    // ppm_write function.
-    //
-    // Normally, you would be running your ray tracing
-    // code here to produce the desired image.
-
-    const RGB BAR_COLOR[8] =
-    {
-        { 255, 255, 255 },  // 100% White
-        { 255, 255,   0 },  // Yellow
-        {   0, 255, 255 },  // Cyan
-        {   0, 255,   0 },  // Green
-        { 255,   0, 255 },  // Magenta
-        { 255,   0,   0 },  // Red
-        {   0,   0, 255 },  // Blue
-        {   0,   0,   0 },  // Black
-    };
-
-    int width = 640, height = 480;
-    int columnWidth = width / 8;
-
-    unsigned char* image = new unsigned char [width * height * 3];
-
-    int i = 0;
-    for (int y = 0; y < height; ++y)
-    {
-        for (int x = 0; x < width; ++x)
-        {
-            int colIdx = x / columnWidth;
-            image[i++] = BAR_COLOR[colIdx][0];
-            image[i++] = BAR_COLOR[colIdx][1];
-            image[i++] = BAR_COLOR[colIdx][2];
-        }
-    }
-
-    write_ppm("test.ppm", image, width, height);
-
-}
-*/

@@ -47,7 +47,7 @@ Vec3real Vec3real::operator*(real scalar) const {
 Point::Point(real _x, real _y, real _z) :
     Vec3real(_x, _y, _z) { }
 
-Point::Point(parser::Vec3f _vec3f) :
+Point::Point(const parser::Vec3f &_vec3f) :
     Vec3real(_vec3f) { }
 
 Point Point::operator+(const Vector &vector) const {
@@ -59,7 +59,11 @@ Point Point::operator+(const Vector &vector) const {
 }
 
 Vector Point::operator-(const Point &second) const {
-    return Vector(this->x - second.x, this->y - second.y, this->z - second.z);
+    return Vector(
+        this->x - second.x,
+        this->y - second.y,
+        this->z - second.z
+    );
 }
 
 
@@ -68,10 +72,10 @@ Vector Point::operator-(const Point &second) const {
 Vector::Vector(real _x, real _y, real _z) :
     Vec3real(_x, _y, _z) { }
 
-// Vector::Vector(parser::Vec3f _vec3f) :
-//     Vec3real(_vec3f) { }
+Vector::Vector(const parser::Vec3f &_vec3f) :
+    Vec3real(_vec3f) { }
 
-Vector::Vector(Point end, Point start) {
+Vector::Vector(const Point &end, const Point &start) {
     *this = end - start;
 }
 
@@ -124,7 +128,7 @@ Vector Vector::cross(const Vector &second) const {
 }
 
 real Vector::length() const {
-    return sqrt(this->dot(*this));
+    return sqrt(this->dotItself());
 }
 
 Vector Vector::normalized() const {
@@ -154,7 +158,7 @@ Point Ray::operator[](real t) const {
 real Ray::intersectWith(const Sphere &sphere) const {
 
     real A = this->direction.dot(this->direction);
-    Vector vCO = this->origin - Scene::vertexData[sphere.centerVertexId - 1];
+    Vector vCO = this->origin - Scene::vertexData[sphere.centerVertexId];
     real halfB = this->direction.dot(vCO);
     real C = vCO.dot(vCO) - sphere.radius * sphere.radius;
     real delta = halfB * halfB - A * C;
@@ -167,9 +171,9 @@ real Ray::intersectWith(const Sphere &sphere) const {
 
 real Ray::intersectWith(const Face &face) const {
 
-    Point A = Scene::vertexData[face.v0_id - 1];
-    Point B = Scene::vertexData[face.v1_id - 1];
-    Point C = Scene::vertexData[face.v2_id - 1];
+    Point A = Scene::vertexData[face.v0_id];
+    Point B = Scene::vertexData[face.v1_id];
+    Point C = Scene::vertexData[face.v2_id];
     Vector columns[4] = { A - B, A - C, this->direction, A - this->origin };
     real detA  = Vector::determinant(columns[0], columns[1], columns[2]);
     real beta  = Vector::determinant(columns[3], columns[1], columns[2]) / detA;
@@ -292,7 +296,6 @@ ColorVector Ray::traceRay() const {
         if (t < tClosest && t >= 0) {
             tClosest = t;
             closestSphere = &(Scene::spheres[i]);
-            // TODO: move this to the outside of the loop
             closestObject = 1;
         }
     }
@@ -326,7 +329,6 @@ ColorVector Ray::traceRay() const {
     if (closestObject == 0) {
         if (thisRay.recursionDepth == 0) {
             // TODO: improve this
-            // return Scene::backgroundColor;
             return ColorVector(
                 Scene::backgroundColor.r,
                 Scene::backgroundColor.g,
@@ -343,15 +345,15 @@ ColorVector Ray::traceRay() const {
     Vector closestObjectNormal;
     switch (closestObject) {
         case 1:
-            material = &Scene::materials[closestSphere->materialId - 1];
+            material = &Scene::materials[closestSphere->materialId];
             closestObjectNormal = closestSphere->normal(p);
             break;
         case 2:
-            material = &Scene::materials[closestTriangle->materialId - 1];
+            material = &Scene::materials[closestTriangle->materialId];
             closestObjectNormal = closestTriangle->face.normal();
             break;
         case 3:
-            material = &Scene::materials[closestMesh->materialId - 1];
+            material = &Scene::materials[closestMesh->materialId];
             closestObjectNormal = closestMeshFace->normal();
             break;
     }
@@ -364,6 +366,9 @@ ColorVector Ray::traceRay() const {
 
 ColorVector::ColorVector(real _x, real _y, real _z) :
     Vec3real(_x, _y, _z) { }
+
+ColorVector::ColorVector(const parser::Vec3f &_vec3f) :
+    Vec3real(_vec3f) { }
 
 void ColorVector::increment(ColorVector irradiance, Vec3real coefficient) {
     x += irradiance.x * coefficient.x;
@@ -401,49 +406,41 @@ RGBColor ColorVector::toRGBColor() const {
 RGBColor::RGBColor(unsigned char _r, unsigned char _g, unsigned char _b) :
     r(_r), g(_g), b(_b) { }
 
+RGBColor::RGBColor(const parser::Vec3i &_vec3i) :
+    r(_vec3i.x), g(_vec3i.y), b(_vec3i.z) { }
+
+
+// class ImagePlane
+
+ImagePlane::ImagePlane() { }
+
+ImagePlane::ImagePlane(const Camera &camera, const parser::Camera &_camera) :
+    left(_camera.near_plane.x),
+    right(_camera.near_plane.y),
+    bottom(_camera.near_plane.z),
+    top(_camera.near_plane.w),
+    nearDistance(_camera.near_distance),
+    imageWidth(_camera.image_width),
+    imageHeight(_camera.image_height),
+    imageName(_camera.image_name) {
+
+    Point planeCenter = camera.position + (camera.gaze * this->nearDistance);
+    Point positionTopLeft = planeCenter + (camera.u * this->left) + (camera.v * this->top);
+    this->pixelWidth = (this->right - this->left) / this->imageWidth;
+    this->pixelHeight = (this->top - this->bottom) / this->imageHeight;
+    this->positionTopLeftPixel = positionTopLeft + (camera.u * (this->pixelWidth / 2)) + (camera.v * (-1 * this->pixelHeight / 2));
+}
+
 
 // class Camera
 
 Camera::Camera(const parser::Camera &_camera) {
-    // this->position = Point(_camera.position);
-    this->position = Point(
-        _camera.position.x,
-        _camera.position.y,
-        _camera.position.z
-    );
-    // this->gaze = Vector(_camera.gaze);
-    this->gaze = Vector(
-        _camera.gaze.x,
-        _camera.gaze.y,
-        _camera.gaze.z
-    );
-    this->gaze.normalize();
-    this->w = gaze * (-1.f);
-    // this->v = Vector(_camera.up);
-    this->v = Vector(
-        _camera.up.x,
-        _camera.up.y,
-        _camera.up.z
-    );
-    this->v.normalize();
+    this->position = Point(_camera.position);
+    this->gaze = Vector(_camera.gaze).normalized();
+    this->w = gaze * (-1.0);
+    this->v = Vector(_camera.up).normalized();
     this->u = this->v.cross(this->w);
-    this->nearPlane.left   = _camera.near_plane.x;
-    this->nearPlane.right  = _camera.near_plane.y;
-    this->nearPlane.bottom = _camera.near_plane.z;
-    this->nearPlane.top    = _camera.near_plane.w;
-    this->nearDistance     = _camera.near_distance;
-    this->imageWidth       = _camera.image_width;
-    this->imageHeight      = _camera.image_height;
-    this->imageName        = _camera.image_name;
-    this->initPositionTopLeftPixel();
-}
-
-void Camera::initPositionTopLeftPixel() {
-    Point imageCenter = position + (gaze * nearDistance);
-    Point positionTopLeft = imageCenter + (u * nearPlane.left) + (v * nearPlane.top);
-    nearPlane.pixelWidth = (nearPlane.right - nearPlane.left) / imageWidth;
-    nearPlane.pixelHeight = (nearPlane.top - nearPlane.bottom) / imageHeight;
-    nearPlane.positionTopLeftPixel = positionTopLeft + (u * (nearPlane.pixelWidth / 2)) + (v * (-1 * nearPlane.pixelHeight / 2));
+    this->nearPlane = ImagePlane(*this, _camera);
 }
 
 // TODO: float precision error: e.g. (400,400) 0.00125003 -0.00125003 -1
@@ -456,16 +453,8 @@ Ray Camera::createRay(int i, int j) {
 // class PointLight
 
 PointLight::PointLight(const parser::PointLight &_pointLight) :
-    position(Point(
-        _pointLight.position.x,
-        _pointLight.position.y,
-        _pointLight.position.z
-    )),
-    intensity(ColorVector(
-        _pointLight.intensity.x,
-        _pointLight.intensity.y,
-        _pointLight.intensity.z
-    )) { }
+    position(_pointLight.position),
+    intensity(_pointLight.intensity) { }
 
 
 // class Material
@@ -482,15 +471,15 @@ Material::Material(const parser::Material &_material) :
 // class Face
 
 Face::Face(const parser::Face &_face) :
-    v0_id(_face.v0_id),
-    v1_id(_face.v1_id),
-    v2_id(_face.v2_id) { }
+    v0_id(_face.v0_id - 1),
+    v1_id(_face.v1_id - 1),
+    v2_id(_face.v2_id - 1) { }
 
 // TODO: precompute normal vectors
 Vector Face::normal() const {
-    Point A = Scene::vertexData[v0_id - 1];
-    Point B = Scene::vertexData[v1_id - 1];
-    Point C = Scene::vertexData[v2_id - 1];
+    Point A = Scene::vertexData[v0_id];
+    Point B = Scene::vertexData[v1_id];
+    Point C = Scene::vertexData[v2_id];
     return (B - A).cross(C - A).normalized();
 }
 
@@ -498,7 +487,7 @@ Vector Face::normal() const {
 // class Mesh
 
 Mesh::Mesh(const parser::Mesh &_mesh) :
-    materialId(_mesh.material_id) {
+    materialId(_mesh.material_id - 1) {
 
     for (auto itr = _mesh.faces.begin(); itr != _mesh.faces.end(); ++itr) {
         this->faces.push_back(*itr);
@@ -509,19 +498,19 @@ Mesh::Mesh(const parser::Mesh &_mesh) :
 // class Triangle
 
 Triangle::Triangle(const parser::Triangle &_triangle) :
-    materialId(_triangle.material_id),
+    materialId(_triangle.material_id - 1),
     face(_triangle.indices) { }
 
 
 // class Sphere
 
 Sphere::Sphere(const parser::Sphere &_sphere) :
-    materialId(_sphere.material_id),
-    centerVertexId(_sphere.center_vertex_id),
+    materialId(_sphere.material_id - 1),
+    centerVertexId(_sphere.center_vertex_id - 1),
     radius(_sphere.radius) { }
 
 Vector Sphere::normal(const Point &point) const {
-    return Vector(point, Scene::vertexData[centerVertexId - 1]).normalized();
+    return Vector(point, Scene::vertexData[centerVertexId]).normalized();
 }
 
 
@@ -531,19 +520,13 @@ void Scene::loadFromXml(const std::string &filePath) {
     parser::Scene _scene;
     _scene.loadFromXml(filePath);
 
-    Scene::backgroundColor.r = _scene.background_color.x;
-    Scene::backgroundColor.g = _scene.background_color.y;
-    Scene::backgroundColor.b = _scene.background_color.z;
+    Scene::backgroundColor = RGBColor(_scene.background_color);
     Scene::shadowRayEpsilon = _scene.shadow_ray_epsilon;
     Scene::maxRecursionDepth = _scene.max_recursion_depth;
     for (auto itr = _scene.cameras.begin(); itr != _scene.cameras.end(); ++itr) {
         Scene::cameras.push_back(Camera(*itr));
     }
-    Scene::ambientLight = ColorVector(
-        _scene.ambient_light.x,
-        _scene.ambient_light.y,
-        _scene.ambient_light.z
-    );
+    Scene::ambientLight = ColorVector(_scene.ambient_light);
     for (auto itr = _scene.point_lights.begin(); itr != _scene.point_lights.end(); ++itr) {
         Scene::pointLights.push_back(*itr);
     }
