@@ -31,7 +31,7 @@ int main(int argc, char* argv[]) {
 
         heightBoundaries[0] = 0;
         for (int i = 0, j = NUM_THREADS; i < NUM_THREADS; i++, j--) {
-            heightBoundaries[i+1] = heightBoundaries[i] + (width - heightBoundaries[i]) / j;
+            heightBoundaries[i+1] = heightBoundaries[i] + (height - heightBoundaries[i]) / j;
         }
 
 
