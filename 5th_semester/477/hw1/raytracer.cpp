@@ -4,7 +4,7 @@
 #include "models.h"
 
 #define NUM_THREADS 4
-#define IS_DEVELOPMENT 1
+#define IS_DEVELOPMENT 0
 
 #if IS_DEVELOPMENT
     #include <chrono>

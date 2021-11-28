@@ -250,7 +250,7 @@ ColorVector Ray::computeColor(const Point &p, Material *material, const Vector &
             continue;
         }
 
-        ColorVector irradiance = pointLight.intensity / toLight.dotItself(); // pow(toLight.length(), 2);
+        ColorVector irradiance = pointLight.intensity / toLight.dotItself();
 
         // calculate diffuse shading
         real cosAngle = objectNormal.dot(toLight.normalized());
@@ -328,7 +328,6 @@ ColorVector Ray::traceRay() const {
     // no intersection
     if (closestObject == 0) {
         if (thisRay.recursionDepth == 0) {
-            // TODO: improve this
             return ColorVector(
                 Scene::backgroundColor.r,
                 Scene::backgroundColor.g,
@@ -443,7 +442,6 @@ Camera::Camera(const parser::Camera &_camera) {
     this->nearPlane = ImagePlane(*this, _camera);
 }
 
-// TODO: float precision error: e.g. (400,400) 0.00125003 -0.00125003 -1
 Ray Camera::createRay(int i, int j) const {
     Point pixel = nearPlane.positionTopLeftPixel + (u * (i * nearPlane.pixelWidth)) + (v * (-j * nearPlane.pixelHeight));
     return Ray(pixel, Vector(pixel, this->position).normalized(), 0);
