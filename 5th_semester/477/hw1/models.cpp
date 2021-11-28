@@ -444,7 +444,7 @@ Camera::Camera(const parser::Camera &_camera) {
 }
 
 // TODO: float precision error: e.g. (400,400) 0.00125003 -0.00125003 -1
-Ray Camera::createRay(int i, int j) {
+Ray Camera::createRay(int i, int j) const {
     Point pixel = nearPlane.positionTopLeftPixel + (u * (i * nearPlane.pixelWidth)) + (v * (-j * nearPlane.pixelHeight));
     return Ray(pixel, Vector(pixel, this->position).normalized(), 0);
 }
@@ -549,3 +549,19 @@ void Scene::loadFromXml(const std::string &filePath) {
 
 
 // global functions
+
+void renderQuarter(unsigned char *image, size_t width, size_t heightStart, size_t heightEnd, const Camera &camera) {
+
+    int index = width * heightStart * 3;
+
+    for (int j = heightStart; j < heightEnd; ++j) {
+        for (int i = 0; i < width; ++i) {
+
+            Ray ray = camera.createRay(i, j);
+            RGBColor color = ray.traceRay().toRGBColor();
+            image[index++] = color.r;
+            image[index++] = color.g;
+            image[index++] = color.b;
+        }
+    }
+}

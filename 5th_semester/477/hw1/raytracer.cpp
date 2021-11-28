@@ -1,4 +1,5 @@
 #include <iostream>
+#include <thread>
 #include "ppm.h"
 #include "models.h"
 
@@ -26,8 +27,14 @@ int main(int argc, char* argv[]) {
     for (auto itr = Scene::cameras.begin(); itr != Scene::cameras.end(); ++itr) {
 
         Camera &camera = *itr;
-        int width = camera.nearPlane.imageWidth;
-        int height = camera.nearPlane.imageHeight;
+        size_t width = camera.nearPlane.imageWidth;
+        size_t height = camera.nearPlane.imageHeight;
+        size_t heightBoundaries[5];
+
+        heightBoundaries[0] = 0;
+        for (int i = 0, j = 4; i < 4; i++, j--) {
+            heightBoundaries[i+1] = heightBoundaries[i] + (width - heightBoundaries[i]) / j;
+        }
 
 
         #if IS_DEVELOPMENT
@@ -38,18 +45,15 @@ int main(int argc, char* argv[]) {
         #endif
 
 
+        std::vector<std::thread> threads;
         unsigned char *image = new unsigned char[width * height * 3];
-        int index = 0;
 
-        for (int j = 0; j < height; ++j) {
-            for (int i = 0; i < width; ++i) {
+        for (int i = 0; i < 4; i++) {
+            threads.push_back(std::thread(renderQuarter, image, width, heightBoundaries[i], heightBoundaries[i + 1], camera));
+        }
 
-                Ray ray = camera.createRay(i, j);
-                RGBColor color = ray.traceRay().toRGBColor();
-                image[index++] = color.r;
-                image[index++] = color.g;
-                image[index++] = color.b;
-            }
+        for (auto itr = threads.begin(); itr != threads.end(); ++itr) {
+            (*itr).join();
         }
 
 

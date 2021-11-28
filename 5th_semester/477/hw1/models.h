@@ -143,7 +143,7 @@ public:
     ImagePlane nearPlane;
 
     Camera(const parser::Camera &_camera);
-    Ray createRay(int i, int j);
+    Ray createRay(int i, int j) const;
 };
 
 
@@ -228,6 +228,8 @@ public:
 
 
 // global functions
+
+void renderQuarter(unsigned char *image, size_t width, size_t heightStart, size_t heightEnd, const Camera &camera);
 
 
 #endif // __MODELS_H__
