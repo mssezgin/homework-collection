@@ -157,10 +157,10 @@ Point Ray::operator[](real t) const {
 
 real Ray::intersectWith(const Sphere &sphere) const {
 
-    real A = this->direction.dot(this->direction);
+    real A = this->direction.dotItself();
     Vector vCO = this->origin - Scene::vertexData[sphere.centerVertexId];
     real halfB = this->direction.dot(vCO);
-    real C = vCO.dot(vCO) - sphere.radius * sphere.radius;
+    real C = vCO.dotItself() - sphere.radius * sphere.radius;
     real delta = halfB * halfB - A * C;
     if (delta < 0) {
         return REAL_MAX;
