@@ -174,9 +174,11 @@ public:
     int v0_id;
     int v1_id;
     int v2_id;
+    Vector _normal;
+    bool normalWasCalculated;
 
     Face(const parser::Face &_face);
-    Vector normal() const;
+    const Vector &normal();
 };
 
 

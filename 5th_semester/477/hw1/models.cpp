@@ -473,14 +473,18 @@ Material::Material(const parser::Material &_material) :
 Face::Face(const parser::Face &_face) :
     v0_id(_face.v0_id - 1),
     v1_id(_face.v1_id - 1),
-    v2_id(_face.v2_id - 1) { }
+    v2_id(_face.v2_id - 1),
+    normalWasCalculated(false) { }
 
-// TODO: precompute normal vectors
-Vector Face::normal() const {
-    Point A = Scene::vertexData[v0_id];
-    Point B = Scene::vertexData[v1_id];
-    Point C = Scene::vertexData[v2_id];
-    return (B - A).cross(C - A).normalized();
+const Vector &Face::normal() {
+    if (!normalWasCalculated) {
+        Point A = Scene::vertexData[v0_id];
+        Point B = Scene::vertexData[v1_id];
+        Point C = Scene::vertexData[v2_id];
+        this->_normal = (B - A).cross(C - A).normalized();
+        this->normalWasCalculated = true;
+    }
+    return this->_normal;
 }
 
 
