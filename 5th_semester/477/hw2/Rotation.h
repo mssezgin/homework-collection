@@ -13,6 +13,7 @@ public:
 
     Rotation();
     Rotation(int rotationId, double angle, double x, double y, double z);
+
     friend ostream &operator<<(ostream &os, const Rotation &r);
 };
 

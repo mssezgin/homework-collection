@@ -13,6 +13,7 @@ public:
 
     Scaling();
     Scaling(int scalingId, double sx, double sy, double sz);
+
     friend ostream &operator<<(ostream &os, const Scaling &s);
 };
 

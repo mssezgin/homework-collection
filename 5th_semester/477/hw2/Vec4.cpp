@@ -1,4 +1,3 @@
-
 #include "Vec4.h"
 #include <iomanip>
 

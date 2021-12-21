@@ -1,6 +1,7 @@
 #include "Triangle.h"
 
-Triangle::Triangle() {
+Triangle::Triangle()
+{
     this->vertexIds[0] = -1;
     this->vertexIds[1] = -1;
     this->vertexIds[2] = -1;

@@ -13,6 +13,7 @@ public:
 
     Translation();
     Translation(int translationId, double tx, double ty, double tz);
+
     friend ostream &operator<<(ostream &os, const Translation &t);
 };
 

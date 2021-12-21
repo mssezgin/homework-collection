@@ -20,5 +20,4 @@ public:
     void setThirdVertexId(int vid);
 };
 
-
 #endif

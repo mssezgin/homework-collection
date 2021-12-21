@@ -1,8 +1,8 @@
-#include <vector>
-#include "Triangle.h"
 #include "Mesh.h"
+#include <vector>
 #include <iostream>
 #include <iomanip>
+#include "Triangle.h"
 
 using namespace std;
 

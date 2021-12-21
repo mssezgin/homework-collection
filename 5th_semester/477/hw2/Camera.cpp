@@ -16,7 +16,6 @@ Camera::Camera(int cameraId,
                int horRes, int verRes,
                string outputFileName)
 {
-
     this->cameraId = cameraId;
     this->projectionType = projectionType;
     this->pos = pos;

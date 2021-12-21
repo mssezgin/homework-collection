@@ -2,6 +2,7 @@
 #define __VEC4_H__
 
 #include <iostream>
+
 using namespace std;
 
 class Vec4
@@ -9,7 +10,6 @@ class Vec4
 public:
     double x, y, z, t;
     int colorId;
-
 
     Vec4();
     Vec4(double x, double y, double z, double t, int colorId);

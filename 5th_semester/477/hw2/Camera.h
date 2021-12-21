@@ -8,7 +8,6 @@ using namespace std;
 
 class Camera
 {
-
 public:
     int cameraId;
     int projectionType; // 1 for perspective, 0 for orthographic
@@ -25,7 +24,6 @@ public:
     string outputFileName;
 
     Camera();
-
     Camera(int cameraId,
            int projectionType,
            Vec3 pos, Vec3 gaze,
@@ -34,7 +32,6 @@ public:
            double near, double far,
            int horRes, int verRes,
            string outputFileName);
-
     Camera(const Camera &other);
 
     friend std::ostream &operator<<(std::ostream &os, const Camera &c);
