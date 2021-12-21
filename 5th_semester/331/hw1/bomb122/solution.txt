@@ -1,0 +1,7 @@
+Your text is I can see Russia from my house!
+31 100 101 102 104 106
+7 1 266
+7 13 DrEvil
+EEEEEE
+5 2 4 3 1 6
+22
