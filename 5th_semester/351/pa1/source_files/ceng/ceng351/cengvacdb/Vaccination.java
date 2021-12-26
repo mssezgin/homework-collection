@@ -1,14 +1,13 @@
 package ceng.ceng351.cengvacdb;
 
 public class Vaccination {
-
     private int code;
     private int userID;
     private int dose;
     private String vacdate;
 
     public Vaccination(int code, int userID, int dose, String vacdate) {
-        this.code=code;
+        this.code = code;
         this.userID = userID;
         this.dose = dose;
         this.vacdate = vacdate;
@@ -45,10 +44,9 @@ public class Vaccination {
     public void setVacdate(String vacdate) {
         this.vacdate = vacdate;
     }
-    
+
     @Override
     public String toString() {
         return code + "\t" + userID + "\t" + dose + "\t" + vacdate;
     }
-    
 }

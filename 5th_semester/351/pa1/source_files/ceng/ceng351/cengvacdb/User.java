@@ -1,7 +1,6 @@
 package ceng.ceng351.cengvacdb;
 
 public class User {
-    
     private int userID;
     private String userName;
     private int age;
@@ -65,11 +64,9 @@ public class User {
     public void setStatus(String status) {
         this.status = status;
     }
-    
+
     @Override
     public String toString() {
         return userID + "\t" + userName + "\t" + age + "\t" + address + "\t" + password + "\t" + status;
     }
-    
-    
 }

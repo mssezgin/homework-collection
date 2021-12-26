@@ -11,34 +11,34 @@ import java.util.List;
 
 public class FileOperations {
 
-    public static FileWriter createFileWriter( String path) throws IOException {
-        File f = new File( path);
+    public static FileWriter createFileWriter(String path) throws IOException {
+        File f = new File(path);
 
         FileWriter fileWriter = null;
 
-        if( f.isDirectory() && !f.exists())
+        if (f.isDirectory() && !f.exists())
             f.mkdirs();
-        else if( !f.isDirectory() && !f.getParentFile().exists())
+        else if (!f.isDirectory() && !f.getParentFile().exists())
             f.getParentFile().mkdirs();
 
-        if( !f.isDirectory() && f.exists())
+        if (!f.isDirectory() && f.exists())
             f.delete();
 
-        fileWriter = new FileWriter( f, false);
+        fileWriter = new FileWriter(f, false);
 
         return fileWriter;
     }
 
-    public static User[] readUserFile(String pathToFile){
+    public static User[] readUserFile(String pathToFile) {
 
         FileReader fileReader = null;
-        BufferedReader bufferedReader = null; 
+        BufferedReader bufferedReader = null;
 
         String strLine;
 
         List<User> userList = new ArrayList<>();
         User[] userArray = null;
-        
+
         try {
 
             fileReader = new FileReader(pathToFile);
@@ -47,15 +47,14 @@ public class FileOperations {
             //example strline
             //userID	name    age    address    password    status
 
-            while((strLine = bufferedReader.readLine())!=null) {
+            while ((strLine = bufferedReader.readLine()) != null) {
 
                 //parse strLine
                 String[] words = strLine.split("\t");
-                
+
                 if (words.length < 6) {
                     System.out.println("There is a problem in User File Reading phase");
-                } 
-                else {
+                } else {
                     int userID = Integer.parseInt(words[0]);
                     String name = words[1];
                     int age = Integer.parseInt(words[2]);
@@ -75,22 +74,21 @@ public class FileOperations {
             userArray = new User[userList.size()];
             userList.toArray(userArray);
 
-        } 
-        catch (IOException e) {
+        } catch (IOException e) {
             e.printStackTrace();
         }
-        
+
         return userArray;
     }
-    
+
     public static Vaccine[] readVaccineFile(String pathToFile) {
-        
+
         FileReader fileReader = null;
-        BufferedReader bufferedReader = null; 
+        BufferedReader bufferedReader = null;
         String strLine;
         List<Vaccine> vaccineList = new ArrayList<>();
         Vaccine[] vaccineArray = null;
-        
+
         try {
             fileReader = new FileReader(pathToFile);
             bufferedReader = new BufferedReader(fileReader);
@@ -98,15 +96,14 @@ public class FileOperations {
             //example strline
             //code	name    type
 
-            while((strLine = bufferedReader.readLine())!=null){
+            while ((strLine = bufferedReader.readLine()) != null) {
 
                 //parse strLine
                 String[] words = strLine.split("\t");
-                
+
                 if (words.length < 3) {
                     System.out.println("There is a problem in Vaccine File Reading phase");
-                } 
-                else {
+                } else {
                     int code = Integer.parseInt(words[0]);
                     String name = words[1];
                     String type = words[2];
@@ -123,25 +120,24 @@ public class FileOperations {
             vaccineArray = new Vaccine[vaccineList.size()];
             vaccineList.toArray(vaccineArray);
 
-        } 
-        catch (IOException e) {
+        } catch (IOException e) {
             e.printStackTrace();
         }
 
         return vaccineArray;
 
     }
-    
-    public static Vaccination[] readVaccinationFile(String pathToFile){
+
+    public static Vaccination[] readVaccinationFile(String pathToFile) {
 
         FileReader fileReader = null;
-        BufferedReader bufferedReader = null; 
+        BufferedReader bufferedReader = null;
 
         String strLine;
 
         List<Vaccination> vaccinationList = new ArrayList<>();
         Vaccination[] vaccinationArray = null;
-        
+
         try {
 
             fileReader = new FileReader(pathToFile);
@@ -150,15 +146,14 @@ public class FileOperations {
             //example strline
             //code	userID	dose	vacdate
 
-            while((strLine = bufferedReader.readLine())!=null) {
+            while ((strLine = bufferedReader.readLine()) != null) {
 
                 //parse strLine
                 String[] words = strLine.split("\t");
-                
+
                 if (words.length < 4) {
                     System.out.println("There is a problem in Vaccination File Reading phase");
-                } 
-                else {
+                } else {
                     int code = Integer.parseInt(words[0]);
                     int userID = Integer.parseInt(words[1]);
                     int dose = Integer.parseInt(words[2]);
@@ -176,23 +171,22 @@ public class FileOperations {
             vaccinationArray = new Vaccination[vaccinationList.size()];
             vaccinationList.toArray(vaccinationArray);
 
-        }
-        catch (IOException e) {
+        } catch (IOException e) {
             e.printStackTrace();
         }
-        
+
         return vaccinationArray;
     }
-    
-    public static AllergicSideEffect[] readAllergicSideEffectFile(String pathToFile){
+
+    public static AllergicSideEffect[] readAllergicSideEffectFile(String pathToFile) {
 
         FileReader fileReader = null;
-        BufferedReader bufferedReader = null; 
+        BufferedReader bufferedReader = null;
         String strLine;
 
         List<AllergicSideEffect> sideEffectList = new ArrayList<>();
         AllergicSideEffect[] sideEffectArray = null;
-        
+
         try {
 
             fileReader = new FileReader(pathToFile);
@@ -200,15 +194,14 @@ public class FileOperations {
 
             //example strline
             //code	name
-            while((strLine = bufferedReader.readLine())!=null) {
+            while ((strLine = bufferedReader.readLine()) != null) {
 
                 //parse strLine
                 String[] words = strLine.split("\t");
-                
+
                 if (words.length < 2) {
                     System.out.println("There is a problem in AllergicSideEffect File Reading phase");
-                } 
-                else {
+                } else {
                     int code = Integer.parseInt(words[0]);
                     String name = words[1];
 
@@ -224,23 +217,22 @@ public class FileOperations {
             sideEffectArray = new AllergicSideEffect[sideEffectList.size()];
             sideEffectList.toArray(sideEffectArray);
 
-        }
-        catch (IOException e) {
+        } catch (IOException e) {
             e.printStackTrace();
         }
-        
+
         return sideEffectArray;
     }
-    
-    public static Seen[] readSeenFile(String pathToFile){
+
+    public static Seen[] readSeenFile(String pathToFile) {
 
         FileReader fileReader = null;
-        BufferedReader bufferedReader = null; 
+        BufferedReader bufferedReader = null;
         String strLine;
 
         List<Seen> seenList = new ArrayList<>();
         Seen[] seenArray = null;
-        
+
         try {
 
             fileReader = new FileReader(pathToFile);
@@ -248,15 +240,14 @@ public class FileOperations {
 
             //example strline
             //e_code	code    userID  date   degree
-            while((strLine = bufferedReader.readLine())!=null) {
+            while ((strLine = bufferedReader.readLine()) != null) {
 
                 //parse strLine
                 String[] words = strLine.split("\t");
-                
+
                 if (words.length < 5) {
                     System.out.println("There is a problem in Seen File Reading phase");
-                } 
-                else {
+                } else {
                     int e_code = Integer.parseInt(words[0]);
                     int code = Integer.parseInt(words[1]);
                     String userID = words[2];
@@ -275,12 +266,10 @@ public class FileOperations {
             seenArray = new Seen[seenList.size()];
             seenList.toArray(seenArray);
 
-        }  
-        catch (IOException e) {
+        } catch (IOException e) {
             e.printStackTrace();
         }
-        
+
         return seenArray;
     }
-
 }

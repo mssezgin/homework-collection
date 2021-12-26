@@ -1,7 +1,6 @@
 package ceng.ceng351.cengvacdb;
 
 public class AllergicSideEffect {
-
     private int effectcode;
     private String effectname;
 
@@ -30,5 +29,4 @@ public class AllergicSideEffect {
     public String toString() {
         return effectcode + "\t" + effectname;
     }
-    
 }

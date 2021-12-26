@@ -1,7 +1,6 @@
 package ceng.ceng351.cengvacdb;
 
 public class Vaccine {
-    
     private int code;
     private String vaccinename;
     private String type;

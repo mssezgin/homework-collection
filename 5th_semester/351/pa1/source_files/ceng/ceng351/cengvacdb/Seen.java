@@ -1,7 +1,6 @@
 package ceng.ceng351.cengvacdb;
 
 public class Seen {
-    
     private int effectcode;
     private int code;
     private String userID;
@@ -32,7 +31,7 @@ public class Seen {
         this.code = code;
     }
 
-    public String getDate(){
+    public String getDate() {
         return date;
     }
 
@@ -55,9 +54,9 @@ public class Seen {
     public void setDegree(String degree) {
         this.degree = degree;
     }
-    
+
     @Override
     public String toString() {
-        return effectcode + "\t" + code +  "\t" + userID + "\t" + date + "\t" + degree;
+        return effectcode + "\t" + code + "\t" + userID + "\t" + date + "\t" + degree;
     }
 }
