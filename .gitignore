@@ -1,5 +1,14 @@
+# editors
 .vscode
+.idea
+*.iml
+# archives
+*.zip
+*.rar
+*.tar
+*.tar.gz
+*.jar
 # instruction files for the homeworks
 *.pdf
 *.png
-*.md
+*.jpg
