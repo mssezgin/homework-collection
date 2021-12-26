@@ -3,12 +3,12 @@ package ceng.ceng351.cengvacdb;
 import java.sql.*;
 
 public class CENGVACDB implements ICENGVACDB {
-    private static String username = "e2380863";
-    private static String password = "f*4ZtsHSlabU";
-    private static String host = "144.122.71.121";
-    private static int port = 8080;
-    private static String database = "db2380863";
-    private static Connection connection = null;
+    private String username = "e2380863";
+    private String password = "f*4ZtsHSlabU";
+    private String host = "144.122.71.121";
+    private int port = 8080;
+    private String database = "db2380863";
+    private Connection connection = null;
 
     @Override
     public void initialize() {
@@ -50,7 +50,7 @@ public class CENGVACDB implements ICENGVACDB {
                 "CREATE TABLE AllergicSideEffect(" +
                         "effectcode INT," +
                         "effectname VARCHAR (50)," +
-                        "PRIMARY KEY (effectcode)," +
+                        "PRIMARY KEY (effectcode)" +
                 ");",
                 "CREATE TABLE Seen(" +
                         "effectcode INT," +
@@ -64,14 +64,17 @@ public class CENGVACDB implements ICENGVACDB {
                         "FOREIGN KEY (userID) REFERENCES User(userID)" +
                 ");"
         };
+        // TODO: add on delete
         int numberOfTablesCreated = 0;
         try {
             Statement st = connection.createStatement();
             for (int i = 0; i < tables.length; i++) {
                 try {
-                    st.executeQuery(tables[i]);
+                    st.executeUpdate(tables[i]);
                     numberOfTablesCreated++;
-                } catch (SQLException ignored) { }
+                } catch (SQLException ignored) {
+                    System.out.println("exception");
+                }
             }
             st.close();
         } catch (SQLException e) {
@@ -88,16 +91,20 @@ public class CENGVACDB implements ICENGVACDB {
             Statement st = connection.createStatement();
             for (int i = 0; i < tables.length; i++) {
                 try {
-                    st.executeQuery("DROP TABLE " + tables[i] + ";");
+                    st.executeUpdate("DROP TABLE " + tables[i]);
                     numberOfTablesDropped++;
-                } catch (SQLException ignored) { }
+                } catch (SQLException ignored) {
+                    System.out.println("exception");
+                }
             }
+            st.close();
         } catch (SQLException e) {
             e.printStackTrace();
         }
         return numberOfTablesDropped;
     }
 
+    // TODO
     public int insertVaccine(Vaccine[] v) { return 0; }
 
     @Override

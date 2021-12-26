@@ -1,13 +1,13 @@
-1234    cough
-1245    sore throat
-1466    loss of taste
-1672    loss of smell
-1888    a rash on skin
-1889    red or irritated eyes
-2030    difficulty breathing
-2049    loss of speech
-2101    confusion
-3001    loss of mobility
-3501    discolouration of fingers
-3502    discolouration of toes
+1234	cough
+1245	sore throat
+1466	loss of taste
+1672	loss of smell
+1888	a rash on skin
+1889	red or irritated eyes
+2030	difficulty breathing
+2049	loss of speech
+2101	confusion
+3001	loss of mobility
+3501	discolouration of fingers
+3502	discolouration of toes
 
