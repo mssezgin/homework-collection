@@ -15,11 +15,11 @@ import java.util.Vector;
 
 
 public class Evaluation {
-    private static String user = "e1234567"; // TODO: Your userName
-    private static String password = "password"; //  TODO: Your password
-    private static String host = "144.122.71.57"; // host name
-    private static String database = "db1234567"; // TODO: Your database name
-    private static int port = 8084; // port
+    private static String user = "e2380863"; // TODO: Your userName
+    private static String password = "f*4ZtsHSlabU"; //  TODO: Your password
+    private static String host = "144.122.71.121"; // host name
+    private static String database = "db2380863"; // TODO: Your database name
+    private static int port = 8080; // port
     private static Connection connection = null;
 
     public static void connect() {
