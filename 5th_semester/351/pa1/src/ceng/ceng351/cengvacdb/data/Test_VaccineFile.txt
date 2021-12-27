@@ -15,5 +15,3 @@
 151	EpiVacCorona	Subunit_vaccines
 161	Novavax	Subunit_vaccines
 171	Soberana	Subunit_vaccines
-
-

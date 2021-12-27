@@ -22,9 +22,11 @@ public class CENGVACDB implements ICENGVACDB {
 
     @Override
     public int createTables() {
+        // TODO: add ON DELETE, but where?
+        // TODO: User.status length of 10 is not sufficient
         String[] tables = {
                 "CREATE TABLE User(" +
-                        "userId INT," +
+                        "userID INT," +
                         "userName VARCHAR(30)," +
                         "age INT," +
                         "address VARCHAR(150)," +
@@ -44,7 +46,7 @@ public class CENGVACDB implements ICENGVACDB {
                         "dose INT," +
                         "vacdate DATE," +
                         "PRIMARY KEY (code, userID)," +
-                        "FOREIGN KEY (code) REFERENCES Vaccine(code)," +
+                        "FOREIGN KEY (code) REFERENCES Vaccine(code) ON DELETE CASCADE," +
                         "FOREIGN KEY (userID) REFERENCES User(userID)" +
                 ");",
                 "CREATE TABLE AllergicSideEffect(" +
@@ -60,19 +62,21 @@ public class CENGVACDB implements ICENGVACDB {
                         "degree VARCHAR(30)," +
                         "PRIMARY KEY (effectcode, code, userID)," +
                         "FOREIGN KEY (effectcode) REFERENCES AllergicSideEffect(effectcode)," +
-                        "FOREIGN KEY (code) REFERENCES Vaccination(code)," +
+                        "FOREIGN KEY (code) REFERENCES Vaccination(code) ON DELETE CASCADE," +
                         "FOREIGN KEY (userID) REFERENCES User(userID)" +
                 ");"
         };
-        // TODO: add on delete
         int numberOfTablesCreated = 0;
         try {
             Statement st = connection.createStatement();
             for (int i = 0; i < tables.length; i++) {
                 try {
+                    // TODO: delete this
+                    System.out.println(tables[i]);
                     st.executeUpdate(tables[i]);
                     numberOfTablesCreated++;
                 } catch (SQLException ignored) {
+                    // TODO: delete this
                     System.out.println("exception");
                 }
             }
@@ -91,10 +95,13 @@ public class CENGVACDB implements ICENGVACDB {
             Statement st = connection.createStatement();
             for (int i = 0; i < tables.length; i++) {
                 try {
-                    st.executeUpdate("DROP TABLE " + tables[i]);
+                    // TODO: delete this
+                    System.out.println("DROP TABLE " + tables[i] + ";");
+                    st.executeUpdate("DROP TABLE " + tables[i] + ";");
                     numberOfTablesDropped++;
                 } catch (SQLException ignored) {
-                    System.out.println("exception");
+                    // TODO: delete this
+                     System.out.println("exception");
                 }
             }
             st.close();
@@ -104,27 +111,154 @@ public class CENGVACDB implements ICENGVACDB {
         return numberOfTablesDropped;
     }
 
-    // TODO
-    public int insertVaccine(Vaccine[] v) { return 0; }
-
     @Override
     public int insertUser(User[] users) {
-        return 0;
+        int numberOfUsersAdded = 0;
+        try {
+            Statement st = connection.createStatement();
+            for (User user : users) {
+                String query = "INSERT INTO User(userID, userName, age, address, password, status) " +
+                        "VALUES(" +
+                                user.getUserID() + "," +
+                                "'" + user.getUserName() + "'," +
+                                user.getAge() + "," +
+                                "'" + user.getAddress() + "'," +
+                                "'" + user.getPassword() + "'," +
+                                "'" + user.getStatus() + "'" +
+                        ");";
+                // TODO: delete this
+                System.out.println(query);
+                try {
+                    st.executeUpdate(query);
+                    numberOfUsersAdded++;
+                } catch (SQLException ignored) {
+                    // TODO: delete this
+                    System.out.println("exception");
+                }
+            }
+            st.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return numberOfUsersAdded;
+    }
+
+    // TODO: this function is not in the interface
+    public int insertVaccine(Vaccine[] vaccines) {
+        int numberOfVaccinesAdded = 0;
+        try {
+            Statement st = connection.createStatement();
+            for (Vaccine vaccine : vaccines) {
+                String query = "INSERT INTO Vaccine(code, vaccinename, type) " +
+                        "VALUES(" +
+                                vaccine.getCode() + "," +
+                                "'" + vaccine.getVaccineName() + "'," +
+                                "'" + vaccine.getType() + "'" +
+                        ");";
+                // TODO: delete this
+                System.out.println(query);
+                try {
+                    st.executeUpdate(query);
+                    numberOfVaccinesAdded++;
+                } catch (SQLException ignored) {
+                    // TODO: delete this
+                    System.out.println("exception");
+                }
+            }
+            st.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return numberOfVaccinesAdded;
     }
 
     @Override
     public int insertAllergicSideEffect(AllergicSideEffect[] sideEffects) {
-        return 0;
+        int numberOfSideEffectsAdded = 0;
+        try {
+            Statement st = connection.createStatement();
+            for (AllergicSideEffect sideEffect : sideEffects) {
+                String query = "INSERT INTO AllergicSideEffect(effectcode, effectname) " +
+                        "VALUES(" +
+                                sideEffect.getEffectCode() + "," +
+                                "'" + sideEffect.getEffectName() + "'" +
+                        ");";
+                // TODO: delete this
+                System.out.println(query);
+                try {
+                    st.executeUpdate(query);
+                    numberOfSideEffectsAdded++;
+                } catch (SQLException ignored) {
+                    // TODO: delete this
+                    System.out.println("exception");
+                }
+            }
+            st.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return numberOfSideEffectsAdded;
     }
 
     @Override
     public int insertVaccination(Vaccination[] vaccinations) {
-        return 0;
+        int numberOfVaccinationsAdded = 0;
+        try {
+            Statement st = connection.createStatement();
+            for (Vaccination vaccination : vaccinations) {
+                String query = "INSERT INTO Vaccination(code, userID, dose, vacdate) " +
+                        "VALUES(" +
+                                vaccination.getCode() + "," +
+                                vaccination.getUserID() + "," +
+                                vaccination.getDose() + "," +
+                                "'" + vaccination.getVacdate() + "'" +
+                        ");";
+                // TODO: delete this
+                System.out.println(query);
+                try {
+                    st.executeUpdate(query);
+                    numberOfVaccinationsAdded++;
+                } catch (SQLException ignored) {
+                    // TODO: delete this
+                    System.out.println("exception");
+                }
+            }
+            st.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return numberOfVaccinationsAdded;
     }
 
     @Override
     public int insertSeen(Seen[] seens) {
-        return 0;
+        int numberOfSeensAdded = 0;
+        try {
+            Statement st = connection.createStatement();
+            for (Seen seen : seens) {
+                String query = "INSERT INTO Seen(effectcode, code, userID, date, degree) " +
+                        "VALUES(" +
+                                seen.getEffectcode() + "," +
+                                seen.getCode() + "," +
+                                "'" + seen.getUserID() + "'," +
+                                "'" + seen.getDate() + "'," +
+                                "'" + seen.getDegree() + "'" +
+                        ");";
+                // TODO: delete this
+                System.out.println(query);
+                try {
+                    st.executeUpdate(query);
+                    numberOfSeensAdded++;
+                } catch (SQLException ignored) {
+                    // TODO: delete this
+                    System.out.println("exception");
+                }
+            }
+            st.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return numberOfSeensAdded;
     }
 
     @Override

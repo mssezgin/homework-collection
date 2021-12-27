@@ -10,4 +10,3 @@
 3001	loss of mobility
 3501	discolouration of fingers
 3502	discolouration of toes
-
