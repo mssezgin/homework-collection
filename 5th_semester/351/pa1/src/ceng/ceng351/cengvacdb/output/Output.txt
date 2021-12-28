@@ -1,7 +1,7 @@
 
 --------------------------------------------------------------
 *** Drop tables ***
-Dropped 5 tables.
+Dropped 2 tables.
 
 --------------------------------------------------------------
 
@@ -25,7 +25,7 @@ Created 5 tables.
 
 --------------------------------------------------------------
 *** Insert into Vaccination ***
-21 vaccinations are inserted.
+30 vaccinations are inserted.
 
 --------------------------------------------------------------
 
@@ -44,6 +44,18 @@ Created 5 tables.
 --------------------------------------------------------------
 *** Find vaccines that have not been applied to any user ***
 Code	Vaccinename	Type
+31	ZyCoV-D	RNA_vaccines_and_DNA_vaccines
+51	Janssen	Adenovirus_vector_vaccines
+71	Sputnik Light	Adenovirus_vector_vaccines
+81	Convidecia	Adenovirus_vector_vaccines
+91	Sinopharm BIBP	Inactivated_virus_vaccines
+111	Covaxin	Inactivated_virus_vaccines
+121	Sinopharm WIBP	Inactivated_virus_vaccines
+131	Abdala	Subunit_vaccines
+141	ZF2001	Subunit_vaccines
+151	EpiVacCorona	Subunit_vaccines
+161	Novavax	Subunit_vaccines
+171	Soberana	Subunit_vaccines
 
 --------------------------------------------------------------
 
@@ -56,6 +68,8 @@ UserID	UserName	Address
 --------------------------------------------------------------
 *** List of the two recent vaccines applied to any user that do not contain ‘vac’ in their name ***
 Code	Vaccinename	Type
+11	Pfizer–BioNTech	RNA_vaccines_and_DNA_vaccines
+11	Pfizer–BioNTech	RNA_vaccines_and_DNA_vaccines
 
 --------------------------------------------------------------
 
@@ -74,25 +88,28 @@ UserID	UserName	Address
 --------------------------------------------------------------
 *** List users who have been vaccinated with at least two different types of vaccines within the given time interval ***
 UserID	UserName	Address
+3	Lale Ege	Merkez/Edirne
 
 --------------------------------------------------------------
 
 --------------------------------------------------------------
 *** List side effects experienced by users who have two doses of vaccine with less than 20 days between doses ***
 EffectCode	EffectName
+1672	loss_of_smell
+1888	a_rash_onskin
 
 --------------------------------------------------------------
 
 --------------------------------------------------------------
 *** Calculate the average frequency of vaccination of users over the age of 65 ***
 Average
-0.00
+1.00
 
 --------------------------------------------------------------
 
 --------------------------------------------------------------
 *** Update his/her status to “eligible” after 120 days have passed since the user was vaccinated last time ***
-0 rows are changed.
+2 rows are changed.
 
 --------------------------------------------------------------
 

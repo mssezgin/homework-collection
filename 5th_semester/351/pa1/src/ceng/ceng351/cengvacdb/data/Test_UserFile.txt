@@ -16,5 +16,5 @@
 16	Anil Ozgul	47	Beysehir/Konya	BMhZ6g2v1	Eligible
 17	Merve Ozturk	28	Persembe/Ordu	wqYSR8cB	Eligible
 18	Cagla Sacak	35	Amasra/Bartın	V7RqyT4fQ	Eligible
-19	Simge Saracgil	20	Karsiyaka/Izmir	b4yBL6mW	Not_Eligible
+19	Simge Saracgil	20	Karsiyaka/Izmirb	4yBL6mW	Not_Eligible
 20	Yasemin Surmeli	49	Surmene/Trabzon	P9Sk5uQmM	Eligible

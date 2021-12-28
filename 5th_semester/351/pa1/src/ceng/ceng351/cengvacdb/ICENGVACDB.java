@@ -41,6 +41,13 @@ public interface ICENGVACDB {
     public int insertAllergicSideEffect(AllergicSideEffect[] sideEffects);
 
     /**
+     * Should insert an array of Vaccine into the database.
+     *
+     * @return Number of rows inserted successfully.
+     */
+    public int insertVaccine(Vaccine[] vaccines);
+
+    /**
      * Should insert an array of Vaccination into the database.
      *
      * @return Number of rows inserted successfully.
