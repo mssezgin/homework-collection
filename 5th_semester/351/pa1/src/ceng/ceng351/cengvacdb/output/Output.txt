@@ -1,7 +1,7 @@
 
 --------------------------------------------------------------
 *** Drop tables ***
-Dropped 2 tables.
+Dropped 5 tables.
 
 --------------------------------------------------------------
 
@@ -62,6 +62,8 @@ Code	Vaccinename	Type
 --------------------------------------------------------------
 *** List users who have been vaccinated for two doses since the given date ***
 UserID	UserName	Address
+7	Tarik Guven	Tepebasi/Eskisehir
+20	Yasemin Surmeli	Surmene/Trabzon
 
 --------------------------------------------------------------
 
@@ -76,6 +78,13 @@ Code	Vaccinename	Type
 --------------------------------------------------------------
 *** List users who have had at least two doses of vaccine and have experienced at most one side effect ***
 UserID	UserName	Address
+1	Haldun Dincturk	Ayazaga/Istanbul
+2	Tugce Dundar	Kadıkoy/Istanbul
+3	Lale Ege	Merkez/Edirne
+5	Deniz Gonul	Cankaya/Ankara
+7	Tarik Guven	Tepebasi/Eskisehir
+10	Umit Kayali	Cerkezkoy/Tekirday
+20	Yasemin Surmeli	Surmene/Trabzon
 
 --------------------------------------------------------------
 
@@ -116,5 +125,6 @@ Average
 --------------------------------------------------------------
 *** Given vaccine name, delete the vaccine(s) from the database ***
 Code	Vaccinename	Type
+81	Convidecia	Adenovirus_vector_vaccines
 
 --------------------------------------------------------------

@@ -71,14 +71,9 @@ public class CENGVACDB implements ICENGVACDB {
             Statement st = connection.createStatement();
             for (int i = 0; i < tables.length; i++) {
                 try {
-                    // TODO: delete this
-                    System.out.println(tables[i]);
                     st.executeUpdate(tables[i]);
                     numberOfTablesCreated++;
-                } catch (SQLException ignored) {
-                    // TODO: delete this
-                    System.out.println("exception");
-                }
+                } catch (SQLException ignored) { }
             }
             st.close();
         } catch (SQLException e) {
@@ -95,14 +90,10 @@ public class CENGVACDB implements ICENGVACDB {
             Statement st = connection.createStatement();
             for (int i = 0; i < tables.length; i++) {
                 try {
-                    // TODO: delete this
-                    System.out.println("DROP TABLE IF EXISTS" + tables[i] + ";");
                     st.executeUpdate("DROP TABLE IF EXISTS " + tables[i] + ";");
+                    // TODO: increment only if drop
                     numberOfTablesDropped++;
-                } catch (SQLException ignored) {
-                    // TODO: delete this
-                     System.out.println("exception");
-                }
+                } catch (SQLException ignored) { }
             }
             st.close();
         } catch (SQLException e) {
@@ -126,15 +117,10 @@ public class CENGVACDB implements ICENGVACDB {
                                 "'" + user.getPassword() + "', " +
                                 "'" + user.getStatus() + "'" +
                         ");";
-                // TODO: delete this
-                System.out.println(query);
                 try {
                     st.executeUpdate(query);
                     numberOfUsersAdded++;
-                } catch (SQLException ignored) {
-                    // TODO: delete this
-                    System.out.println("exception");
-                }
+                } catch (SQLException ignored) { }
             }
             st.close();
         } catch (SQLException e) {
@@ -154,15 +140,10 @@ public class CENGVACDB implements ICENGVACDB {
                                 sideEffect.getEffectCode() + ", " +
                                 "'" + sideEffect.getEffectName() + "'" +
                         ");";
-                // TODO: delete this
-                System.out.println(query);
                 try {
                     st.executeUpdate(query);
                     numberOfSideEffectsAdded++;
-                } catch (SQLException ignored) {
-                    // TODO: delete this
-                    System.out.println("exception");
-                }
+                } catch (SQLException ignored) { }
             }
             st.close();
         } catch (SQLException e) {
@@ -183,15 +164,10 @@ public class CENGVACDB implements ICENGVACDB {
                         "'" + vaccine.getVaccineName() + "', " +
                         "'" + vaccine.getType() + "'" +
                         ");";
-                // TODO: delete this
-                System.out.println(query);
                 try {
                     st.executeUpdate(query);
                     numberOfVaccinesAdded++;
-                } catch (SQLException ignored) {
-                    // TODO: delete this
-                    System.out.println("exception");
-                }
+                } catch (SQLException ignored) { }
             }
             st.close();
         } catch (SQLException e) {
@@ -213,15 +189,10 @@ public class CENGVACDB implements ICENGVACDB {
                                 vaccination.getDose() + ", " +
                                 "'" + vaccination.getVacdate() + "'" +
                         ");";
-                // TODO: delete this
-                System.out.println(query);
                 try {
                     st.executeUpdate(query);
                     numberOfVaccinationsAdded++;
-                } catch (SQLException ignored) {
-                    // TODO: delete this
-                    System.out.println("exception");
-                }
+                } catch (SQLException ignored) { }
             }
             st.close();
         } catch (SQLException e) {
@@ -244,15 +215,10 @@ public class CENGVACDB implements ICENGVACDB {
                                 "'" + seen.getDate() + "', " +
                                 "'" + seen.getDegree() + "'" +
                         ");";
-                // TODO: delete this
-                System.out.println(query);
                 try {
                     st.executeUpdate(query);
                     numberOfSeensAdded++;
-                } catch (SQLException ignored) {
-                    // TODO: delete this
-                    System.out.println("exception");
-                }
+                } catch (SQLException ignored) { }
             }
             st.close();
         } catch (SQLException e) {
@@ -298,15 +264,51 @@ public class CENGVACDB implements ICENGVACDB {
 
     @Override
     public QueryResult.UserIDuserNameAddressResult[] getVaccinatedUsersforTwoDosesByDate(String vacdate) {
-        // TODO
-        return new QueryResult.UserIDuserNameAddressResult[0];
+        String query =
+                "SELECT U.userID, U.userName, U.address " +
+                "FROM User U " +
+                "WHERE " +
+                    "U.userID IN (" +
+                        "SELECT C.userID " +
+                        "FROM Vaccination C " +
+                        "WHERE C.vacdate >= '" + vacdate + "' AND C.dose = 1" +
+                    ") AND " +
+                    "U.userID IN (" +
+                        "SELECT C.userID " +
+                        "FROM Vaccination C " +
+                        "WHERE C.vacdate >= '" + vacdate + "' AND C.dose = 2" +
+                    ") " +
+                "ORDER BY U.userID ASC;";
+        QueryResult.UserIDuserNameAddressResult[] userResults = null;
+        try {
+            Statement st = connection.createStatement();
+            ResultSet rs = st.executeQuery(query);
+            int size = 0;
+            if (rs.last()) {
+                size = rs.getRow();
+                rs.beforeFirst();
+            }
+            userResults = new QueryResult.UserIDuserNameAddressResult[size];
+            for (int i = 0; rs.next(); i++) {
+                userResults[i] = new QueryResult.UserIDuserNameAddressResult(
+                        rs.getString("userID"),
+                        rs.getString("userName"),
+                        rs.getString("address")
+                );
+            }
+            rs.close();
+            st.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return userResults;
     }
 
     @Override
     public Vaccine[] getTwoRecentVaccinesDoNotContainVac() {
-        // TODO: use DISTINCT
+        // TODO: DISTINCT causes problems
         String query =
-                "SELECT V.code, V.vaccinename, V.type " +
+                "SELECT DISTINCT V.code, V.vaccinename, V.type " +
                 "FROM Vaccine V, Vaccination C " +
                 "WHERE V.code = C.code AND " +
                     "V.code IN (" +
@@ -347,7 +349,46 @@ public class CENGVACDB implements ICENGVACDB {
 
     @Override
     public QueryResult.UserIDuserNameAddressResult[] getUsersAtHasLeastTwoDoseAtMostOneSideEffect() {
-        return new QueryResult.UserIDuserNameAddressResult[0];
+        String query =
+                "SELECT U.userID, U.userName, U.address " +
+                "FROM User U " +
+                "WHERE " +
+                    "U.userID IN (" +
+                        "SELECT C.userID " +
+                        "FROM Vaccination C " +
+                        "GROUP BY C.code, C.userID " +
+                        "HAVING COUNT(*) >= 2" +
+                    ") AND " +
+                    "U.userID NOT IN (" +
+                        "SELECT S.userID " +
+                        "FROM Seen S " +
+                        "GROUP BY S.userID " +
+                        "HAVING COUNT(*) > 1" +
+                    ") " +
+                "ORDER BY U.userID ASC;";
+        QueryResult.UserIDuserNameAddressResult[] userResults = null;
+        try {
+            Statement st = connection.createStatement();
+            ResultSet rs = st.executeQuery(query);
+            int size = 0;
+            if (rs.last()) {
+                size = rs.getRow();
+                rs.beforeFirst();
+            }
+            userResults = new QueryResult.UserIDuserNameAddressResult[size];
+            for (int i = 0; rs.next(); i++) {
+                userResults[i] = new QueryResult.UserIDuserNameAddressResult(
+                        rs.getString("userID"),
+                        rs.getString("userName"),
+                        rs.getString("address")
+                );
+            }
+            rs.close();
+            st.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return userResults;
     }
 
     @Override
@@ -366,7 +407,7 @@ public class CENGVACDB implements ICENGVACDB {
                         "FROM (" +
                             "SELECT C2.userID, C2.code " +
                             "FROM Vaccination C2 " +
-                            "WHERE C2.vacdate >= '2000-01-01' AND C2.vacdate <= '2021-12-31' " +
+                            "WHERE C2.vacdate >= '" + startdate + "' AND C2.vacdate <= '" + enddate + "' " +
                             "GROUP BY C2.userID, C2.code" +
                         ") as C " +
                         "GROUP BY C.userID " +
@@ -456,7 +497,7 @@ public class CENGVACDB implements ICENGVACDB {
             Statement st = connection.createStatement();
             ResultSet rs = st.executeQuery(query);
             if (rs.next()) {
-                avgdose = rs.getInt("avgdose");
+                avgdose = rs.getInt(1);
             }
             rs.close();
             st.close();
@@ -475,7 +516,7 @@ public class CENGVACDB implements ICENGVACDB {
                     "SELECT C.userID " +
                     "FROM Vaccination C " +
                     "GROUP BY C.userID " +
-                    "HAVING DATEDIFF(CURRENT_TIME(), MAX(C.vacdate)) >= 120" +
+                    "HAVING DATEDIFF('" + givendate + "', MAX(C.vacdate)) >= 120" +
                 ");";
         int numberOfRowsUpdated = 0;
         try {
@@ -493,10 +534,10 @@ public class CENGVACDB implements ICENGVACDB {
         String query =
                 "SELECT V.code, V.vaccinename, V.type " +
                 "FROM Vaccine V " +
-                "WHERE V.vaccinename = 'vaccinename';";
+                "WHERE V.vaccinename = '" + vaccineName + "';";
         String delete =
                 "DELETE FROM Vaccine V " +
-                "WHERE V.vaccinename = 'vaccinename';";
+                "WHERE V.vaccinename = '" + vaccineName + "';";
         Vaccine vaccine = null;
         try {
             Statement st = connection.createStatement();

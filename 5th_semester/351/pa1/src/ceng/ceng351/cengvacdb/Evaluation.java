@@ -24,7 +24,7 @@ public class Evaluation {
 
     public static void connect() {
 
-        String url = "jdbc:mysql://" + host + ":" + port + "/" + database;
+        String url = "jdbc:mysql://" + host + ":" + port + "/" + database + "?useSSL=false";
 
         try {
             Class.forName("com.mysql.cj.jdbc.Driver");
