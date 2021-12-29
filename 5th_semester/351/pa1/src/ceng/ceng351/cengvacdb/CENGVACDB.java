@@ -10,6 +10,58 @@ public class CENGVACDB implements ICENGVACDB {
     private String database = "db2380863";
     private Connection connection = null;
 
+    private Vaccine[] getVaccinesFromQuery(String query) {
+        Vaccine[] vaccines = null;
+        try {
+            Statement st = connection.createStatement();
+            ResultSet rs = st.executeQuery(query);
+            int size = 0;
+            if (rs.last()) {
+                size = rs.getRow();
+                rs.beforeFirst();
+            }
+            vaccines = new Vaccine[size];
+            for (int i = 0; rs.next(); i++) {
+                vaccines[i] = new Vaccine(
+                        rs.getInt("code"),
+                        rs.getString("vaccinename"),
+                        rs.getString("type")
+                );
+            }
+            rs.close();
+            st.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return vaccines;
+    }
+
+    private QueryResult.UserIDuserNameAddressResult[] getUsersFromQuery(String query) {
+        QueryResult.UserIDuserNameAddressResult[] userResults = null;
+        try {
+            Statement st = connection.createStatement();
+            ResultSet rs = st.executeQuery(query);
+            int size = 0;
+            if (rs.last()) {
+                size = rs.getRow();
+                rs.beforeFirst();
+            }
+            userResults = new QueryResult.UserIDuserNameAddressResult[size];
+            for (int i = 0; rs.next(); i++) {
+                userResults[i] = new QueryResult.UserIDuserNameAddressResult(
+                        rs.getString("userID"),
+                        rs.getString("userName"),
+                        rs.getString("address")
+                );
+            }
+            rs.close();
+            st.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return userResults;
+    }
+
     @Override
     public void initialize() {
         String url = "jdbc:mysql://" + host + ":" + port + "/" + database + "?useSSL=false";
@@ -241,29 +293,7 @@ public class CENGVACDB implements ICENGVACDB {
                     "FROM Vaccination C" +
                 ") " +
                 "ORDER BY V.code ASC;";
-        Vaccine[] vaccines = null;
-        try {
-            Statement st = connection.createStatement();
-            ResultSet rs = st.executeQuery(query);
-            int size = 0;
-            if (rs.last()) {
-                size = rs.getRow();
-                rs.beforeFirst();
-            }
-            vaccines = new Vaccine[size];
-            for (int i = 0; rs.next(); i++) {
-                vaccines[i] = new Vaccine(
-                        rs.getInt("code"),
-                        rs.getString("vaccinename"),
-                        rs.getString("type")
-                );
-            }
-            rs.close();
-            st.close();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return vaccines;
+        return getVaccinesFromQuery(query);
     }
 
     @Override
@@ -283,29 +313,7 @@ public class CENGVACDB implements ICENGVACDB {
                         "WHERE C.vacdate >= '" + vacdate + "' AND C.dose = 2" +
                     ") " +
                 "ORDER BY U.userID ASC;";
-        QueryResult.UserIDuserNameAddressResult[] userResults = null;
-        try {
-            Statement st = connection.createStatement();
-            ResultSet rs = st.executeQuery(query);
-            int size = 0;
-            if (rs.last()) {
-                size = rs.getRow();
-                rs.beforeFirst();
-            }
-            userResults = new QueryResult.UserIDuserNameAddressResult[size];
-            for (int i = 0; rs.next(); i++) {
-                userResults[i] = new QueryResult.UserIDuserNameAddressResult(
-                        rs.getString("userID"),
-                        rs.getString("userName"),
-                        rs.getString("address")
-                );
-            }
-            rs.close();
-            st.close();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return userResults;
+        return getUsersFromQuery(query);
     }
 
     @Override
@@ -318,29 +326,7 @@ public class CENGVACDB implements ICENGVACDB {
                 "GROUP BY V.code, V.vaccinename, V.type " +
                 "ORDER BY MAX(C.vacdate) DESC " +
                 "LIMIT 2;";
-        Vaccine[] vaccines = null;
-        try {
-            Statement st = connection.createStatement();
-            ResultSet rs = st.executeQuery(query);
-            int size = 0;
-            if (rs.last()) {
-                size = rs.getRow();
-                rs.beforeFirst();
-            }
-            vaccines = new Vaccine[size];
-            for (int i = 0; rs.next(); i++) {
-                vaccines[i] = new Vaccine(
-                        rs.getInt("code"),
-                        rs.getString("vaccinename"),
-                        rs.getString("type")
-                );
-            }
-            rs.close();
-            st.close();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return vaccines;
+        return getVaccinesFromQuery(query);
     }
 
     @Override
@@ -362,29 +348,7 @@ public class CENGVACDB implements ICENGVACDB {
                         "HAVING COUNT(*) > 1" +
                     ") " +
                 "ORDER BY U.userID ASC;";
-        QueryResult.UserIDuserNameAddressResult[] userResults = null;
-        try {
-            Statement st = connection.createStatement();
-            ResultSet rs = st.executeQuery(query);
-            int size = 0;
-            if (rs.last()) {
-                size = rs.getRow();
-                rs.beforeFirst();
-            }
-            userResults = new QueryResult.UserIDuserNameAddressResult[size];
-            for (int i = 0; rs.next(); i++) {
-                userResults[i] = new QueryResult.UserIDuserNameAddressResult(
-                        rs.getString("userID"),
-                        rs.getString("userName"),
-                        rs.getString("address")
-                );
-            }
-            rs.close();
-            st.close();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return userResults;
+        return getUsersFromQuery(query);
     }
 
     @Override
@@ -413,29 +377,7 @@ public class CENGVACDB implements ICENGVACDB {
                         ")" +
                 ") " +
                 "ORDER BY U.userID ASC;";
-        QueryResult.UserIDuserNameAddressResult[] userResults = null;
-        try {
-            Statement st = connection.createStatement();
-            ResultSet rs = st.executeQuery(query);
-            int size = 0;
-            if (rs.last()) {
-                size = rs.getRow();
-                rs.beforeFirst();
-            }
-            userResults = new QueryResult.UserIDuserNameAddressResult[size];
-            for (int i = 0; rs.next(); i++) {
-                userResults[i] = new QueryResult.UserIDuserNameAddressResult(
-                        rs.getString("userID"),
-                        rs.getString("userName"),
-                        rs.getString("address")
-                );
-            }
-            rs.close();
-            st.close();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return userResults;
+        return getUsersFromQuery(query);
     }
 
     @Override
@@ -456,29 +398,7 @@ public class CENGVACDB implements ICENGVACDB {
                         "HAVING COUNT(*) >= 2" +
                     ") " +
                 "ORDER BY U.userID ASC;";
-        QueryResult.UserIDuserNameAddressResult[] userResults = null;
-        try {
-            Statement st = connection.createStatement();
-            ResultSet rs = st.executeQuery(query);
-            int size = 0;
-            if (rs.last()) {
-                size = rs.getRow();
-                rs.beforeFirst();
-            }
-            userResults = new QueryResult.UserIDuserNameAddressResult[size];
-            for (int i = 0; rs.next(); i++) {
-                userResults[i] = new QueryResult.UserIDuserNameAddressResult(
-                        rs.getString("userID"),
-                        rs.getString("userName"),
-                        rs.getString("address")
-                );
-            }
-            rs.close();
-            st.close();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return userResults;
+        return getUsersFromQuery(query);
     }
 
     @Override
