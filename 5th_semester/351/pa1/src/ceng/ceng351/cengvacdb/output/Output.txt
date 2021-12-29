@@ -71,7 +71,7 @@ UserID	UserName	Address
 *** List of the two recent vaccines applied to any user that do not contain ‘vac’ in their name ***
 Code	Vaccinename	Type
 11	Pfizer–BioNTech	RNA_vaccines_and_DNA_vaccines
-11	Pfizer–BioNTech	RNA_vaccines_and_DNA_vaccines
+41	Oxford–AstraZeneca	Adenovirus_vector_vaccines
 
 --------------------------------------------------------------
 
@@ -91,6 +91,7 @@ UserID	UserName	Address
 --------------------------------------------------------------
 *** List users who have been vaccinated with all vaccines that can cause the given side effect ***
 UserID	UserName	Address
+20	Yasemin Surmeli	Surmene/Trabzon
 
 --------------------------------------------------------------
 
@@ -110,9 +111,9 @@ EffectCode	EffectName
 --------------------------------------------------------------
 
 --------------------------------------------------------------
-*** Calculate the average frequency of vaccination of users over the age of 65 ***
+*** Calculate the average number of doses of vaccinated users over the age of 65 ***
 Average
-1.00
+1.80
 
 --------------------------------------------------------------
 

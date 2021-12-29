@@ -127,7 +127,7 @@ public class Evaluation {
         String givendate = "2021-12-19";
         String startdate = "2021-01-01";
         String enddate = "2021-12-19";
-        String effectname = "loss of speech";
+        String effectname = "loss_of_speech";
         String vaccineName = "Convidecia";
 
         try {
@@ -314,7 +314,7 @@ public class Evaluation {
             addInputTitle("List users who have been vaccinated for two doses since the given date", bufferedWriter);
             try {
 
-                QueryResult.UserIDuserNameAddressResult[] UserIDuserNameAddressResultArray1 = cengvacDB.getVaccinatedUsersforTwoDosesByDate(vacdate);
+                UserIDuserNameAddressResult[] UserIDuserNameAddressResultArray1 = cengvacDB.getVaccinatedUsersforTwoDosesByDate(vacdate);
 
                 //Header Line
                 printLine("UserID" + "\t" + "UserName" + "\t" + "Address", bufferedWriter);
@@ -368,7 +368,7 @@ public class Evaluation {
             addInputTitle("List users who have had at least two doses of vaccine and have experienced at most one side effect", bufferedWriter);
             try {
 
-                QueryResult.UserIDuserNameAddressResult[] UserIDuserNameAddressResultArray2 = cengvacDB.getUsersAtHasLeastTwoDoseAtMostOneSideEffect();
+                UserIDuserNameAddressResult[] UserIDuserNameAddressResultArray2 = cengvacDB.getUsersAtHasLeastTwoDoseAtMostOneSideEffect();
 
                 //Header Line
                 printLine("UserID" + "\t" + "UserName" + "\t" + "Address", bufferedWriter);
@@ -420,7 +420,7 @@ public class Evaluation {
             addInputTitle("List users who have been vaccinated with at least two different types of vaccines within the given time interval", bufferedWriter);
             try {
 
-                QueryResult.UserIDuserNameAddressResult[] UserIDuserNameAddressResultArray4 = cengvacDB.getUsersWithAtLeastTwoDifferentVaccineTypeByGivenInterval(startdate, enddate);
+                UserIDuserNameAddressResult[] UserIDuserNameAddressResultArray4 = cengvacDB.getUsersWithAtLeastTwoDifferentVaccineTypeByGivenInterval(startdate, enddate);
 
                 //Header Line
                 printLine("UserID" + "\t" + "UserName" + "\t" + "Address", bufferedWriter);
@@ -469,7 +469,7 @@ public class Evaluation {
             /***********************************************************/
             /***********************************************************/
             addDivider(bufferedWriter);
-            addInputTitle("Calculate the average frequency of vaccination of users over the age of 65", bufferedWriter);
+            addInputTitle("Calculate the average number of doses of vaccinated users over the age of 65", bufferedWriter);
             try {
 
                 double average = cengvacDB.averageNumberofDosesofVaccinatedUserOverSixtyFiveYearsOld();

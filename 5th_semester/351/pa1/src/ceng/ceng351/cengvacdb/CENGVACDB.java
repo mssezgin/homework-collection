@@ -90,8 +90,7 @@ public class CENGVACDB implements ICENGVACDB {
             Statement st = connection.createStatement();
             for (int i = 0; i < tables.length; i++) {
                 try {
-                    st.executeUpdate("DROP TABLE IF EXISTS " + tables[i] + ";");
-                    // TODO: increment only if drop
+                    st.executeUpdate("DROP TABLE " + tables[i] + ";");
                     numberOfTablesDropped++;
                 } catch (SQLException ignored) { }
             }
@@ -108,14 +107,15 @@ public class CENGVACDB implements ICENGVACDB {
         try {
             Statement st = connection.createStatement();
             for (User user : users) {
-                String query = "INSERT INTO User(userID, userName, age, address, password, status) " +
+                String query =
+                        "INSERT INTO User(userID, userName, age, address, password, status) " +
                         "VALUES(" +
-                                user.getUserID() + ", " +
-                                "'" + user.getUserName() + "', " +
-                                user.getAge() + ", " +
-                                "'" + user.getAddress() + "', " +
-                                "'" + user.getPassword() + "', " +
-                                "'" + user.getStatus() + "'" +
+                            user.getUserID() + ", " +
+                            "'" + user.getUserName() + "', " +
+                            user.getAge() + ", " +
+                            "'" + user.getAddress() + "', " +
+                            "'" + user.getPassword() + "', " +
+                            "'" + user.getStatus() + "'" +
                         ");";
                 try {
                     st.executeUpdate(query);
@@ -135,10 +135,11 @@ public class CENGVACDB implements ICENGVACDB {
         try {
             Statement st = connection.createStatement();
             for (AllergicSideEffect sideEffect : sideEffects) {
-                String query = "INSERT INTO AllergicSideEffect(effectcode, effectname) " +
+                String query =
+                        "INSERT INTO AllergicSideEffect(effectcode, effectname) " +
                         "VALUES(" +
-                                sideEffect.getEffectCode() + ", " +
-                                "'" + sideEffect.getEffectName() + "'" +
+                            sideEffect.getEffectCode() + ", " +
+                            "'" + sideEffect.getEffectName() + "'" +
                         ");";
                 try {
                     st.executeUpdate(query);
@@ -158,11 +159,12 @@ public class CENGVACDB implements ICENGVACDB {
         try {
             Statement st = connection.createStatement();
             for (Vaccine vaccine : vaccines) {
-                String query = "INSERT INTO Vaccine(code, vaccinename, type) " +
+                String query =
+                        "INSERT INTO Vaccine(code, vaccinename, type) " +
                         "VALUES(" +
-                        vaccine.getCode() + ", " +
-                        "'" + vaccine.getVaccineName() + "', " +
-                        "'" + vaccine.getType() + "'" +
+                            vaccine.getCode() + ", " +
+                            "'" + vaccine.getVaccineName() + "', " +
+                            "'" + vaccine.getType() + "'" +
                         ");";
                 try {
                     st.executeUpdate(query);
@@ -182,12 +184,13 @@ public class CENGVACDB implements ICENGVACDB {
         try {
             Statement st = connection.createStatement();
             for (Vaccination vaccination : vaccinations) {
-                String query = "INSERT INTO Vaccination(code, userID, dose, vacdate) " +
+                String query =
+                        "INSERT INTO Vaccination(code, userID, dose, vacdate) " +
                         "VALUES(" +
-                                vaccination.getCode() + ", " +
-                                vaccination.getUserID() + ", " +
-                                vaccination.getDose() + ", " +
-                                "'" + vaccination.getVacdate() + "'" +
+                            vaccination.getCode() + ", " +
+                            vaccination.getUserID() + ", " +
+                            vaccination.getDose() + ", " +
+                            "'" + vaccination.getVacdate() + "'" +
                         ");";
                 try {
                     st.executeUpdate(query);
@@ -207,13 +210,14 @@ public class CENGVACDB implements ICENGVACDB {
         try {
             Statement st = connection.createStatement();
             for (Seen seen : seens) {
-                String query = "INSERT INTO Seen(effectcode, code, userID, date, degree) " +
+                String query =
+                        "INSERT INTO Seen(effectcode, code, userID, date, degree) " +
                         "VALUES(" +
-                                seen.getEffectcode() + ", " +
-                                seen.getCode() + ", " +
-                                "'" + seen.getUserID() + "', " +
-                                "'" + seen.getDate() + "', " +
-                                "'" + seen.getDegree() + "'" +
+                            seen.getEffectcode() + ", " +
+                            seen.getCode() + ", " +
+                            "'" + seen.getUserID() + "', " +
+                            "'" + seen.getDate() + "', " +
+                            "'" + seen.getDegree() + "'" +
                         ");";
                 try {
                     st.executeUpdate(query);
@@ -306,21 +310,13 @@ public class CENGVACDB implements ICENGVACDB {
 
     @Override
     public Vaccine[] getTwoRecentVaccinesDoNotContainVac() {
-        // TODO: DISTINCT causes problems
         String query =
-                "SELECT DISTINCT V.code, V.vaccinename, V.type " +
-                "FROM Vaccine V, Vaccination C " +
-                "WHERE V.code = C.code AND " +
-                    "V.code IN (" +
-                        "SELECT V1.code " +
-                        "FROM Vaccine V1" +
-                    ") AND " +
-                    "V.code NOT IN (" +
-                        "SELECT V2.code " +
-                        "FROM Vaccine V2 " +
-                        "WHERE V2.vaccinename LIKE '%vac%'" +
-                    ") " +
-                "ORDER BY C.vacdate DESC, V.code ASC " +
+                "SELECT V.code, V.vaccinename, V.type " +
+                "FROM Vaccination C, Vaccine V " +
+                "WHERE C.code = V.code AND " +
+                    "V.vaccinename NOT LIKE '%vac%' " +
+                "GROUP BY V.code, V.vaccinename, V.type " +
+                "ORDER BY MAX(C.vacdate) DESC " +
                 "LIMIT 2;";
         Vaccine[] vaccines = null;
         try {
@@ -393,7 +389,53 @@ public class CENGVACDB implements ICENGVACDB {
 
     @Override
     public QueryResult.UserIDuserNameAddressResult[] getVaccinatedUsersWithAllVaccinesCanCauseGivenSideEffect(String effectname) {
-        return new QueryResult.UserIDuserNameAddressResult[0];
+        String query =
+                "SELECT U.userID, U.userName, U.address " +
+                "FROM User U " +
+                "WHERE " +
+                    "EXISTS(" +
+                        "SELECT A1.effectcode " +
+                        "FROM AllergicSideEffect A1 " +
+                        "WHERE A1.effectname = '" + effectname + "'" +
+                    ") AND NOT EXISTS(" +
+                        "SELECT T.code " +
+                        "FROM (" +
+                            "SELECT S.code " +
+                            "FROM Seen S, AllergicSideEffect A " +
+                            "WHERE " +
+                                "S.effectcode = A.effectcode AND " +
+                                "A.effectname = '" + effectname + "'" +
+                        ") as T " +
+                        "WHERE T.code NOT IN (" +
+                            "SELECT C.code " +
+                            "FROM Vaccination C " +
+                            "WHERE C.userID = U.userID" +
+                        ")" +
+                ") " +
+                "ORDER BY U.userID ASC;";
+        QueryResult.UserIDuserNameAddressResult[] userResults = null;
+        try {
+            Statement st = connection.createStatement();
+            ResultSet rs = st.executeQuery(query);
+            int size = 0;
+            if (rs.last()) {
+                size = rs.getRow();
+                rs.beforeFirst();
+            }
+            userResults = new QueryResult.UserIDuserNameAddressResult[size];
+            for (int i = 0; rs.next(); i++) {
+                userResults[i] = new QueryResult.UserIDuserNameAddressResult(
+                        rs.getString("userID"),
+                        rs.getString("userName"),
+                        rs.getString("address")
+                );
+            }
+            rs.close();
+            st.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return userResults;
     }
 
     @Override
@@ -485,19 +527,19 @@ public class CENGVACDB implements ICENGVACDB {
     @Override
     public double averageNumberofDosesofVaccinatedUserOverSixtyFiveYearsOld() {
         String query =
-                "SELECT AVG(T.maxdose) as avgdose " +
+                "SELECT AVG(T.doses) as avgdose " +
                 "FROM (" +
-                    "SELECT C.code, C.userID, MAX(C.dose) as maxdose " +
+                    "SELECT C.userID, COUNT(*) as doses " +
                     "FROM Vaccination C, User U " +
                     "WHERE C.userID = U.userID AND U.age >= 65 " +
-                    "GROUP BY C.code, C.userID" +
+                    "GROUP BY C.userID" +
                 ") as T;";
         double avgdose = 0;
         try {
             Statement st = connection.createStatement();
             ResultSet rs = st.executeQuery(query);
             if (rs.next()) {
-                avgdose = rs.getInt(1);
+                avgdose = rs.getDouble("avgdose");
             }
             rs.close();
             st.close();
