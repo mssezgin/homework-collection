@@ -13,6 +13,11 @@
 #    i set rcx to rdx and used seven additions
 #    (-1 instruction per program)
 #    avg: 17.83 -> 17.76
+#
+# 2. instead of adding length to rcx seven times, i add rcx
+#    to itself three times
+#    (-4 instructions per program)
+#    avg: 17.76 -> 17.46
 ##################################################################
 # Do not modify this portion
 # Function prologue.
@@ -25,13 +30,9 @@ absrev:
     
 	# all this for dst_rev = dst + len - 1
 	rrmovq	%rdx,%rcx	# rcx = len
-	addq	%rdx,%rcx	# rcx = len * 2
-	addq	%rdx,%rcx	# rcx = len * 3
-	addq	%rdx,%rcx	# rcx = len * 4
-	addq	%rdx,%rcx	# rcx = len * 5
-	addq	%rdx,%rcx	# rcx = len * 6
-	addq	%rdx,%rcx	# rcx = len * 7
-	addq	%rdx,%rcx	# rcx = len * 8
+	addq	%rcx,%rcx	# rcx = len * 2
+	addq	%rcx,%rcx	# rcx = len * 4
+	addq	%rcx,%rcx	# rcx = len * 8
 	irmovq	$8,%r8		# for subtracting 8
 	addq	%rsi,%rcx	# add dst
 	subq	%r8,%rcx	# finally, rcx holds dst_rev
