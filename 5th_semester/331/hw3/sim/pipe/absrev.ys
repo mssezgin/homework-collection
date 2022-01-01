@@ -8,7 +8,7 @@
 ##################################################################
 # mustafa sezgin
 # 2380863
-# 
+#
 # 1. instead of setting rcx to 0 and using eight additions,
 #    i set rcx to rdx and used seven additions
 #    (-1 instruction per program)
@@ -18,7 +18,7 @@
 #    to itself three times
 #    (-4 instructions per program)
 #    avg: 17.76 -> 17.46
-# 
+#
 # 3. instead of using another register (rcx) to hold dst_rev,
 #    i convert dst (rsi) to dst_rev,
 #    also length is now eight times its value and is decremented
@@ -28,6 +28,10 @@
 #    (-1 instruction per program)
 #    (-1 instruction per iteration)
 #    avg: 17.46 -> 16.38
+#
+# 4. i used r8 as a constant global variable for addq and subq
+#    (-1 instruction per iteration)
+#    avg: 16.38 -> 15.38
 ##################################################################
 # Do not modify this portion
 # Function prologue.
@@ -39,11 +43,11 @@ absrev:
 	xorq	%rax,%rax	# sum = 0;
     
 	# all this for dst_rev = dst + len - 1
+	irmovq	$8,%r8		# const for addq and subq
 	addq	%rdx,%rdx	# rdx = len * 2
 	addq	%rdx,%rdx	# rdx = len * 4
 	addq	%rdx,%rdx	# rdx = len * 8
 	addq	%rdx,%rsi	# rsi = dst + len * 8
-	irmovq	$8,%r8		# for subtracting 8
 	subq	%r8,%rsi	# rsi = dst + len * 8 - 8
 
 	andq	%rdx,%rdx	# len <= 0?
@@ -58,10 +62,9 @@ Loop:
 	subq	%r9,%r10	# negation achieved!
 Positive:
 	addq	%r10,%rax	# sum += absval
-	irmovq	$8,%r10
-	subq	%r10,%rdx	# len--
-	addq	%r10,%rdi	# src++
-	subq	%r10,%rsi	# dst_rev--
+	subq	%r8,%rdx	# len--
+	addq	%r8,%rdi	# src++
+	subq	%r8,%rsi	# dst_rev--
 	andq	%rdx,%rdx	# len > 0?
 	jg	Loop		# if so, goto Loop:
 ##################################################################
