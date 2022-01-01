@@ -1,0 +1,83 @@
+####################
+## mustafa sezgin ##
+## 2380863        ##
+####################
+	.pos 0x0
+	irmovq	stack,%rsp
+	call	main
+	halt
+
+# btree
+	.pos 0x200
+root:
+	.quad 5
+	.quad node7
+	.quad node12
+node7:
+	.quad 7
+	.quad node25
+	.quad node905
+node25:
+	.quad 25
+	.quad 0
+	.quad 0
+node905:
+	.quad 905
+	.quad nodem1
+	.quad 0
+nodem1:
+	.quad -1
+	.quad 0
+	.quad 0
+node12:
+	.quad 12
+	.quad node219
+	.quad nodem10
+node219:
+	.quad 219
+	.quad 0
+	.quad 0
+nodem10:
+	.quad -10
+	.quad 0
+	.quad node331
+node331:
+	.quad 331
+	.quad 0
+	.quad 0
+
+# int main()
+main:
+	irmovq	root,%rdi
+	call	max_btree
+	ret
+
+# long max_btree(const node *root)
+max_btree:
+	irmovq	$0x8000000000000000,%rax	# max = INT_MIN;
+	andq	%rdi,%rdi
+	je	retn
+	pushq	%rbp
+	pushq	%rbx
+	mrmovq	(%rdi),%rbx			# max = root->value
+	rrmovq	%rdi,%rbp
+	mrmovq	0x8(%rbp),%rdi			# root->left
+	call	max_btree			# candidate = max_btree(root->left)
+	rrmovq	%rax,%rcx			# diff = candidate
+	subq	%rbx,%rcx			# diff -= max
+	cmovg	%rax,%rbx			# max = (diff > 0) ? candidate : max
+	mrmovq	0x10(%rbp),%rdi
+	call	max_btree			# candidate = max_btree(root->right)
+	rrmovq	%rax,%rcx			# diff = candidate
+	subq	%rbx,%rcx			# diff -= max
+	cmovg	%rax,%rbx			# max = (diff > 0) ? candidate : max
+	rrmovq	%rbx,%rax
+	popq	%rbx
+	popq	%rbp
+retn:
+	ret
+
+# stack
+	.pos 0x800
+stack:
+
