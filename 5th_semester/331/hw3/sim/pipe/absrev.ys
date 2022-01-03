@@ -6,35 +6,34 @@
 # Include your name and ID here.
 # Describe how and why you modified the baseline code.
 ##################################################################
-# mustafa sezgin
-# 2380863
 #
-# 1. instead of setting rcx to 0 and using eight additions,
-#    i set rcx to rdx and used seven additions
+#    mustafa sezgin
+#    2380863
+#
+# 1. reduction in strength: instead of setting rcx to 0 and
+#    using eight additions, i set rcx to len (rdx) and add rcx
+#    to itself three times.
+#    (-5 instruction per program)
+#    avg: 17.83 -> 17.46
+#
+# 2. instead of using another register (rcx) to hold dst_rev,
+#    i convert dst (rsi) to dst_rev.
 #    (-1 instruction per program)
-#    avg: 17.83 -> 17.76
-#
-# 2. instead of adding length to rcx seven times, i add rcx
-#    to itself three times
-#    (-4 instructions per program)
-#    avg: 17.76 -> 17.46
-#
-# 3. instead of using another register (rcx) to hold dst_rev,
-#    i convert dst (rsi) to dst_rev,
-#    also length is now eight times its value and is decremented
+#    also, rdx now holds eight times length and is decremented
 #    by eight at each iteration as if it were a pointer, which
-#    which elminates keeping 1 and 8 in seperate registers
-#    for addq and subq
-#    (-1 instruction per program)
+#    eliminates setting r10 to 1.
 #    (-1 instruction per iteration)
 #    avg: 17.46 -> 16.38
 #
-# 4. i used r8 as a constant global variable for addq and subq
+# 3. code motion: i used r8 (instead of r10) as a constant global
+#    variable to hold 8 for addq and subq.
 #    (-1 instruction per iteration)
 #    avg: 16.38 -> 15.38
 #
-# 5. i eliminated the first condition check, created Condition
-#    label
+# 4. i deleted the first condition check and keep the one
+#    (labeled as Condition) that is at the end of the loop body.
+#    this condition check is prone to continuing the iteration
+#    and misprediction happens only once (before returning).
 #    (-1 instruction per program)
 #    avg: 15.38 -> 15.31
 ##################################################################
