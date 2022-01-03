@@ -14,6 +14,15 @@
 ## This file also contains an implementation of cmpq.
 
 ####################################################################
+#
+#    mustafa sezgin
+#    2380863
+#
+# 1. i implemented the leaq instruction.
+#
+####################################################################
+
+####################################################################
 #    C Include's.  Don't alter these                               #
 ####################################################################
 
@@ -165,7 +174,7 @@ word f_ifun = [
 # Is instruction valid?
 bool instr_valid = f_icode in 
 	{ INOP, IHALT, IRRMOVQ, IIRMOVQ, IRMMOVQ, IMRMOVQ,
-	  IOPQ, IJXX, ICALL, IRET, IPUSHQ, IPOPQ, IICMPQ };
+	  IOPQ, IJXX, ICALL, IRET, IPUSHQ, IPOPQ, IICMPQ, ILEAQ };
 
 # Determine status code for fetched instruction
 word f_stat = [
@@ -178,11 +187,11 @@ word f_stat = [
 # Does fetched instruction require a regid byte?
 bool need_regids =
 	f_icode in { IRRMOVQ, IOPQ, IPUSHQ, IPOPQ, 
-		     IIRMOVQ, IRMMOVQ, IMRMOVQ, IICMPQ };
+		     IIRMOVQ, IRMMOVQ, IMRMOVQ, IICMPQ, ILEAQ };
 
 # Does fetched instruction require a constant word?
 bool need_valC =
-	f_icode in { IIRMOVQ, IRMMOVQ, IMRMOVQ, IJXX, ICALL, IICMPQ };
+	f_icode in { IIRMOVQ, IRMMOVQ, IMRMOVQ, IJXX, ICALL, IICMPQ, ILEAQ };
 
 # Predict next value of PC
 word f_predPC = [
@@ -202,13 +211,14 @@ word d_srcA = [
 
 ## What register should be used as the B source?
 word d_srcB = [
-	D_icode in { IOPQ, IRMMOVQ, IMRMOVQ, IICMPQ  } : D_rB;
+	D_icode in { IOPQ, IRMMOVQ, IMRMOVQ, IICMPQ, ILEAQ  } : D_rB;
 	D_icode in { IPUSHQ, IPOPQ, ICALL, IRET } : RRSP;
 	1 : RNONE;  # Don't need register
 ];
 
 ## What register should be used as the E destination?
 word d_dstE = [
+	D_icode in { ILEAQ } : D_rA;
 	D_icode in { IRRMOVQ, IIRMOVQ, IOPQ} : D_rB;
 	D_icode in { IPUSHQ, IPOPQ, ICALL, IRET } : RRSP;
 	1 : RNONE;  # Don't write any register
@@ -246,7 +256,7 @@ word d_valB = [
 ## Select input A to ALU
 word aluA = [
     E_icode in { IRRMOVQ, IOPQ } : E_valA;
-	E_icode in { IIRMOVQ, IRMMOVQ, IMRMOVQ, IICMPQ } : E_valC;
+	E_icode in { IIRMOVQ, IRMMOVQ, IMRMOVQ, IICMPQ, ILEAQ } : E_valC;
 	E_icode in { ICALL, IPUSHQ } : -8;
 	E_icode in { IRET, IPOPQ } : 8;
 	# Other instructions don't need ALU
@@ -254,8 +264,8 @@ word aluA = [
 
 ## Select input B to ALU
 word aluB = [
-E_icode in { IRMMOVQ, IMRMOVQ, IOPQ, ICALL, IICMPQ,
-		     IPUSHQ, IRET, IPOPQ } : E_valB;
+	E_icode in { IRMMOVQ, IMRMOVQ, IOPQ, ICALL, IICMPQ,
+		     IPUSHQ, IRET, IPOPQ, ILEAQ } : E_valB;
 	E_icode in { IRRMOVQ, IIRMOVQ } : 0;
 	# Other instructions don't need ALU
 ];
@@ -263,7 +273,7 @@ E_icode in { IRMMOVQ, IMRMOVQ, IOPQ, ICALL, IICMPQ,
 ## Set the ALU function
 word alufun = [
 	E_icode == IOPQ : E_ifun;
-    E_icode == IICMPQ : ALUSUB;
+	E_icode == IICMPQ : ALUSUB;
 	1 : ALUADD;
 ];
 
