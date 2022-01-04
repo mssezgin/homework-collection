@@ -48,6 +48,11 @@
 #    also, i implemented leaq instruction on pipe-full.hcl and
 #    used it instead of some of addq and subq instructions.
 #    avg: 15.31 -> 14.31
+#
+# 6. reduction in strength: instead of adding the absolute value
+#    of val to the sum, i subtracted it from the sum if val < 0.
+#    (-2 instruction per iteration when val < 0)
+#    avg: 14.31 -> 13.27
 ##################################################################
 # Do not modify this portion
 # Function prologue.
@@ -64,15 +69,15 @@ absrev:
 	leaq	0xfffffffffffffff8(%rsi),%rsi	# rsi = dst + len * 8 - 8
 	jmp	Condition			# first, check condition
 Loop:    
-	mrmovq	(%rdi),%r10			# read val from src...
-	rmmovq	%r10,(%rsi)			# ...and store it to dst
-	andq	%r10,%r10			# val >= 0?
-	jge	Positive			# if so, skip negating
-	rrmovq	%r10,%r9			# temporary move
-	xorq	%r10,%r10			# zero r10
-	subq	%r9,%r10			# negation achieved!
+	mrmovq	(%rdi),%r10			# val = *rsc
+	rmmovq	%r10,(%rsi)			# *dst_rev = val
+	andq	%r10,%r10			# check if val >= 0
+	jge	Positive			#
+	subq	%r10,%rax			# sum -= val, if val < 0
+	jmp	Continue			#
 Positive:
-	addq	%r10,%rax			# sum += absval
+	addq	%r10,%rax			# sum += val, if val >= 0
+Continue:
 	leaq	0x8(%rdi),%rdi			# src++
 	leaq	0xfffffffffffffff8(%rsi),%rsi	# dst_rev--
 Condition:
