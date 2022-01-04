@@ -3,12 +3,12 @@ package ceng.ceng351.cengvacdb;
 public class QueryResult {
 
     public static class UserIDuserNameAddressResult {
-        String userID;
+        int userID;
         String userName;
         String address;
 
         public UserIDuserNameAddressResult(
-                String userID,
+                int userID,
                 String userName,
                 String address) {
 

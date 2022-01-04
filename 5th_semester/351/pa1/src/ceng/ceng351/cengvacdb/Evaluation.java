@@ -490,7 +490,7 @@ public class Evaluation {
             /***********************************************************/
             /***********************************************************/
             addDivider(bufferedWriter);
-            addInputTitle("Update his/her status to “eligible” after 120 days have passed since the user was vaccinated last time", bufferedWriter);
+            addInputTitle("Update his/her status to \"eligible\" after 120 days have passed since the user was vaccinated last time", bufferedWriter);
             try {
 
                 int numberofChanged = cengvacDB.updateStatusToEligible(givendate);

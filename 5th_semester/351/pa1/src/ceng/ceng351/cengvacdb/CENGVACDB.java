@@ -49,7 +49,7 @@ public class CENGVACDB implements ICENGVACDB {
             userResults = new QueryResult.UserIDuserNameAddressResult[size];
             for (int i = 0; rs.next(); i++) {
                 userResults[i] = new QueryResult.UserIDuserNameAddressResult(
-                        rs.getString("userID"),
+                        rs.getInt("userID"),
                         rs.getString("userName"),
                         rs.getString("address")
                 );
@@ -90,8 +90,6 @@ public class CENGVACDB implements ICENGVACDB {
                         "type VARCHAR(30), " +
                         "PRIMARY KEY (code)" +
                 ");",
-                // TODO: add ON DELETE, but where?
-                // TODO: PRIMARY KEY (code, userID) is not correct
                 "CREATE TABLE Vaccination(" +
                         "code INT, " +
                         "userID INT, " +
@@ -311,6 +309,11 @@ public class CENGVACDB implements ICENGVACDB {
                         "SELECT C.userID " +
                         "FROM Vaccination C " +
                         "WHERE C.vacdate >= '" + vacdate + "' AND C.dose = 2" +
+                    ") AND " +
+                    "U.userID NOT IN (" +
+                        "SELECT C.userID " +
+                        "FROM Vaccination C " +
+                        "WHERE C.vacdate >= '" + vacdate + "' AND C.dose >= 3" +
                     ") " +
                 "ORDER BY U.userID ASC;";
         return getUsersFromQuery(query);

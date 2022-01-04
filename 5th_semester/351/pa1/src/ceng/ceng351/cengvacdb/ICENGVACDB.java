@@ -124,7 +124,7 @@ public interface ICENGVACDB {
     public double averageNumberofDosesofVaccinatedUserOverSixtyFiveYearsOld();
 
     /**
-     * Update his/her status to “eligible” after 120 days have
+     * Update his/her status to "eligible" after 120 days have
      * passed since the user was vaccinated last time
      *
      * @return the row count for SQL Data Manipulation Language (DML) statements

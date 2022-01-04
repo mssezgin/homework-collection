@@ -118,7 +118,7 @@ Average
 --------------------------------------------------------------
 
 --------------------------------------------------------------
-*** Update his/her status to “eligible” after 120 days have passed since the user was vaccinated last time ***
+*** Update his/her status to "eligible" after 120 days have passed since the user was vaccinated last time ***
 2 rows are changed.
 
 --------------------------------------------------------------
