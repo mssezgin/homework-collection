@@ -36,6 +36,12 @@
 #    and misprediction happens only once (before returning).
 #    (-1 instruction per program)
 #    avg: 15.38 -> 15.31
+#
+# 5. i implemented leaq instruction on pipe-full.hcl and used
+#    leaq instead of addq and subq, which eliminates the need
+#    of keeping a register (r8) to hold the immediate value.
+#    (-1 instruction per program)
+#    avg: 15.31 -> 15.24
 ##################################################################
 # Do not modify this portion
 # Function prologue.
@@ -43,33 +49,29 @@
 absrev:
 ##################################################################
 # You can modify this portion
-	# Loop header
-	xorq	%rax,%rax	# sum = 0;
-    
-	# all this for dst_rev = dst + len - 1
-	irmovq	$8,%r8		# const for addq and subq
-	addq	%rdx,%rdx	# rdx = len * 2
-	addq	%rdx,%rdx	# rdx = len * 4
-	addq	%rdx,%rdx	# rdx = len * 8
-	addq	%rdx,%rsi	# rsi = dst + len * 8
-	subq	%r8,%rsi	# rsi = dst + len * 8 - 8
-	jmp	Condition	# first, check condition
+	xorq	%rax,%rax			# sum = 0;
+	addq	%rdx,%rdx			# rdx = len * 2
+	addq	%rdx,%rdx			# rdx = len * 4
+	addq	%rdx,%rdx			# rdx = len * 8
+	addq	%rdx,%rsi			# rsi = dst + len * 8
+	leaq	0xfffffffffffffff8(%rsi),%rsi	# rsi = dst + len * 8 - 8
+	jmp	Condition			# first, check condition
 Loop:    
-	mrmovq	(%rdi),%r10	# read val from src...
-	rmmovq	%r10,(%rsi)	# ...and store it to dst
-	andq	%r10,%r10	# val >= 0?
-	jge	Positive	# if so, skip negating
-	rrmovq	%r10,%r9	# temporary move
-	xorq	%r10,%r10	# zero r10
-	subq	%r9,%r10	# negation achieved!
+	mrmovq	(%rdi),%r10			# read val from src...
+	rmmovq	%r10,(%rsi)			# ...and store it to dst
+	andq	%r10,%r10			# val >= 0?
+	jge	Positive			# if so, skip negating
+	rrmovq	%r10,%r9			# temporary move
+	xorq	%r10,%r10			# zero r10
+	subq	%r9,%r10			# negation achieved!
 Positive:
-	addq	%r10,%rax	# sum += absval
-	subq	%r8,%rdx	# len--
-	addq	%r8,%rdi	# src++
-	subq	%r8,%rsi	# dst_rev--
+	addq	%r10,%rax			# sum += absval
+	leaq	0xfffffffffffffff8(%rdx),%rdx	# len--
+	leaq	0x8(%rdi),%rdi			# src++
+	leaq	0xfffffffffffffff8(%rsi),%rsi	# dst_rev--
 Condition:
-	andq	%rdx,%rdx	# check if len > 0
-	jg	Loop		# if so, goto Loop:
+	andq	%rdx,%rdx			# check if len > 0
+	jg	Loop				# if so, goto Loop:
 ##################################################################
 # Do not modify the following section of code
 # Function epilogue.
