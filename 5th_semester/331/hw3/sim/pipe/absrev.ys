@@ -53,6 +53,23 @@
 #    of val to the sum, i subtracted it from the sum if val < 0.
 #    (-2 instruction per iteration when val < 0)
 #    avg: 14.31 -> 13.27
+#
+# 7. i eliminated the load use hazard by moving an increment
+#    instruction between mrmovq and rmmovq.
+#    (-1 instruction per iteration)
+#    avg: 13.27 -> 12.27
+#
+# 8. loop unrolling: i applied 6x1 loop unrolling. this eliminates
+#    increment and decrement at each 5 iteration.
+#    (-15 instruction per 6 iteration)
+#    also, i needed to keep 48 in a register (r9) for decrement
+#    len.
+#    (+1 instruction per program)
+#    since i cannot check the loop condition without decrementing
+#    len (equivalent to 'while ((len -= 6) >= 0)'), i needed to
+#    increment it back once it quits the first loop.
+#    (+1 instruction per program)
+#    avg: 12.27 -> 10.17
 ##################################################################
 # Do not modify this portion
 # Function prologue.
@@ -62,27 +79,95 @@ absrev:
 # You can modify this portion
 	xorq	%rax,%rax			# sum = 0;
 	irmovq	$0x8,%r8			# const r8 = 8
+	irmovq	$0x30,%r9			# const r9 = 48
 	addq	%rdx,%rdx			# rdx = len * 2
 	addq	%rdx,%rdx			# rdx = len * 4
 	addq	%rdx,%rdx			# rdx = len * 8
 	addq	%rdx,%rsi			# rsi = dst + len * 8
 	leaq	0xfffffffffffffff8(%rsi),%rsi	# rsi = dst + len * 8 - 8
-	jmp	Condition			# first, check condition
-Loop:    
+
+	# 6x1 loop unrolling
+	jmp	Condition1			# first, check condition
+Loop1:    
+	mrmovq	(%rdi),%r10			# val1 = *src
+	mrmovq	0x8(%rdi),%r11			# val2 = *(src + 1)
+	mrmovq	0x10(%rdi),%r12			# val3 = *(src + 2)
+	mrmovq	0x18(%rdi),%r13			# val4 = *(src + 3)
+	mrmovq	0x20(%rdi),%rbx			# val5 = *(src + 4)
+	mrmovq	0x28(%rdi),%rbp			# val6 = *(src + 5)
+	rmmovq	%r10,(%rsi)			# *dst_rev = val1
+	rmmovq	%r11,0xfffffffffffffff8(%rsi)	# *(dst_rev - 1) = val2
+	rmmovq	%r12,0xfffffffffffffff0(%rsi)	# *(dst_rev - 2) = val3
+	rmmovq	%r13,0xffffffffffffffe8(%rsi)	# *(dst_rev - 3) = val4
+	rmmovq	%rbx,0xffffffffffffffe0(%rsi)	# *(dst_rev - 4) = val5
+	rmmovq	%rbp,0xffffffffffffffd8(%rsi)	# *(dst_rev - 5) = val6
+	andq	%r10,%r10			# check if val1 >= 0
+	jge	Positive10			#
+	subq	%r10,%rax			# sum -= val1, if val1 < 0
+	jmp	Continue10			#
+Positive10:					#
+	addq	%r10,%rax			# sum += val1, if val1 >= 0
+Continue10:
+	andq	%r11,%r11			# check if val2 >= 0
+	jge	Positive11			#
+	subq	%r11,%rax			# sum -= val2, if val2 < 0
+	jmp	Continue11			#
+Positive11:					#
+	addq	%r11,%rax			# sum += val2, if val2 >= 0
+Continue11:
+	andq	%r12,%r12			# check if val3 >= 0
+	jge	Positive12			#
+	subq	%r12,%rax			# sum -= val3, if val3 < 0
+	jmp	Continue12			#
+Positive12:					#
+	addq	%r12,%rax			# sum += val3, if val3 >= 0
+Continue12:
+	andq	%r13,%r13			# check if val4 >= 0
+	jge	Positive13			#
+	subq	%r13,%rax			# sum -= val4, if val4 < 0
+	jmp	Continue13			#
+Positive13:					#
+	addq	%r13,%rax			# sum += val4, if val4 >= 0
+Continue13:
+	andq	%rbx,%rbx			# check if val5 >= 0
+	jge	Positive14			#
+	subq	%rbx,%rax			# sum -= val5, if val5 < 0
+	jmp	Continue14			#
+Positive14:					#
+	addq	%rbx,%rax			# sum += val5, if val5 >= 0
+Continue14:
+	andq	%rbp,%rbp			# check if val6 >= 0
+	jge	Positive15			#
+	subq	%rbp,%rax			# sum -= val6, if val6 < 0
+	jmp	Continue15			#
+Positive15:					#
+	addq	%rbp,%rax			# sum += val6, if val6 >= 0
+Continue15:
+	leaq	0x30(%rdi),%rdi			# src += 6
+	leaq	0xffffffffffffffd0(%rsi),%rsi	# dst_rev -= 6
+Condition1:
+	subq	%r9,%rdx			# len -= 6, and check if len >= 0
+	jge	Loop1				# if so, goto Loop.1:
+
+	addq	%r9,%rdx			# len += 6, to cure predecrement issue
+
+	# no loop unrolling
+	jmp	Condition2			# first, check condition
+Loop2:
 	mrmovq	(%rdi),%r10			# val = *rsc
 	rmmovq	%r10,(%rsi)			# *dst_rev = val
 	andq	%r10,%r10			# check if val >= 0
-	jge	Positive			#
+	jge	Positive20			#
 	subq	%r10,%rax			# sum -= val, if val < 0
-	jmp	Continue			#
-Positive:
+	jmp	Continue20			#
+Positive20:
 	addq	%r10,%rax			# sum += val, if val >= 0
-Continue:
+Continue20:
 	leaq	0x8(%rdi),%rdi			# src++
 	leaq	0xfffffffffffffff8(%rsi),%rsi	# dst_rev--
-Condition:
+Condition2:
 	subq	%r8,%rdx			# len--, and check if len >= 0
-	jge	Loop				# if so, goto Loop:
+	jge	Loop2				# if so, goto Loop:
 ##################################################################
 # Do not modify the following section of code
 # Function epilogue.
