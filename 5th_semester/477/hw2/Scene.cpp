@@ -242,8 +242,11 @@ Scene::Scene(const char *xmlPath)
 		row = strtok(clone_str, "\n");
 		while (row != NULL)
 		{
-			sscanf(row, "%d %d %d", &v1, &v2, &v3);
-			mesh->triangles.push_back(Triangle(v1, v2, v3));
+			int result = sscanf(row, "%d %d %d", &v1, &v2, &v3);
+			
+			if (result != EOF) {
+				mesh->triangles.push_back(Triangle(v1, v2, v3));
+			}
 			row = strtok(NULL, "\n");
 		}
 		mesh->numberOfTriangles = mesh->triangles.size();

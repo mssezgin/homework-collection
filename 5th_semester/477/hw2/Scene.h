@@ -1,5 +1,5 @@
-#ifndef _SCENE_H_
-#define _SCENE_H_
+#ifndef __SCENE_H__
+#define __SCENE_H__
 
 #include <cstdio>
 #include <cstdlib>
@@ -36,6 +36,7 @@ public:
 	vector< Mesh* > meshes;
 
 	Scene(const char *xmlPath);
+	// TODO: create destructor and delete allocated memories
 
 	void initializeImage(Camera* camera);
 	void forwardRenderingPipeline(Camera* camera);

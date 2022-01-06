@@ -134,7 +134,7 @@ int areEqualVec3(Vec3 a, Vec3 b)
 
 /*
  * Returns an identity matrix (values on the diagonal are 1, others are 0).
-*/
+ */
 Matrix4 getIdentityMatrix()
 {
     Matrix4 result;
