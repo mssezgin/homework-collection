@@ -32,56 +32,81 @@ class Vec4;
 
 
 /*
- * Calculate cross product of vec3 a, vec3 b and return resulting vec3.
+ * Calculate cross product of Vec3 a, Vec3 b and return resulting Vec3.
  */
 Vec3 crossProductVec3(const Vec3& a, const Vec3& b);
 
 /*
- * Calculate dot product of vec3 a, vec3 b and return resulting value.
+ * Calculate cross product of Vec4 a, Vec4 b and return resulting Vec4.
+ */
+Vec4 crossProductVec4(const Vec4& a, const Vec4& b);
+
+/*
+ * Calculate dot product of Vec3 a, Vec3 b and return resulting value.
  */
 double dotProductVec3(const Vec3& a, const Vec3& b);
 
 /*
- * Find length (|v|) of vec3 v.
+ * Calculate dot product of Vec4 a, Vec4 b and return resulting value.
+ */
+double dotProductVec4(const Vec4& a, const Vec4& b);
+
+/*
+ * Find length (|v|) of Vec3 v.
  */
 double magnitudeOfVec3(const Vec3& v);
 
 /*
- * Normalize the vec3 to make it unit vec3.
+ * Find length (|v|) of Vec4 v.
+ */
+double magnitudeOfVec4(const Vec4& v);
+
+/*
+ * Normalize the Vec3 to make it unit Vec3.
  */
 Vec3 normalizeVec3(const Vec3& v);
 
 /*
- * Return -v (inverse of vec3 v)
+ * Normalize the Vec4 to make it unit Vec4.
+ */
+Vec4 normalizeVec4(const Vec4& v);
+
+/*
+ * Return -v (inverse of Vec3 v)
  */
 Vec3 inverseVec3(const Vec3& v);
 
 /*
- * Add vec3 a to vec3 b and return resulting vec3 (a+b).
+ * Return -v (inverse of Vec4 v)
  */
-Vec3 addVec3(const Vec3& a, const Vec3& b);
+Vec4 inverseVec4(const Vec4& v);
 
 /*
- * Subtract vec3 b from vec3 a and return resulting vec3 (a-b).
+ * Add Vec4 a to Vec4 b and return resulting Vec4 (a+b).
  */
-Vec3 subtractVec3(const Vec3& a, const Vec3& b);
+Vec4 addVec4(const Vec4& a, const Vec4& b);
 
 /*
- * Multiply each element of vec3 by scalar.
+ * Subtract Vec4 b from Vec4 a and return resulting Vec4 (a-b).
  */
-Vec3 multiplyVec3ByScalar(const Vec3& v, double c);
+Vec4 subtractVec4(const Vec4& a, const Vec4& b);
 
 /*
- * Prints elements in a vec3. Can be used for debugging purposes.
+ * Multiply each element of Vec4 by scalar.
  */
-void printVec3(const Vec3& v);
+Vec4 multiplyVec4ByScalar(const Vec4& v, double c);
 
 /*
- * Check whether vec3 a and vec3 b are equal.
+ * Prints elements in a Vec4. Can be used for debugging purposes.
+ */
+void printVec4(const Vec4& v);
+
+/*
+ * Check whether Vec4 a and Vec4 b are equal.
  * In case of equality, returns 1.
  * Otherwise, returns 0.
  */
-int areEqualVec3(const Vec3& a, const Vec3& b);
+int areEqualVec4(const Vec4& a, const Vec4& b);
 
 /*
  * Returns an identity matrix (values on the diagonal are 1, others are 0).
@@ -103,6 +128,9 @@ Matrix4 transposeMatrix(const Matrix4& matrix);
 
 
 Matrix4 getOrthonormalMatrix(const Vec3& vector);
+
+
+Matrix4 multiplyMatrixTransposeByMatrix(const Matrix4& matrix1, const Matrix4& matrix2);
 
 
 

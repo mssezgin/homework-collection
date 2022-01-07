@@ -13,7 +13,22 @@ Vec3 crossProductVec3(const Vec3& a, const Vec3& b)
     return result;
 }
 
+Vec4 crossProductVec4(const Vec4& a, const Vec4& b)
+{
+    Vec4 result;
+    result.x = a.y * b.z - b.y * a.z;
+    result.y = b.x * a.z - a.x * b.z;
+    result.z = a.x * b.y - b.x * a.y;
+    result.t = a.t;
+    return result;
+}
+
 double dotProductVec3(const Vec3& a, const Vec3& b)
+{
+    return a.x * b.x + a.y * b.y + a.z * b.z;
+}
+
+double dotProductVec4(const Vec4& a, const Vec4& b)
 {
     return a.x * b.x + a.y * b.y + a.z * b.z;
 }
@@ -23,14 +38,30 @@ double magnitudeOfVec3(const Vec3& v)
     return sqrt(v.x * v.x + v.y * v.y + v.z * v.z);
 }
 
+double magnitudeOfVec4(const Vec4& v)
+{
+    return sqrt(v.x * v.x + v.y * v.y + v.z * v.z);
+}
+
 Vec3 normalizeVec3(const Vec3& v)
 {
     Vec3 result;
-    double d;
-    d = magnitudeOfVec3(v);
-    result.x = v.x / d;
-    result.y = v.y / d;
-    result.z = v.z / d;
+    double inv_d = 1 / magnitudeOfVec3(v);
+    result.x = v.x * inv_d;
+    result.y = v.y * inv_d;
+    result.z = v.z * inv_d;
+    // TODO: result.colorId = v.colorId;
+    return result;
+}
+
+Vec4 normalizeVec4(const Vec4& v)
+{
+    Vec4 result;
+    double inv_d = 1 / magnitudeOfVec4(v);
+    result.x = v.x * inv_d;
+    result.y = v.y * inv_d;
+    result.z = v.z * inv_d;
+    result.t = v.t;
     // TODO: result.colorId = v.colorId;
     return result;
 }
@@ -45,40 +76,54 @@ Vec3 inverseVec3(const Vec3& v)
     return result;
 }
 
-Vec3 addVec3(const Vec3& a, const Vec3& b)
+Vec4 inverseVec4(const Vec4& v)
 {
-    Vec3 result;
-    result.x = a.x + b.x;
-    result.y = a.y + b.y;
-    result.z = a.z + b.z;
-    return result;
-}
-
-Vec3 subtractVec3(const Vec3& a, const Vec3& b)
-{
-    Vec3 result;
-    result.x = a.x - b.x;
-    result.y = a.y - b.y;
-    result.z = a.z - b.z;
-    return result;
-}
-
-Vec3 multiplyVec3ByScalar(const Vec3& v, double c)
-{
-    Vec3 result;
-    result.x = v.x * c;
-    result.y = v.y * c;
-    result.z = v.z * c;
+    Vec4 result;
+    result.x = -v.x;
+    result.y = -v.y;
+    result.z = -v.z;
+    result.t = v.t;
     // TODO: result.colorId = v.colorId;
     return result;
 }
 
-void printVec3(const Vec3& v)
+Vec4 addVec4(const Vec4& a, const Vec4& b)
 {
-    cout << "(" << v.x << "," << v.y << "," << v.z << ")" << endl;
+    Vec4 result;
+    result.x = a.x + b.x;
+    result.y = a.y + b.y;
+    result.z = a.z + b.z;
+    result.t = a.t;
+    return result;
 }
 
-int areEqualVec3(const Vec3& a, const Vec3& b)
+Vec4 subtractVec4(const Vec4& a, const Vec4& b)
+{
+    Vec4 result;
+    result.x = a.x - b.x;
+    result.y = a.y - b.y;
+    result.z = a.z - b.z;
+    result.t = a.t;
+    return result;
+}
+
+Vec4 multiplyVec4ByScalar(const Vec4& v, double c)
+{
+    Vec4 result;
+    result.x = v.x * c;
+    result.y = v.y * c;
+    result.z = v.z * c;
+    result.t = v.t;
+    // TODO: result.colorId = v.colorId;
+    return result;
+}
+
+void printVec4(const Vec4& v)
+{
+    cout << "(" << v.x << "," << v.y << "," << v.z << ", " << v.t << ")" << endl;
+}
+
+int areEqualVec4(const Vec4& a, const Vec4& b)
 {
     // if x difference, y difference and z difference is smaller than threshold, then they are equal
     if ((ABS((a.x - b.x)) < EPSILON) && (ABS((a.y - b.y)) < EPSILON) && (ABS((a.z - b.z)) < EPSILON))
@@ -174,6 +219,23 @@ Matrix4 getOrthonormalMatrix(const Vec3& vector)
     M.val[2][0] = w.x; M.val[2][1] = w.y; M.val[2][2] = w.z;
     M.val[3][3] = 1;
     return M;
+}
+
+Matrix4 multiplyMatrixTransposeByMatrix(const Matrix4& matrix1, const Matrix4& matrix2)
+{
+    Matrix4 result;
+    double total;
+    for (int i = 0; i < 4; i++)
+    {
+        for (int j = 0; j < 4; j++)
+        {
+            total = 0;
+            for (int k = 0; k < 4; k++)
+                total += matrix1.val[k][i] * matrix2.val[k][j];
+            result.val[i][j] = total;
+        }
+    }
+    return result;
 }
 
 ////////////////////////////////
@@ -342,26 +404,19 @@ Matrix4::Matrix4(const Translation& translation)
 
 Matrix4::Matrix4(const Rotation& rotation)
 {
-    for (int i = 0; i < 4; i++)
-        for (int j = 0; j < 4; j++)
-            this->val[i][j] = 0;
-
+    Matrix4 M = getOrthonormalMatrix(Vec3(rotation.ux, rotation.uy, rotation.uz, -1));
+    Matrix4 R;
     double angle = rotation.angle / 180 * M_PI;
     double c = cos(angle);
     double s = sin(angle);
-    this->val[0][0] = 1;
-    this->val[1][1] = c;
-    this->val[1][2] = -s;
-    this->val[2][1] = s;
-    this->val[2][2] = c;
-    this->val[3][3] = 1;
+    R.val[0][0] = 1;
+    R.val[1][1] = c;
+    R.val[1][2] = -s;
+    R.val[2][1] = s;
+    R.val[2][2] = c;
+    R.val[3][3] = 1;
 
-    // TODO: use transpose matrix multiplication
-    Matrix4 M = getOrthonormalMatrix(Vec3(rotation.ux, rotation.uy, rotation.uz, -1));
-    Matrix4 Mt = transposeMatrix(M);
-
-    *this = multiplyMatrixByMatrix(*this, M);
-    *this = multiplyMatrixByMatrix(Mt, *this);
+    *this = multiplyMatrixTransposeByMatrix(M, multiplyMatrixByMatrix(R, M));
 }
 
 Matrix4::Matrix4(const Scaling& scaling)
@@ -445,8 +500,8 @@ Camera::Camera(const Camera &other)
 Matrix4 Camera::viewportTransformationMatrix() const
 {
     Matrix4 M;
-    double nx_2 = this->horRes / 2.0;
-    double ny_2 = this->verRes / 2.0;
+    double nx_2 = this->horRes * 0.5;
+    double ny_2 = this->verRes * 0.5;
     M.val[0][0] = nx_2;
     M.val[0][3] = nx_2 - 0.5;
     M.val[1][1] = ny_2;
@@ -868,6 +923,7 @@ Scene::Scene(const char *xmlPath)
 
         str = pVertex->Attribute("position");
         sscanf(str, "%lf %lf %lf", &vertex->x, &vertex->y, &vertex->z);
+        vertex->t = 1;
 
         str = pVertex->Attribute("color");
         sscanf(str, "%lf %lf %lf", &color->r, &color->g, &color->b);
