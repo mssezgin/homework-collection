@@ -448,6 +448,50 @@ Camera::Camera(const Camera &other)
     this->outputFileName = other.outputFileName;
 }
 
+Matrix4 Camera::viewportTransformationMatrix() const
+{
+    Matrix4 M;
+    double nx_2 = this->horRes / 2.0;
+    double ny_2 = this->verRes / 2.0;
+    M.val[0][0] = nx_2;
+    M.val[0][3] = nx_2 - 0.5;
+    M.val[1][1] = ny_2;
+    M.val[1][3] = ny_2 - 0.5;
+    M.val[2][2] = 0.5;
+    M.val[2][3] = 0.5;
+    M.val[3][3] = 1.0;
+    return M;
+}
+
+Matrix4 Camera::cameraTransformationMatrix() const
+{
+    Matrix4 M;
+    double inv_dx = 1.0 / (right - left);
+    double inv_dy = 1.0 / (top - bottom);
+    double inv_dz = 1.0 / (far - near);
+    if (projectionType == 0) // orthographic
+    {
+        M.val[0][0] = 2.0 * inv_dx;
+        M.val[0][3] = -(right + left) * inv_dx;
+        M.val[1][1] = 2.0 * inv_dy;
+        M.val[1][3] = -(top + bottom) * inv_dy;
+        M.val[2][2] = -2.0 * inv_dz;
+        M.val[2][3] = -(far + near) * inv_dz;
+        M.val[3][3] = 1.0;
+    }
+    else // perspective
+    {
+        M.val[0][0] = 2.0 * near * inv_dx;
+        M.val[0][2] = (right + left) * inv_dx;
+        M.val[1][1] = 2.0 * near * inv_dy;
+        M.val[1][2] = (top + bottom) * inv_dy;
+        M.val[2][2] = -(far + near) * inv_dz;
+        M.val[2][3] = -2.0 * far * near * inv_dz;
+        M.val[3][2] = -1.0;
+    }
+    return M;
+}
+
 ostream& operator<<(ostream& os, const Camera& c)
 {
     const char *camType = c.projectionType ? "perspective" : "orthographic";
@@ -694,6 +738,9 @@ void Triangle::setThirdVertexId(int vid)
 */
 void Scene::forwardRenderingPipeline(Camera *camera)
 {
+    Matrix4 M_vp = camera->viewportTransformationMatrix();
+    Matrix4 M_cam = camera->cameraTransformationMatrix();
+
     // TODO: back-face culling
 
     for (auto itr = meshes.begin(); itr != meshes.end(); ++itr)
@@ -703,9 +750,15 @@ void Scene::forwardRenderingPipeline(Camera *camera)
         // modeling transformation
         Matrix4 M_model = mesh->modelingTransformationMatrix(this);
 
-        // TODO: viewing transformation
+        // TODO: normal transformation
+
+        // TODO: camera transformation
 
         // TODO: clipping
+
+        // TODO: perspective divide
+
+        // TODO: viewport transformation
 
         // TODO: rasterization
 

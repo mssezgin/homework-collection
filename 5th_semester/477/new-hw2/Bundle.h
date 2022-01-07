@@ -185,6 +185,9 @@ public:
            string outputFileName);
     Camera(const Camera &other);
 
+    Matrix4 viewportTransformationMatrix() const;
+    Matrix4 cameraTransformationMatrix() const;
+
     friend std::ostream& operator<<(std::ostream& os, const Camera& c);
 };
 
