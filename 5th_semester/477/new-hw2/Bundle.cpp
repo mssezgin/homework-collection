@@ -4,89 +4,81 @@
 // Global Functions
 ////////////////////////////////
 
-Vec3 crossProductVec3(Vec3 a, Vec3 b)
+Vec3 crossProductVec3(const Vec3& a, const Vec3& b)
 {
     Vec3 result;
-
     result.x = a.y * b.z - b.y * a.z;
     result.y = b.x * a.z - a.x * b.z;
     result.z = a.x * b.y - b.x * a.y;
-
     return result;
 }
 
-double dotProductVec3(Vec3 a, Vec3 b)
+double dotProductVec3(const Vec3& a, const Vec3& b)
 {
     return a.x * b.x + a.y * b.y + a.z * b.z;
 }
 
-double magnitudeOfVec3(Vec3 v)
+double magnitudeOfVec3(const Vec3& v)
 {
     return sqrt(v.x * v.x + v.y * v.y + v.z * v.z);
 }
 
-Vec3 normalizeVec3(Vec3 v)
+Vec3 normalizeVec3(const Vec3& v)
 {
     Vec3 result;
     double d;
-
     d = magnitudeOfVec3(v);
     result.x = v.x / d;
     result.y = v.y / d;
     result.z = v.z / d;
     // TODO: result.colorId = v.colorId;
-
     return result;
 }
 
-Vec3 inverseVec3(Vec3 v)
+Vec3 inverseVec3(const Vec3& v)
 {
     Vec3 result;
     result.x = -v.x;
     result.y = -v.y;
     result.z = -v.z;
     // TODO: result.colorId = v.colorId;
-
     return result;
 }
 
-Vec3 addVec3(Vec3 a, Vec3 b)
+Vec3 addVec3(const Vec3& a, const Vec3& b)
 {
     Vec3 result;
     result.x = a.x + b.x;
     result.y = a.y + b.y;
     result.z = a.z + b.z;
-
     return result;
 }
 
-Vec3 subtractVec3(Vec3 a, Vec3 b)
+Vec3 subtractVec3(const Vec3& a, const Vec3& b)
 {
     Vec3 result;
     result.x = a.x - b.x;
     result.y = a.y - b.y;
     result.z = a.z - b.z;
-
     return result;
 }
 
-Vec3 multiplyVec3ByScalar(Vec3 v, double c)
+Vec3 multiplyVec3ByScalar(const Vec3& v, double c)
 {
     Vec3 result;
     result.x = v.x * c;
     result.y = v.y * c;
     result.z = v.z * c;
     // TODO: result.colorId = v.colorId;
-
     return result;
 }
 
-void printVec3(Vec3 v)
+void printVec3(const Vec3& v)
 {
     cout << "(" << v.x << "," << v.y << "," << v.z << ")" << endl;
 }
 
-int areEqualVec3(Vec3 a, Vec3 b)
+int areEqualVec3(const Vec3& a, const Vec3& b)
 {
     // if x difference, y difference and z difference is smaller than threshold, then they are equal
     if ((ABS((a.x - b.x)) < EPSILON) && (ABS((a.y - b.y)) < EPSILON) && (ABS((a.z - b.z)) < EPSILON))
@@ -121,7 +113,7 @@ Matrix4 getIdentityMatrix()
     return result;
 }
 
-Matrix4 multiplyMatrixByMatrix(Matrix4 m1, Matrix4 m2)
+Matrix4 multiplyMatrixByMatrix(const Matrix4& m1, const Matrix4& m2)
 {
     Matrix4 result;
     double total;
@@ -143,7 +135,7 @@ Matrix4 multiplyMatrixByMatrix(Matrix4 m1, Matrix4 m2)
     return result;
 }
 
-Vec4 multiplyMatrixByVec4(Matrix4 m, Vec4 v)
+Vec4 multiplyMatrixByVec4(const Matrix4& m, const Vec4& v)
 {
     double values[4];
     double total;
@@ -204,7 +196,7 @@ Vec3::Vec3(double x, double y, double z, int colorId)
     this->colorId = colorId;
 }
 
-Vec3::Vec3(const Vec3 &other)
+Vec3::Vec3(const Vec3& other)
 {
     this->x = other.x;
     this->y = other.y;
@@ -212,26 +204,26 @@ Vec3::Vec3(const Vec3 &other)
     this->colorId = other.colorId;
 }
 
-double Vec3::getElementAt(int index)
+double Vec3::getElementAt(int index) const
 {
     switch (index)
     {
-    case 0:
-        return this->x;
+        case 0:
+            return this->x;
 
-    case 1:
-        return this->y;
+        case 1:
+            return this->y;
 
-    case 2:
-        return this->z;
+        case 2:
+            return this->z;
 
-    default:
-        return this->z;
+        default:
+            return this->z;
     }
 }
 
-ostream& operator<<(ostream& os, const Vec3& v) {
-    
+ostream& operator<<(ostream& os, const Vec3& v)
+{
     os << fixed << setprecision(6) << "[" << v.x << ", " << v.y << ", " << v.z << "]";
 
     return os;
@@ -258,7 +250,8 @@ Vec4::Vec4(double x, double y, double z, double t, int colorId)
     this->t = t;
     this->colorId = colorId;
 }
-Vec4::Vec4(const Vec4 &other)
+
+Vec4::Vec4(const Vec4& other)
 {
     this->x = other.x;
     this->y = other.y;
@@ -267,29 +260,29 @@ Vec4::Vec4(const Vec4 &other)
     this->colorId = other.colorId;
 }
 
-double Vec4::getElementAt(int index)
+double Vec4::getElementAt(int index) const
 {
     switch (index)
     {
-    case 0:
-        return this->x;
+        case 0:
+            return this->x;
 
-    case 1:
-        return this->y;
+        case 1:
+            return this->y;
 
-    case 2:
-        return this->z;
+        case 2:
+            return this->z;
 
-    case 3:
-        return this->t;
+        case 3:
+            return this->t;
 
-    default:
-        return this->t;
+        default:
+            return this->t;
     }
 }
 
-ostream& operator<<(ostream& os, const Vec4& v) {
-    
+ostream& operator<<(ostream& os, const Vec4& v)
+{
     os << fixed << setprecision(6) << "[" << v.x << ", " << v.y << ", " << v.z << ", " << v.t << "]";
 
     return os;
@@ -321,7 +314,7 @@ Matrix4::Matrix4(double val[4][4])
     }
 }
 
-Matrix4::Matrix4(const Matrix4 &other)
+Matrix4::Matrix4(const Matrix4& other)
 {
     for (int i = 0; i < 4; i++)
     {
@@ -363,6 +356,7 @@ Matrix4::Matrix4(const Rotation& rotation)
     this->val[2][2] = c;
     this->val[3][3] = 1;
 
+    // TODO: use transpose matrix multiplication
     Matrix4 M = getOrthonormalMatrix(Vec3(rotation.ux, rotation.uy, rotation.uz, -1));
     Matrix4 Mt = transposeMatrix(M);
 
@@ -403,8 +397,8 @@ Camera::Camera() {}
 
 Camera::Camera(int cameraId,
                int projectionType,
-               Vec3 pos, Vec3 gaze,
-               Vec3 u, Vec3 v, Vec3 w,
+               const Vec3& pos, const Vec3& gaze,
+               const Vec3& u, const Vec3& v, const Vec3& w,
                double left, double right, double bottom, double top,
                double near, double far,
                int horRes, int verRes,
@@ -594,7 +588,8 @@ ostream& operator<<(ostream& os, const Mesh& m)
     os << fixed << setprecision(3) << m.numberOfTransformations << " transformations and " << m.numberOfTriangles << " triangles"
        << endl << "\tTriangles are:" << endl << fixed << setprecision(0);
 
-    for (int i = 0; i < m.triangles.size(); i++) {
+    for (int i = 0; i < m.triangles.size(); i++)
+    {
         os << "\t\t" << m.triangles[i].vertexIds[0] << " " << m.triangles[i].vertexIds[1] << " " << m.triangles[i].vertexIds[2] << endl;
     }
 
@@ -741,28 +736,35 @@ void Scene::forwardRenderingPipeline(Camera *camera)
     Matrix4 M_vp = camera->viewportTransformationMatrix();
     Matrix4 M_cam = camera->cameraTransformationMatrix();
 
-    // TODO: back-face culling
-
     for (auto itr = meshes.begin(); itr != meshes.end(); ++itr)
     {
-        Mesh* mesh = *itr;
+        Mesh& mesh = **itr;
+        Matrix4 M_model = mesh.modelingTransformationMatrix(this);
+        Matrix4 M = multiplyMatrixByMatrix(M_cam, M_model);
 
-        // modeling transformation
-        Matrix4 M_model = mesh->modelingTransformationMatrix(this);
+        for (auto itr = mesh.triangles.begin(); itr != mesh.triangles.end(); ++itr)
+        {
+            Triangle& triangle = *itr;
 
-        // TODO: normal transformation
+            // projection, camera and modeling transformation
+            Vec4 v0 = multiplyMatrixByVec4(M, *this->vertices[triangle.vertexIds[0] - 1]);
+            Vec4 v1 = multiplyMatrixByVec4(M, *this->vertices[triangle.vertexIds[1] - 1]);
+            Vec4 v2 = multiplyMatrixByVec4(M, *this->vertices[triangle.vertexIds[2] - 1]);
 
-        // TODO: camera transformation
+            // TODO: normal transformation
 
-        // TODO: clipping
+            // TODO: back-face culling
 
-        // TODO: perspective divide
+            // TODO: clipping
 
-        // TODO: viewport transformation
+            // TODO: perspective divide
 
-        // TODO: rasterization
+            // TODO: viewport transformation
 
-        // TODO: fragment processing
+            // TODO: rasterization
+
+            // TODO: fragment processing
+        }
     }
 }
 
@@ -859,7 +861,7 @@ Scene::Scene(const char *xmlPath)
 
     while (pVertex != NULL)
     {
-        Vec3 *vertex = new Vec3();
+        Vec4 *vertex = new Vec4();
         Color *color = new Color();
 
         vertex->colorId = vertexId;

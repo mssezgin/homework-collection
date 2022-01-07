@@ -7,7 +7,7 @@
 using namespace std;
 
 
-Scene *scene;
+Scene* scene;
 
 int main(int argc, char *argv[])
 {
@@ -19,7 +19,7 @@ int main(int argc, char *argv[])
     }
     else
     {
-        const char *xmlPath = argv[1];
+        const char* xmlPath = argv[1];
 
         scene = new Scene(xmlPath);
 

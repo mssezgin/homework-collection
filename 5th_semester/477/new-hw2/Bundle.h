@@ -34,54 +34,54 @@ class Vec4;
 /*
  * Calculate cross product of vec3 a, vec3 b and return resulting vec3.
  */
-Vec3 crossProductVec3(Vec3 a, Vec3 b);
+Vec3 crossProductVec3(const Vec3& a, const Vec3& b);
 
 /*
  * Calculate dot product of vec3 a, vec3 b and return resulting value.
  */
-double dotProductVec3(Vec3 a, Vec3 b);
+double dotProductVec3(const Vec3& a, const Vec3& b);
 
 /*
  * Find length (|v|) of vec3 v.
  */
-double magnitudeOfVec3(Vec3 v);
+double magnitudeOfVec3(const Vec3& v);
 
 /*
  * Normalize the vec3 to make it unit vec3.
  */
-Vec3 normalizeVec3(Vec3 v);
+Vec3 normalizeVec3(const Vec3& v);
 
 /*
  * Return -v (inverse of vec3 v)
  */
-Vec3 inverseVec3(Vec3 v);
+Vec3 inverseVec3(const Vec3& v);
 
 /*
  * Add vec3 a to vec3 b and return resulting vec3 (a+b).
  */
-Vec3 addVec3(Vec3 a, Vec3 b);
+Vec3 addVec3(const Vec3& a, const Vec3& b);
 
 /*
  * Subtract vec3 b from vec3 a and return resulting vec3 (a-b).
  */
-Vec3 subtractVec3(Vec3 a, Vec3 b);
+Vec3 subtractVec3(const Vec3& a, const Vec3& b);
 
 /*
  * Multiply each element of vec3 by scalar.
  */
-Vec3 multiplyVec3ByScalar(Vec3 v, double c);
+Vec3 multiplyVec3ByScalar(const Vec3& v, double c);
 
 /*
  * Prints elements in a vec3. Can be used for debugging purposes.
  */
-void printVec3(Vec3 v);
+void printVec3(const Vec3& v);
 
 /*
  * Check whether vec3 a and vec3 b are equal.
  * In case of equality, returns 1.
  * Otherwise, returns 0.
  */
-int areEqualVec3(Vec3 a, Vec3 b);
+int areEqualVec3(const Vec3& a, const Vec3& b);
 
 /*
  * Returns an identity matrix (values on the diagonal are 1, others are 0).
@@ -91,12 +91,12 @@ Matrix4 getIdentityMatrix();
 /*
  * Multiply matrices m1 (Matrix4) and m2 (Matrix4) and return the result matrix r (Matrix4).
  */
-Matrix4 multiplyMatrixByMatrix(Matrix4 m1, Matrix4 m2);
+Matrix4 multiplyMatrixByMatrix(const Matrix4& m1, const Matrix4& m2);
 
 /*
  * Multiply matrix m (Matrix4) by vector v (vec4) and store the result in vector r (vec4).
  */
-Vec4 multiplyMatrixByVec4(Matrix4 m, Vec4 v);
+Vec4 multiplyMatrixByVec4(const Matrix4& m, const Vec4& v);
 
 
 Matrix4 transposeMatrix(const Matrix4& matrix);
@@ -114,9 +114,9 @@ public:
 
     Vec3();
     Vec3(double x, double y, double z, int colorId);
-    Vec3(const Vec3 &other);
+    Vec3(const Vec3& other);
 
-    double getElementAt(int index);
+    double getElementAt(int index) const;
     
     friend std::ostream& operator<<(std::ostream& os, const Vec3& v);
 };
@@ -131,9 +131,9 @@ public:
 
     Vec4();
     Vec4(double x, double y, double z, double t, int colorId);
-    Vec4(const Vec4 &other);
+    Vec4(const Vec4& other);
     
-    double getElementAt(int index);
+    double getElementAt(int index) const;
 
     friend std::ostream& operator<<(std::ostream& os, const Vec4& v);
 };
@@ -147,7 +147,7 @@ public:
 
     Matrix4();
     Matrix4(double val[4][4]);
-    Matrix4(const Matrix4 &other);
+    Matrix4(const Matrix4& other);
     Matrix4(const Translation& translation);
     Matrix4(const Rotation& rotation);
     Matrix4(const Scaling& scaling);
@@ -177,8 +177,8 @@ public:
     Camera();
     Camera(int cameraId,
            int projectionType,
-           Vec3 pos, Vec3 gaze,
-           Vec3 u, Vec3 v, Vec3 w,
+           const Vec3& pos, const Vec3& gaze,
+           const Vec3& u, const Vec3& v, const Vec3& w,
            double left, double right, double bottom, double top,
            double near, double far,
            int horRes, int verRes,
@@ -302,7 +302,7 @@ public:
 
     vector< vector<Color> > image;
     vector< Camera* > cameras;
-    vector< Vec3* > vertices;
+    vector< Vec4* > vertices;
     vector< Color* > colorsOfVertices;
     vector< Scaling* > scalings;
     vector< Rotation* > rotations;
