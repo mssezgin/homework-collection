@@ -145,6 +145,9 @@ Color subtractColor(const Color& color1, const Color& color2);
 Color multiplyColorByScalar(const Color& color, double scalar);
 
 
+std::pair<double, double> minAndMaxOfThree(double a, double b, double c);
+
+
 
 class Vec3
 {
@@ -355,7 +358,8 @@ public:
     void initializeImage(Camera* camera);
     void forwardRenderingPipeline(Camera* camera);
     void rasterizeLine(const Vec4* v0, const Vec4* v1, const Color* c0, const Color* c1);
-    void drawLine(int x0, int y0, int x1, int y1, int dx, int dy, bool negateY, bool swapXY, const Color* c0, const Color* c1);
+    void drawLine(int x0, int y0, int x1, int y1, int dx, int dy, bool negateRow, bool swapXY, const Color* c0, const Color* c1);
+    void rasterizeTriangle(const Vec4& v0, const Vec4& v1, const Vec4& v2, const Color& c0, const Color& c1, const Color& c2);
     int makeBetweenZeroAnd255(double value);
     void writeImageToPPMFile(Camera* camera);
     void convertPPMToPNG(string ppmFileName, int osType);

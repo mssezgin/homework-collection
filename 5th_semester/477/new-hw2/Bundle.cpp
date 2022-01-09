@@ -278,6 +278,36 @@ Color multiplyColorByScalar(const Color& color, double scalar)
     );
 }
 
+std::pair<double, double> minAndMaxOfThree(double a, double b, double c)
+{
+    std::pair<double, double> result;
+    if (a < b)
+    {
+        if (a < c)
+            result.first = a;
+        else
+            result.first = c;
+
+        if (b < c)
+            result.second = c;
+        else
+            result.second = b;
+    }
+    else
+    {
+        if (b < c)
+            result.first = b;
+        else
+            result.first = c;
+
+        if (a < c)
+            result.second = c;
+        else
+            result.second = a;
+    }
+    return result;
+}
+
 ////////////////////////////////
 // Vec3
 ////////////////////////////////
@@ -832,7 +862,61 @@ void Triangle::setThirdVertexId(int vid)
 // Scene
 ////////////////////////////////
 
-void Scene::drawLine(int x0, int y0, int x1, int y1, int dx, int dy, bool negateY, bool swapXY, const Color* c0, const Color* c1)
+void Scene::rasterizeTriangle(const Vec4& v0, const Vec4& v1, const Vec4& v2, const Color& c0, const Color& c1, const Color& c2)
+{
+    /* int x_min, x_max, y_min, y_max;
+    if (v0.x < v1.x)
+    {
+        if (v0.x < v2.x)
+            x_min = (int) v0.x;
+        else
+            x_min = (int) v2.x;
+
+        if (v1.x < v2.x)
+            x_max = (int) v2.x;
+        else
+            x_max = (int) v1.x;
+    }
+    else
+    {
+        if (v1.x < v2.x)
+            x_min = (int) v1.x;
+        else
+            x_min = (int) v2.x;
+
+        if (v0.x < v2.x)
+            x_max = (int) v2.x;
+        else
+            x_max = (int) v0.x;
+    } */
+    std::pair<double, double> xmm = minAndMaxOfThree(v0.x, v1.x, v2.x);
+    std::pair<double, double> ymm = minAndMaxOfThree(v0.y, v1.y, v2.y);
+    int x_min = (int) xmm.first;
+    int x_max = (int) xmm.second;
+    int y_min = (int) ymm.first;
+    int y_max = (int) ymm.second;
+    double alpha, beta, gamma;
+    // denum = f_12(x_0,y_0) = f_20(x_1,y_1) = f_01(x_2,y_2)
+    double inv_denum = 1.0 / (v0.x * (v1.y - v2.y) + v0.y * (v2.x - v1.x) + v1.x * v2.y - v1.y * v2.x);
+
+    // TODO: int or double?
+    for (int y = y_min; y <= y_max; y++)
+    {
+        for (int x = x_min; x <= x_max; x++)
+        {
+            alpha = (x * (v1.y - v2.y) + y * (v2.x - v1.x) + v1.x * v2.y - v1.y * v2.x) * inv_denum; // f_12(x,y) / f_12(x_0,y_0)
+            beta  = (x * (v2.y - v0.y) + y * (v0.x - v2.x) + v2.x * v0.y - v2.y * v0.x) * inv_denum; // f_20(x,y) / f_20(x_1,y_1)
+            gamma = (x * (v0.y - v1.y) + y * (v1.x - v0.x) + v0.x * v1.y - v0.y * v1.x) * inv_denum; // f_01(x,y) / f_01(x_2,y_2)
+
+            if (alpha >= 0 && beta >= 0 && gamma >= 0)
+            {
+                this->image[x][y] = addColor(multiplyColorByScalar(c0, alpha), addColor(multiplyColorByScalar(c1, beta), multiplyColorByScalar(c2, gamma)));
+            }
+        }
+    }
+}
+
+void Scene::drawLine(int x0, int y0, int x1, int y1, int dx, int dy, bool negateRow, bool swapXY, const Color* c0, const Color* c1)
 {
     int x = x0;
     int y = y0;
@@ -844,7 +928,7 @@ void Scene::drawLine(int x0, int y0, int x1, int y1, int dx, int dy, bool negate
 
     while (x <= x1)
     {
-        if (negateY)
+        if (negateRow)
         {
             if (swapXY)
                 this->image[y][-x] = c;
@@ -963,14 +1047,17 @@ void Scene::forwardRenderingPipeline(Camera *camera)
             v1 = multiplyMatrixByVec4(M_vp, v1);
             v2 = multiplyMatrixByVec4(M_vp, v2);
 
-            // TODO: rasterization
-            // if (mesh.type == 0) // wireframe
-            // {
+            // rasterization
+            if (mesh.type == 0) // wireframe
+            {
                 rasterizeLine(&v0, &v1, &c0, &c1);
                 rasterizeLine(&v1, &v2, &c1, &c2);
                 rasterizeLine(&v2, &v0, &c2, &c0);
-            // }
-            // else; // solid
+            }
+            else // solid
+            {
+                rasterizeTriangle(v0, v1, v2, c0, c1, c2);
+            }
         }
     }
 }
