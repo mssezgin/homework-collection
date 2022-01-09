@@ -862,7 +862,71 @@ void Triangle::setThirdVertexId(int vid)
 // Scene
 ////////////////////////////////
 
-void Scene::rasterizeTriangle(const Vec4& v0, const Vec4& v1, const Vec4& v2, const Color& c0, const Color& c1, const Color& c2)
+bool Scene::isLineVisible(double den, double num, double& te, double& tl)
+{
+    if (den > 0)
+    {
+        double t = num / den;
+        if (t > tl)
+            return false;
+        if (t > te)
+            te = t;
+    }
+    else if (den < 0)
+    {
+        double t = num / den;
+        if (t < te)
+            return false;
+        if (t < tl)
+            tl = t;
+    }
+    else if (num > 0)
+    {
+        return false;
+    }
+
+    return true;
+}
+
+bool Scene::clipLine(const Camera& camera, std::pair<Vec4, Vec4>& line, std::pair<Color, Color>& colors)
+{
+    double te = 0.0;
+    double tl = 1.0;
+    bool visible = false;
+    Vec4 d = subtractVec4(line.second, line.first);
+    Color dc = subtractColor(colors.second, colors.first);
+
+    if (isLineVisible(d.x, -1 - line.first.x, te, tl))
+        if (isLineVisible(-d.x, line.first.x - 1, te, tl))
+            if (isLineVisible(d.y, -1 - line.first.y, te, tl))
+                if (isLineVisible(-d.y, line.first.y - 1, te, tl))
+                    if (isLineVisible(d.z, -1 - line.first.z, te, tl))
+                        if (isLineVisible(-d.z, line.first.z - 1, te, tl))
+                        {
+                            visible = true;
+                            int x = 0;
+                            if (tl < 1)
+                            {
+                                line.second = addVec4(line.first, multiplyVec4ByScalar(d, tl));
+                                colors.second = addColor(colors.first, multiplyColorByScalar(dc, tl));
+                            }
+                            if (te > 0)
+                            {
+                                line.first = addVec4(line.first, multiplyVec4ByScalar(d, te));
+                                colors.first = addColor(colors.first, multiplyColorByScalar(dc, te));
+                            }
+                        }
+
+    return visible;
+}
+
+bool Scene::isBackFaceCulled(const Vec4& v0, const Vec4& v1, const Vec4& v2)
+{
+    Vec4 normal = crossProductVec4(subtractVec4(v1, v0), subtractVec4(v2, v0));
+    return dotProductVec4(normal, v0) <= 0;
+}
+
+void Scene::rasterizeTriangle(const Camera& camera, const Vec4& v0, const Vec4& v1, const Vec4& v2, const Color& c0, const Color& c1, const Color& c2)
 {
     int x0 = (int) v0.x + 0.5;
     int y0 = (int) v0.y + 0.5;
@@ -878,6 +942,15 @@ void Scene::rasterizeTriangle(const Vec4& v0, const Vec4& v1, const Vec4& v2, co
     int y_max = ymm.second;
     double alpha, beta, gamma;
     double inv_denum = 1.0 / (x0 * (y1 - y2) + y0 * (x2 - x1) + x1 * y2 - y1 * x2); // denum = f_12(x_0,y_0) = f_20(x_1,y_1) = f_01(x_2,y_2)
+
+    if (x_min < 0)
+        x_min = 0;
+    if (x_max >= camera.horRes)
+        x_max = camera.horRes - 1;
+    if (y_min < 0)
+        y_min = 0;
+    if (y_max >= camera.verRes)
+        y_max = camera.verRes - 1;
 
     for (int y = y_min; y <= y_max; y++)
     {
@@ -939,10 +1012,10 @@ void Scene::drawLine(int x0, int y0, int x1, int y1, int dx, int dy, bool negate
 
 void Scene::rasterizeLine(const Vec4* v0, const Vec4* v1, const Color* c0, const Color* c1)
 {
-    int x0 = (int) v0->x;
-    int y0 = (int) v0->y;
-    int x1 = (int) v1->x;
-    int y1 = (int) v1->y;
+    int x0 = (int) (v0->x);
+    int y0 = (int) (v0->y);
+    int x1 = (int) (v1->x);
+    int y1 = (int) (v1->y);
     int dx = x1 - x0;
     int dy = y1 - y0;
     bool swapXY = false;
@@ -1010,32 +1083,60 @@ void Scene::forwardRenderingPipeline(Camera *camera)
             Color& c1 = *this->colorsOfVertices[triangle.vertexIds[1] - 1];
             Color& c2 = *this->colorsOfVertices[triangle.vertexIds[2] - 1];
 
-            // TODO: normal transformation
+            // back-face culling
+            if (this->cullingEnabled && isBackFaceCulled(v0, v1, v2))
+                continue;
 
-            // TODO: back-face culling
-
-            // TODO: clipping
-
-            // perspective divide
-            perspectiveDivideVec4(v0);
-            perspectiveDivideVec4(v1);
-            perspectiveDivideVec4(v2);
-
-            // viewport transformation
-            v0 = multiplyMatrixByVec4(M_vp, v0);
-            v1 = multiplyMatrixByVec4(M_vp, v1);
-            v2 = multiplyMatrixByVec4(M_vp, v2);
-
-            // rasterization
             if (mesh.type == 0) // wireframe
             {
-                rasterizeLine(&v0, &v1, &c0, &c1);
-                rasterizeLine(&v1, &v2, &c1, &c2);
-                rasterizeLine(&v2, &v0, &c2, &c0);
+                std::pair<Vec4, Vec4> v01(v0, v1);
+                std::pair<Vec4, Vec4> v12(v1, v2);
+                std::pair<Vec4, Vec4> v20(v2, v0);
+                std::pair<Color, Color> c01(c0, c1);
+                std::pair<Color, Color> c12(c1, c2);
+                std::pair<Color, Color> c20(c2, c0);
+                perspectiveDivideVec4(v01.first);
+                perspectiveDivideVec4(v01.second);
+                perspectiveDivideVec4(v12.first);
+                perspectiveDivideVec4(v12.second);
+                perspectiveDivideVec4(v20.first);
+                perspectiveDivideVec4(v20.second);
+
+                if (clipLine(*camera, v01, c01))
+                {
+                    v01.first  = multiplyMatrixByVec4(M_vp, v01.first);
+                    v01.second = multiplyMatrixByVec4(M_vp, v01.second);
+                    rasterizeLine(&v01.first, &v01.second, &c01.first, &c01.second);
+                }
+
+                if (clipLine(*camera, v12, c12))
+                {
+                    v12.first  = multiplyMatrixByVec4(M_vp, v12.first);
+                    v12.second = multiplyMatrixByVec4(M_vp, v12.second);
+                    rasterizeLine(&v12.first, &v12.second, &c12.first, &c12.second);
+                }
+
+                if (clipLine(*camera, v20, c20))
+                {
+                    v20.first  = multiplyMatrixByVec4(M_vp, v20.first);
+                    v20.second = multiplyMatrixByVec4(M_vp, v20.second);
+                    rasterizeLine(&v20.first, &v20.second, &c20.first, &c20.second);
+                }
             }
             else // solid
             {
-                rasterizeTriangle(v0, v1, v2, c0, c1, c2);
+                // perspective divide
+                perspectiveDivideVec4(v0);
+                perspectiveDivideVec4(v1);
+                perspectiveDivideVec4(v2);
+
+                // viewport transformation
+                v0 = multiplyMatrixByVec4(M_vp, v0);
+                v1 = multiplyMatrixByVec4(M_vp, v1);
+                v2 = multiplyMatrixByVec4(M_vp, v2);
+
+                // rasterization
+                rasterizeTriangle(*camera, v0, v1, v2, c0, c1, c2);
             }
         }
     }
