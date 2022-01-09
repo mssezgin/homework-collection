@@ -124,6 +124,9 @@ Matrix4 multiplyMatrixByMatrix(const Matrix4& m1, const Matrix4& m2);
 Vec4 multiplyMatrixByVec4(const Matrix4& m, const Vec4& v);
 
 
+void perspectiveDivideVec4(Vec4& vector);
+
+
 Matrix4 transposeMatrix(const Matrix4& matrix);
 
 
@@ -131,6 +134,15 @@ Matrix4 getOrthonormalMatrix(const Vec3& vector);
 
 
 Matrix4 multiplyMatrixTransposeByMatrix(const Matrix4& matrix1, const Matrix4& matrix2);
+
+
+Color addColor(const Color& color1, const Color& color2);
+
+
+Color subtractColor(const Color& color1, const Color& color2);
+
+
+Color multiplyColorByScalar(const Color& color, double scalar);
 
 
 
@@ -342,6 +354,8 @@ public:
 
     void initializeImage(Camera* camera);
     void forwardRenderingPipeline(Camera* camera);
+    void rasterizeLine(const Vec4* v0, const Vec4* v1, const Color* c0, const Color* c1);
+    void drawLine(int x0, int y0, int x1, int y1, int dx, int dy, bool negateY, bool swapXY, const Color* c0, const Color* c1);
     int makeBetweenZeroAnd255(double value);
     void writeImageToPPMFile(Camera* camera);
     void convertPPMToPNG(string ppmFileName, int osType);

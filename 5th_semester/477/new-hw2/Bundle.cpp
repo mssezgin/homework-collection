@@ -198,6 +198,15 @@ Vec4 multiplyMatrixByVec4(const Matrix4& m, const Vec4& v)
     return Vec4(values[0], values[1], values[2], values[3], v.colorId);
 }
 
+void perspectiveDivideVec4(Vec4& vector)
+{
+    double inv_t = 1.0 / vector.t;
+    vector.x *= inv_t;
+    vector.y *= inv_t;
+    vector.z *= inv_t;
+    vector.t = 1.0;
+}
+
 Matrix4 transposeMatrix(const Matrix4& matrix)
 {
     Matrix4 M;
@@ -211,7 +220,11 @@ Matrix4 transposeMatrix(const Matrix4& matrix)
 Matrix4 getOrthonormalMatrix(const Vec3& vector)
 {
     Vec3 u = normalizeVec3(vector);
-    Vec3 v = normalizeVec3(Vec3(-vector.y, vector.x, 0.0, -1));
+    Vec3 v;
+    if (vector.z == 0)
+        v = normalizeVec3(Vec3(-vector.y, vector.x, 0.0, -1));
+    else
+        v = normalizeVec3(Vec3(-vector.z, 0.0, vector.x, -1));
     Vec3 w = crossProductVec3(u, v);
     Matrix4 M;
     M.val[0][0] = u.x; M.val[0][1] = u.y; M.val[0][2] = u.z;
@@ -236,6 +249,33 @@ Matrix4 multiplyMatrixTransposeByMatrix(const Matrix4& matrix1, const Matrix4& m
         }
     }
     return result;
+}
+
+Color addColor(const Color& color1, const Color& color2)
+{
+    return Color(
+        color1.r + color2.r,
+        color1.g + color2.g,
+        color1.b + color2.b
+    );
+}
+
+Color subtractColor(const Color& color1, const Color& color2)
+{
+    return Color(
+        color1.r - color2.r,
+        color1.g - color2.g,
+        color1.b - color2.b
+    );
+}
+
+Color multiplyColorByScalar(const Color& color, double scalar)
+{
+    return Color(
+        color.r * scalar,
+        color.g * scalar,
+        color.b * scalar
+    );
 }
 
 ////////////////////////////////
@@ -514,31 +554,41 @@ Matrix4 Camera::viewportTransformationMatrix() const
 
 Matrix4 Camera::cameraTransformationMatrix() const
 {
-    Matrix4 M;
+    Matrix4 M_cam;
+    M_cam.val[0][0] = u.x; M_cam.val[0][1] = u.y; M_cam.val[0][2] = u.z;
+    M_cam.val[1][0] = v.x; M_cam.val[1][1] = v.y; M_cam.val[1][2] = v.z;
+    M_cam.val[2][0] = w.x; M_cam.val[2][1] = w.y; M_cam.val[2][2] = w.z;
+    M_cam.val[0][3] = -dotProductVec3(u, pos);
+    M_cam.val[1][3] = -dotProductVec3(v, pos);
+    M_cam.val[2][3] = -dotProductVec3(w, pos);
+    M_cam.val[3][3] = 1.0;
+
+    Matrix4 M_proj;
     double inv_dx = 1.0 / (right - left);
     double inv_dy = 1.0 / (top - bottom);
     double inv_dz = 1.0 / (far - near);
     if (projectionType == 0) // orthographic
     {
-        M.val[0][0] = 2.0 * inv_dx;
-        M.val[0][3] = -(right + left) * inv_dx;
-        M.val[1][1] = 2.0 * inv_dy;
-        M.val[1][3] = -(top + bottom) * inv_dy;
-        M.val[2][2] = -2.0 * inv_dz;
-        M.val[2][3] = -(far + near) * inv_dz;
-        M.val[3][3] = 1.0;
+        M_proj.val[0][0] = 2.0 * inv_dx;
+        M_proj.val[0][3] = -(right + left) * inv_dx;
+        M_proj.val[1][1] = 2.0 * inv_dy;
+        M_proj.val[1][3] = -(top + bottom) * inv_dy;
+        M_proj.val[2][2] = -2.0 * inv_dz;
+        M_proj.val[2][3] = -(far + near) * inv_dz;
+        M_proj.val[3][3] = 1.0;
     }
     else // perspective
     {
-        M.val[0][0] = 2.0 * near * inv_dx;
-        M.val[0][2] = (right + left) * inv_dx;
-        M.val[1][1] = 2.0 * near * inv_dy;
-        M.val[1][2] = (top + bottom) * inv_dy;
-        M.val[2][2] = -(far + near) * inv_dz;
-        M.val[2][3] = -2.0 * far * near * inv_dz;
-        M.val[3][2] = -1.0;
+        M_proj.val[0][0] = 2.0 * near * inv_dx;
+        M_proj.val[0][2] = (right + left) * inv_dx;
+        M_proj.val[1][1] = 2.0 * near * inv_dy;
+        M_proj.val[1][2] = (top + bottom) * inv_dy;
+        M_proj.val[2][2] = -(far + near) * inv_dz;
+        M_proj.val[2][3] = -2.0 * far * near * inv_dz;
+        M_proj.val[3][2] = -1.0;
     }
-    return M;
+
+    return multiplyMatrixByMatrix(M_proj, M_cam);
 }
 
 ostream& operator<<(ostream& os, const Camera& c)
@@ -782,6 +832,94 @@ void Triangle::setThirdVertexId(int vid)
 // Scene
 ////////////////////////////////
 
+void Scene::drawLine(int x0, int y0, int x1, int y1, int dx, int dy, bool negateY, bool swapXY, const Color* c0, const Color* c1)
+{
+    int x = x0;
+    int y = y0;
+    int d_dot_e = -dy;
+    int d_dot_ne = d_dot_e + dx;
+    int dot = 2 * d_dot_e + dx;
+    Color c = *c0;
+    Color dc = multiplyColorByScalar(subtractColor(*c1, *c0), 1.0 / dx);
+
+    while (x <= x1)
+    {
+        if (negateY)
+        {
+            if (swapXY)
+                this->image[y][-x] = c;
+            else
+                this->image[x][-y] = c;
+        }
+        else
+        {
+            if (swapXY)
+                this->image[y][x] = c;
+            else
+                this->image[x][y] = c;
+        }
+
+        if (dot < 0)
+        {
+            y++;
+            dot += d_dot_ne;
+        }
+        else
+        {
+            dot += d_dot_e;
+        }
+
+        x++;
+        c = addColor(c, dc);
+    }
+}
+
+void Scene::rasterizeLine(const Vec4* v0, const Vec4* v1, const Color* c0, const Color* c1)
+{
+    int x0 = (int) v0->x;
+    int y0 = (int) v0->y;
+    int x1 = (int) v1->x;
+    int y1 = (int) v1->y;
+    int dx = x1 - x0;
+    int dy = y1 - y0;
+    bool swapXY = false;
+
+    if (dx < 0)
+    {
+        if (dy < 0)
+        {
+            if (dx > dy) // -dx < -dy
+                drawLine(y1, x1, y0, x0, -dy, -dx, false, true, c1, c0); // quadrant 3 - below
+            else // dx <= dy // -dx >= -dy
+                drawLine(x1, y1, x0, y0, -dx, -dy, false, false, c1, c0); // quadrant 3 - above
+        }
+        else // dy >= 0
+        {
+            if (-dx < dy)
+                drawLine(-y1, x1, -y0, x0, dy, -dx, true, true, c1, c0); // quadrant 2 - above
+            else // -dx >= dy
+                drawLine(x1, -y1, x0, -y0, -dx, dy, true, false, c1, c0); // quadrant 2 - below
+        }
+    }
+    else // dx >= 0
+    {
+        if (dy < 0)
+        {
+            if (dx < -dy)
+                drawLine(-y0, x0, -y1, x1, -dy, dx, true, true, c0, c1); // quadrant 4 - below
+            else // dx >= -dy
+                drawLine(x0, -y0, x1, -y1, dx, -dy, true, false, c0, c1); // quadrant 4 - above
+        }
+        else // dy >= 0
+        {
+            if (dx < dy)
+                drawLine(y0, x0, y1, x1, dy, dx, false, true, c0, c1); // quadrant 1 - above
+            else // dx >= dy
+                drawLine(x0, y0, x1, y1, dx, dy, false, false, c0, c1); // quadrant 1 - below
+        }
+    }
+}
+
 /*
     Transformations, clipping, culling, rasterization are done here.
     You may define helper functions.
@@ -789,13 +927,13 @@ void Triangle::setThirdVertexId(int vid)
 void Scene::forwardRenderingPipeline(Camera *camera)
 {
     Matrix4 M_vp = camera->viewportTransformationMatrix();
-    Matrix4 M_cam = camera->cameraTransformationMatrix();
+    Matrix4 M_proj_cam = camera->cameraTransformationMatrix();
 
     for (auto itr = meshes.begin(); itr != meshes.end(); ++itr)
     {
         Mesh& mesh = **itr;
         Matrix4 M_model = mesh.modelingTransformationMatrix(this);
-        Matrix4 M = multiplyMatrixByMatrix(M_cam, M_model);
+        Matrix4 M = multiplyMatrixByMatrix(M_proj_cam, M_model);
 
         for (auto itr = mesh.triangles.begin(); itr != mesh.triangles.end(); ++itr)
         {
@@ -805,6 +943,9 @@ void Scene::forwardRenderingPipeline(Camera *camera)
             Vec4 v0 = multiplyMatrixByVec4(M, *this->vertices[triangle.vertexIds[0] - 1]);
             Vec4 v1 = multiplyMatrixByVec4(M, *this->vertices[triangle.vertexIds[1] - 1]);
             Vec4 v2 = multiplyMatrixByVec4(M, *this->vertices[triangle.vertexIds[2] - 1]);
+            Color& c0 = *this->colorsOfVertices[triangle.vertexIds[0] - 1];
+            Color& c1 = *this->colorsOfVertices[triangle.vertexIds[1] - 1];
+            Color& c2 = *this->colorsOfVertices[triangle.vertexIds[2] - 1];
 
             // TODO: normal transformation
 
@@ -812,13 +953,24 @@ void Scene::forwardRenderingPipeline(Camera *camera)
 
             // TODO: clipping
 
-            // TODO: perspective divide
+            // perspective divide
+            perspectiveDivideVec4(v0);
+            perspectiveDivideVec4(v1);
+            perspectiveDivideVec4(v2);
 
-            // TODO: viewport transformation
+            // viewport transformation
+            v0 = multiplyMatrixByVec4(M_vp, v0);
+            v1 = multiplyMatrixByVec4(M_vp, v1);
+            v2 = multiplyMatrixByVec4(M_vp, v2);
 
             // TODO: rasterization
-
-            // TODO: fragment processing
+            // if (mesh.type == 0) // wireframe
+            // {
+                rasterizeLine(&v0, &v1, &c0, &c1);
+                rasterizeLine(&v1, &v2, &c1, &c2);
+                rasterizeLine(&v2, &v0, &c2, &c0);
+            // }
+            // else; // solid
         }
     }
 }
@@ -1139,14 +1291,14 @@ void Scene::convertPPMToPNG(string ppmFileName, int osType)
     if (osType == 1)
     {
         command = "convert " + ppmFileName + " " + ppmFileName + ".png";
-        system(command.c_str());
+        int x = system(command.c_str());
     }
 
     // call command on Windows
     else if (osType == 2)
     {
         command = "magick convert " + ppmFileName + " " + ppmFileName + ".png";
-        system(command.c_str());
+        int x = system(command.c_str());
     }
 
     // default action - don't do conversion
