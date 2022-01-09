@@ -13,3 +13,7 @@ ppmclean:
 
 pngclean:
 	rm *.png
+
+imgclean:
+	rm *.ppm
+	rm *.png
