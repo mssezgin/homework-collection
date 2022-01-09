@@ -14,6 +14,8 @@
 #define ABS(a) ((a) > 0 ? (a) : -1 * (a))
 #define EPSILON 0.000000001
 
+#define INT_OR_DOUBLE 1
+
 using namespace tinyxml2;
 using namespace std;
 
@@ -145,7 +147,7 @@ Color subtractColor(const Color& color1, const Color& color2);
 Color multiplyColorByScalar(const Color& color, double scalar);
 
 
-std::pair<double, double> minAndMaxOfThree(double a, double b, double c);
+std::pair<int, int> minAndMaxOfThree(int a, int b, int c);
 
 
 
