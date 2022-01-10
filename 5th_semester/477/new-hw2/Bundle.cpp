@@ -975,9 +975,9 @@ void Scene::drawLine(const Camera& camera, int x0, int y0, int x1, int y1, int d
 {
     int x = x0;
     int y = y0;
-    int d_dot_e = -dy;
-    int d_dot_ne = d_dot_e + dx;
-    int dot = 2 * d_dot_e + dx;
+    int dot = 2 * -dy + dx;
+    int d_dot_e = 2 * -dy;
+    int d_dot_ne = 2 * (-dy + dx);
     Color c = c0;
     Color dc = multiplyColorByScalar(subtractColor(c1, c0), 1.0 / dx);
 
