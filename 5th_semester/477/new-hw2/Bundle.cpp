@@ -892,25 +892,28 @@ bool Scene::clipLine(const Camera& camera, std::pair<Vec4, Vec4>& line, std::pai
 {
     double te = 0.0;
     double tl = 1.0;
+    double w_max = (ABS(line.first.t) > ABS(line.second.t)) ? ABS(line.first.t) : ABS(line.second.t);
+    double w_min = -w_max;
     bool visible = false;
     Vec4 d = subtractVec4(line.second, line.first);
     Color dc = subtractColor(colors.second, colors.first);
 
-    if (isLineVisible(d.x, -1 - line.first.x, te, tl))
-        if (isLineVisible(-d.x, line.first.x - 1, te, tl))
-            if (isLineVisible(d.y, -1 - line.first.y, te, tl))
-                if (isLineVisible(-d.y, line.first.y - 1, te, tl))
-                    if (isLineVisible(d.z, -1 - line.first.z, te, tl))
-                        if (isLineVisible(-d.z, line.first.z - 1, te, tl))
+    if (isLineVisible(d.x, w_min - line.first.x, te, tl))
+        if (isLineVisible(-d.x, line.first.x - w_max, te, tl))
+            if (isLineVisible(d.y, w_min - line.first.y, te, tl))
+                if (isLineVisible(-d.y, line.first.y - w_max, te, tl))
+                    if (isLineVisible(d.z, w_min - line.first.z, te, tl))
+                        if (isLineVisible(-d.z, line.first.z - w_max, te, tl))
                         {
                             visible = true;
-                            int x = 0;
-                            if (tl < 1)
+                            if (tl < 1.0)
                             {
+                                double second_t = line.second.t;
                                 line.second = addVec4(line.first, multiplyVec4ByScalar(d, tl));
+                                line.second.t = second_t;
                                 colors.second = addColor(colors.first, multiplyColorByScalar(dc, tl));
                             }
-                            if (te > 0)
+                            if (te > 0.0)
                             {
                                 line.first = addVec4(line.first, multiplyVec4ByScalar(d, te));
                                 colors.first = addColor(colors.first, multiplyColorByScalar(dc, te));
@@ -968,7 +971,7 @@ void Scene::rasterizeTriangle(const Camera& camera, const Vec4& v0, const Vec4& 
     }
 }
 
-void Scene::drawLine(int x0, int y0, int x1, int y1, int dx, int dy, bool negateRow, bool swapXY, const Color* c0, const Color* c1)
+void Scene::drawLine(const Camera& camera, int x0, int y0, int x1, int y1, int dx, int dy, bool negateRow, bool swapXY, const Color* c0, const Color* c1)
 {
     int x = x0;
     int y = y0;
@@ -983,16 +986,28 @@ void Scene::drawLine(int x0, int y0, int x1, int y1, int dx, int dy, bool negate
         if (negateRow)
         {
             if (swapXY)
-                this->image[y][-x] = c;
+            {
+                if (0 <= y && y < camera.horRes && 0 <= -x && -x < camera.verRes)
+                    this->image[y][-x] = c;
+            }
             else
-                this->image[x][-y] = c;
+            {
+                if (0 <= x && x < camera.horRes && 0 <= -y && -y < camera.verRes)
+                    this->image[x][-y] = c;
+            }
         }
         else
         {
             if (swapXY)
-                this->image[y][x] = c;
+            {
+                if (0 <= y && y < camera.horRes && 0 <= x && x < camera.verRes)
+                    this->image[y][x] = c;
+            }
             else
-                this->image[x][y] = c;
+            {
+                if (0 <= x && x < camera.horRes && 0 <= y && y < camera.verRes)
+                    this->image[x][y] = c;
+            }
         }
 
         if (dot < 0)
@@ -1010,7 +1025,7 @@ void Scene::drawLine(int x0, int y0, int x1, int y1, int dx, int dy, bool negate
     }
 }
 
-void Scene::rasterizeLine(const Vec4* v0, const Vec4* v1, const Color* c0, const Color* c1)
+void Scene::rasterizeLine(const Camera& camera, const Vec4* v0, const Vec4* v1, const Color* c0, const Color* c1)
 {
     int x0 = (int) (v0->x);
     int y0 = (int) (v0->y);
@@ -1025,16 +1040,16 @@ void Scene::rasterizeLine(const Vec4* v0, const Vec4* v1, const Color* c0, const
         if (dy < 0)
         {
             if (dx > dy) // -dx < -dy
-                drawLine(y1, x1, y0, x0, -dy, -dx, false, true, c1, c0); // quadrant 3 - below
+                drawLine(camera, y1, x1, y0, x0, -dy, -dx, false, true, c1, c0); // quadrant 3 - below
             else // dx <= dy // -dx >= -dy
-                drawLine(x1, y1, x0, y0, -dx, -dy, false, false, c1, c0); // quadrant 3 - above
+                drawLine(camera, x1, y1, x0, y0, -dx, -dy, false, false, c1, c0); // quadrant 3 - above
         }
         else // dy >= 0
         {
             if (-dx < dy)
-                drawLine(-y1, x1, -y0, x0, dy, -dx, true, true, c1, c0); // quadrant 2 - above
+                drawLine(camera, -y1, x1, -y0, x0, dy, -dx, true, true, c1, c0); // quadrant 2 - above
             else // -dx >= dy
-                drawLine(x1, -y1, x0, -y0, -dx, dy, true, false, c1, c0); // quadrant 2 - below
+                drawLine(camera, x1, -y1, x0, -y0, -dx, dy, true, false, c1, c0); // quadrant 2 - below
         }
     }
     else // dx >= 0
@@ -1042,16 +1057,16 @@ void Scene::rasterizeLine(const Vec4* v0, const Vec4* v1, const Color* c0, const
         if (dy < 0)
         {
             if (dx < -dy)
-                drawLine(-y0, x0, -y1, x1, -dy, dx, true, true, c0, c1); // quadrant 4 - below
+                drawLine(camera, -y0, x0, -y1, x1, -dy, dx, true, true, c0, c1); // quadrant 4 - below
             else // dx >= -dy
-                drawLine(x0, -y0, x1, -y1, dx, -dy, true, false, c0, c1); // quadrant 4 - above
+                drawLine(camera, x0, -y0, x1, -y1, dx, -dy, true, false, c0, c1); // quadrant 4 - above
         }
         else // dy >= 0
         {
             if (dx < dy)
-                drawLine(y0, x0, y1, x1, dy, dx, false, true, c0, c1); // quadrant 1 - above
+                drawLine(camera, y0, x0, y1, x1, dy, dx, false, true, c0, c1); // quadrant 1 - above
             else // dx >= dy
-                drawLine(x0, y0, x1, y1, dx, dy, false, false, c0, c1); // quadrant 1 - below
+                drawLine(camera, x0, y0, x1, y1, dx, dy, false, false, c0, c1); // quadrant 1 - below
         }
     }
 }
@@ -1095,32 +1110,32 @@ void Scene::forwardRenderingPipeline(Camera *camera)
                 std::pair<Color, Color> c01(c0, c1);
                 std::pair<Color, Color> c12(c1, c2);
                 std::pair<Color, Color> c20(c2, c0);
-                perspectiveDivideVec4(v01.first);
-                perspectiveDivideVec4(v01.second);
-                perspectiveDivideVec4(v12.first);
-                perspectiveDivideVec4(v12.second);
-                perspectiveDivideVec4(v20.first);
-                perspectiveDivideVec4(v20.second);
 
                 if (clipLine(*camera, v01, c01))
                 {
+                    perspectiveDivideVec4(v01.first);
+                    perspectiveDivideVec4(v01.second);
                     v01.first  = multiplyMatrixByVec4(M_vp, v01.first);
                     v01.second = multiplyMatrixByVec4(M_vp, v01.second);
-                    rasterizeLine(&v01.first, &v01.second, &c01.first, &c01.second);
+                    rasterizeLine(*camera, &v01.first, &v01.second, &c01.first, &c01.second);
                 }
 
                 if (clipLine(*camera, v12, c12))
                 {
+                    perspectiveDivideVec4(v12.first);
+                    perspectiveDivideVec4(v12.second);
                     v12.first  = multiplyMatrixByVec4(M_vp, v12.first);
                     v12.second = multiplyMatrixByVec4(M_vp, v12.second);
-                    rasterizeLine(&v12.first, &v12.second, &c12.first, &c12.second);
+                    rasterizeLine(*camera, &v12.first, &v12.second, &c12.first, &c12.second);
                 }
 
                 if (clipLine(*camera, v20, c20))
                 {
+                    perspectiveDivideVec4(v20.first);
+                    perspectiveDivideVec4(v20.second);
                     v20.first  = multiplyMatrixByVec4(M_vp, v20.first);
                     v20.second = multiplyMatrixByVec4(M_vp, v20.second);
-                    rasterizeLine(&v20.first, &v20.second, &c20.first, &c20.second);
+                    rasterizeLine(*camera, &v20.first, &v20.second, &c20.first, &c20.second);
                 }
             }
             else // solid
