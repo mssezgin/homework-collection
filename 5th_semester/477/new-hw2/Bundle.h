@@ -359,8 +359,8 @@ public:
 
     void initializeImage(Camera* camera);
     void forwardRenderingPipeline(Camera* camera);
-    void rasterizeLine(const Camera& camera, const Vec4* v0, const Vec4* v1, const Color* c0, const Color* c1);
-    void drawLine(const Camera& camera, int x0, int y0, int x1, int y1, int dx, int dy, bool negateRow, bool swapXY, const Color* c0, const Color* c1);
+    void rasterizeLine(const Camera& camera, const Vec4& v0, const Vec4& v1, const Color& c0, const Color& c1);
+    void drawLine(const Camera& camera, int x0, int y0, int x1, int y1, int dx, int dy, bool negateRow, bool swapXY, const Color& c0, const Color& c1);
     void rasterizeTriangle(const Camera& camera, const Vec4& v0, const Vec4& v1, const Vec4& v2, const Color& c0, const Color& c1, const Color& c2);
     bool isBackFaceCulled(const Vec4& v0, const Vec4& v1, const Vec4& v2);
     bool clipLine(const Camera& camera, std::pair<Vec4, Vec4>& line, std::pair<Color, Color>& colors);

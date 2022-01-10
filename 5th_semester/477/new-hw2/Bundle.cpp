@@ -971,15 +971,15 @@ void Scene::rasterizeTriangle(const Camera& camera, const Vec4& v0, const Vec4& 
     }
 }
 
-void Scene::drawLine(const Camera& camera, int x0, int y0, int x1, int y1, int dx, int dy, bool negateRow, bool swapXY, const Color* c0, const Color* c1)
+void Scene::drawLine(const Camera& camera, int x0, int y0, int x1, int y1, int dx, int dy, bool negateRow, bool swapXY, const Color& c0, const Color& c1)
 {
     int x = x0;
     int y = y0;
     int d_dot_e = -dy;
     int d_dot_ne = d_dot_e + dx;
     int dot = 2 * d_dot_e + dx;
-    Color c = *c0;
-    Color dc = multiplyColorByScalar(subtractColor(*c1, *c0), 1.0 / dx);
+    Color c = c0;
+    Color dc = multiplyColorByScalar(subtractColor(c1, c0), 1.0 / dx);
 
     while (x <= x1)
     {
@@ -1025,12 +1025,12 @@ void Scene::drawLine(const Camera& camera, int x0, int y0, int x1, int y1, int d
     }
 }
 
-void Scene::rasterizeLine(const Camera& camera, const Vec4* v0, const Vec4* v1, const Color* c0, const Color* c1)
+void Scene::rasterizeLine(const Camera& camera, const Vec4& v0, const Vec4& v1, const Color& c0, const Color& c1)
 {
-    int x0 = (int) (v0->x);
-    int y0 = (int) (v0->y);
-    int x1 = (int) (v1->x);
-    int y1 = (int) (v1->y);
+    int x0 = (int) (v0.x);
+    int y0 = (int) (v0.y);
+    int x1 = (int) (v1.x);
+    int y1 = (int) (v1.y);
     int dx = x1 - x0;
     int dy = y1 - y0;
     bool swapXY = false;
@@ -1117,7 +1117,7 @@ void Scene::forwardRenderingPipeline(Camera *camera)
                     perspectiveDivideVec4(v01.second);
                     v01.first  = multiplyMatrixByVec4(M_vp, v01.first);
                     v01.second = multiplyMatrixByVec4(M_vp, v01.second);
-                    rasterizeLine(*camera, &v01.first, &v01.second, &c01.first, &c01.second);
+                    rasterizeLine(*camera, v01.first, v01.second, c01.first, c01.second);
                 }
 
                 if (clipLine(*camera, v12, c12))
@@ -1126,7 +1126,7 @@ void Scene::forwardRenderingPipeline(Camera *camera)
                     perspectiveDivideVec4(v12.second);
                     v12.first  = multiplyMatrixByVec4(M_vp, v12.first);
                     v12.second = multiplyMatrixByVec4(M_vp, v12.second);
-                    rasterizeLine(*camera, &v12.first, &v12.second, &c12.first, &c12.second);
+                    rasterizeLine(*camera, v12.first, v12.second, c12.first, c12.second);
                 }
 
                 if (clipLine(*camera, v20, c20))
@@ -1135,7 +1135,7 @@ void Scene::forwardRenderingPipeline(Camera *camera)
                     perspectiveDivideVec4(v20.second);
                     v20.first  = multiplyMatrixByVec4(M_vp, v20.first);
                     v20.second = multiplyMatrixByVec4(M_vp, v20.second);
-                    rasterizeLine(*camera, &v20.first, &v20.second, &c20.first, &c20.second);
+                    rasterizeLine(*camera, v20.first, v20.second, c20.first, c20.second);
                 }
             }
             else // solid
