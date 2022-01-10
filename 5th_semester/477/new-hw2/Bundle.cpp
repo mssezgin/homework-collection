@@ -955,9 +955,9 @@ void Scene::rasterizeTriangle(const Camera& camera, const Vec4& v0, const Vec4& 
     if (y_max >= camera.verRes)
         y_max = camera.verRes - 1;
 
-    for (int y = y_min; y <= y_max; y++)
+    for (int y = y_min; y < y_max; y++)
     {
-        for (int x = x_min; x <= x_max; x++)
+        for (int x = x_min; x < x_max; x++)
         {
             alpha = (x * (y1 - y2) + y * (x2 - x1) + x1 * y2 - y1 * x2) * inv_denum; // f_12(x,y) / f_12(x_0,y_0)
             beta  = (x * (y2 - y0) + y * (x0 - x2) + x2 * y0 - y2 * x0) * inv_denum; // f_20(x,y) / f_20(x_1,y_1)
