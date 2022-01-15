@@ -12,8 +12,8 @@
 team_t team = {
     "Team",                     /* Team name */
 
-    "Student Name",             /* First member full name */
-    "eXXXXXXX",                 /* First member id */
+    "Mustafa Sezgin",           /* First member full name */
+    "e2380863",                 /* First member id */
 
     "",                         /* Second member full name (leave blank if none) */
     "",                         /* Second member id (leave blank if none) */
@@ -36,11 +36,11 @@ team_t team = {
 char naive_fusion_descr[] = "naive_fusion: Naive baseline exposure fusion";
 void naive_fusion(int dim, int *img, int *w, int *dst) {
   
-    int i, j, k; 
-    for(k = 0; k < 4; k++){
-        for(i = 0; i < dim; i++) {
-            for(j = 0; j < dim; j++) {
-                    dst[i*dim+j] += w[k*dim*dim+i*dim+j] * img[k*dim*dim+i*dim+j];
+    int i, j, k;
+    for (k = 0; k < 4; k++) {
+        for (i = 0; i < dim; i++) {
+            for (j = 0; j < dim; j++) {
+                dst[i*dim+j] += w[k*dim*dim+i*dim+j] * img[k*dim*dim+i*dim+j];
             }
         }
     }
@@ -51,9 +51,18 @@ void naive_fusion(int dim, int *img, int *w, int *dst) {
  * IMPORTANT: This is the version you will be graded on
  */
 char fusion_descr[] = "fusion: Current working version";
-void fusion(int dim, int *img, int *w, int *dst) 
-{
-    naive_fusion(dim, img, w, dst);
+void fusion(int dim, int *img, int *w, int *dst) {
+
+    int i, k;
+    int dim2 = dim * dim;
+    int* dst0;
+
+    for (k = 0; k < 4; k++) {
+        for (i = 0, dst0 = dst; i < dim2; i += 2, dst0 += 2, w += 2, img += 2) {
+            *dst0 += *w * *img;
+            *(dst0+1) += *(w+1) * *(img+1);
+        }
+    }
 }
 
 /*********************************************************************
@@ -64,11 +73,9 @@ void fusion(int dim, int *img, int *w, int *dst)
  *     registered test function.  
  *********************************************************************/
 
-void register_fusion_functions() 
-{
-    add_fusion_function(&naive_fusion, naive_fusion_descr);  
-    add_fusion_function(&fusion, fusion_descr);  
-    /* ... Register additional test functions here */
+void register_fusion_functions() {
+    add_fusion_function(&naive_fusion, naive_fusion_descr);
+    add_fusion_function(&fusion, fusion_descr);
 }
 
 /***************************
@@ -82,15 +89,15 @@ void register_fusion_functions()
 /* 
  * naive_blur - The naive baseline version of Gussian blur
  */
-char naive_blur_descr[] = "naive_blur The naive baseline version of Gaussian blur";
+char naive_blur_descr[] = "naive_blur: The naive baseline version of Gaussian blur";
 void naive_blur(int dim, float *img, float *flt, float *dst) {
   
     int i, j, k, l;
 
-    for(i = 0; i < dim-5+1; i++){
-        for(j = 0; j < dim-5+1; j++) {
-            for(k = 0; k < 5; k++){
-                for(l = 0; l < 5; l++) {
+    for (i = 0; i < dim-5+1; i++) {
+        for (j = 0; j < dim-5+1; j++) {
+            for (k = 0; k < 5; k++) {
+                for (l = 0; l < 5; l++) {
                     dst[i*dim+j] = dst[i*dim+j] + img[(i+k)*dim+j+l] * flt[k*dim+l];
                 }
             }
@@ -103,8 +110,7 @@ void naive_blur(int dim, float *img, float *flt, float *dst) {
  * IMPORTANT: This is the version you will be graded on
  */
 char blur_descr[] = "blur: Current working version";
-void blur(int dim, float *img, float *flt, float *dst) 
-{
+void blur(int dim, float *img, float *flt, float *dst) {
     naive_blur(dim, img, flt, dst);
 }
 
@@ -116,8 +122,7 @@ void blur(int dim, float *img, float *flt, float *dst)
  *     registered test function.  
  *********************************************************************/
 
-void register_blur_functions() 
-{
+void register_blur_functions() {
     add_blur_function(&naive_blur, naive_blur_descr); 
     add_blur_function(&blur, blur_descr);
     /* ... Register additional test functions here */
