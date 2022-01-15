@@ -50,7 +50,7 @@ void naive_fusion(int dim, int *img, int *w, int *dst) {
  * fusion - Your current working version of fusion
  * IMPORTANT: This is the version you will be graded on
  */
-char fusion_descr[] = "fusion: Current working version";
+char fusion_descr[] = "fusion: 2 by 1 loop unrolling, one loop from 0 to dim^2";
 void fusion(int dim, int *img, int *w, int *dst) {
 
     int i, k;
@@ -109,9 +109,40 @@ void naive_blur(int dim, float *img, float *flt, float *dst) {
  * blur - Your current working version of Gaussian blur
  * IMPORTANT: This is the version you will be graded on
  */
-char blur_descr[] = "blur: Current working version";
+char blur_descr[] = "blur: 4 by 1 loop unrolling, no i,j,k,l, pointers instead";
 void blur(int dim, float *img, float *flt, float *dst) {
-    naive_blur(dim, img, flt, dst);
+
+    int dim_dst = dim - 4;
+
+    int kdim, k5dim;
+    for (kdim = 0, k5dim = dim * 5; kdim < k5dim; kdim += dim) {
+
+        int kdim_l, kdim_5;
+        for (kdim_l = kdim, kdim_5 = kdim + 5; kdim_l < kdim_5; kdim_l++) {
+
+            float flt_kl = flt[kdim_l];
+
+            float* dst_ij = dst;
+            float* dst_in = dst + dim_dst;
+            float* dst_n0 = dst + dim * dim_dst;
+            float* img_ij = img + kdim_l;
+
+            while (dst_ij < dst_n0) {
+
+                while (dst_ij < dst_in) {
+
+                    *dst_ij++ += *img_ij++ * flt_kl;
+                    *dst_ij++ += *img_ij++ * flt_kl;
+                    *dst_ij++ += *img_ij++ * flt_kl;
+                    *dst_ij++ += *img_ij++ * flt_kl;
+                }
+
+                dst_ij += 4;
+                dst_in += dim;
+                img_ij += 4;
+            }
+        }
+    }
 }
 
 /*********************************************************************
@@ -125,6 +156,4 @@ void blur(int dim, float *img, float *flt, float *dst) {
 void register_blur_functions() {
     add_blur_function(&naive_blur, naive_blur_descr); 
     add_blur_function(&blur, blur_descr);
-    /* ... Register additional test functions here */
 }
-
