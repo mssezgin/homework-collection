@@ -35,7 +35,7 @@ team_t team = {
  */
 char naive_fusion_descr[] = "naive_fusion: Naive baseline exposure fusion";
 void naive_fusion(int dim, int *img, int *w, int *dst) {
-  
+
     int i, j, k;
     for (k = 0; k < 4; k++) {
         for (i = 0; i < dim; i++) {
@@ -109,7 +109,7 @@ void naive_blur(int dim, float *img, float *flt, float *dst) {
  * blur - Your current working version of Gaussian blur
  * IMPORTANT: This is the version you will be graded on
  */
-char blur_descr[] = "blur: 4 by 1 loop unrolling, no i,j,k,l, pointers instead";
+char blur_descr[] = "blur: img[i][j..j+4] at the same iteration";
 void blur(int dim, float *img, float *flt, float *dst) {
 
     int dim_dst = dim - 4;
@@ -117,30 +117,35 @@ void blur(int dim, float *img, float *flt, float *dst) {
     int kdim, k5dim;
     for (kdim = 0, k5dim = dim * 5; kdim < k5dim; kdim += dim) {
 
-        int kdim_l, kdim_5;
-        for (kdim_l = kdim, kdim_5 = kdim + 5; kdim_l < kdim_5; kdim_l++) {
+        float flt_k0 = flt[kdim];
+        float flt_k1 = flt[kdim + 1];
+        float flt_k2 = flt[kdim + 2];
+        float flt_k3 = flt[kdim + 3];
+        float flt_k4 = flt[kdim + 4];
 
-            float flt_kl = flt[kdim_l];
+        float* dst_ij = dst;
+        float* dst_in = dst + dim_dst;
+        float* dst_n0 = dst + dim * dim_dst;
+        float* img_ij = img + kdim;
 
-            float* dst_ij = dst;
-            float* dst_in = dst + dim_dst;
-            float* dst_n0 = dst + dim * dim_dst;
-            float* img_ij = img + kdim_l;
+        while (dst_ij < dst_n0) {
 
-            while (dst_ij < dst_n0) {
+            while (dst_ij < dst_in) {
 
-                while (dst_ij < dst_in) {
-
-                    *dst_ij++ += *img_ij++ * flt_kl;
-                    *dst_ij++ += *img_ij++ * flt_kl;
-                    *dst_ij++ += *img_ij++ * flt_kl;
-                    *dst_ij++ += *img_ij++ * flt_kl;
-                }
-
-                dst_ij += 4;
-                dst_in += dim;
-                img_ij += 4;
+                *dst_ij +=
+                    *img_ij       * flt_k0 +
+                    *(img_ij + 1) * flt_k1 +
+                    *(img_ij + 2) * flt_k2 +
+                    *(img_ij + 3) * flt_k3 +
+                    *(img_ij + 4) * flt_k4;
+                
+                dst_ij++;
+                img_ij++;
             }
+
+            dst_ij += 4;
+            dst_in += dim;
+            img_ij += 4;
         }
     }
 }
