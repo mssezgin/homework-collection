@@ -109,7 +109,7 @@ void naive_blur(int dim, float *img, float *flt, float *dst) {
  * blur - Your current working version of Gaussian blur
  * IMPORTANT: This is the version you will be graded on
  */
-char blur_descr[] = "blur: img[i][j..j+4] at the same iteration";
+char blur_descr[] = "blur: 4x1 loop unrolling, one row at the same time";
 void blur(int dim, float *img, float *flt, float *dst) {
 
     int dim_dst = dim - 4;
@@ -138,9 +138,30 @@ void blur(int dim, float *img, float *flt, float *dst) {
                     *(img_ij + 2) * flt_k2 +
                     *(img_ij + 3) * flt_k3 +
                     *(img_ij + 4) * flt_k4;
-                
-                dst_ij++;
-                img_ij++;
+
+                *(dst_ij + 1) +=
+                    *(img_ij + 1) * flt_k0 +
+                    *(img_ij + 2) * flt_k1 +
+                    *(img_ij + 3) * flt_k2 +
+                    *(img_ij + 4) * flt_k3 +
+                    *(img_ij + 5) * flt_k4;
+
+                *(dst_ij + 2) +=
+                    *(img_ij + 2) * flt_k0 +
+                    *(img_ij + 3) * flt_k1 +
+                    *(img_ij + 4) * flt_k2 +
+                    *(img_ij + 5) * flt_k3 +
+                    *(img_ij + 6) * flt_k4;
+
+                *(dst_ij + 3) +=
+                    *(img_ij + 3) * flt_k0 +
+                    *(img_ij + 4) * flt_k1 +
+                    *(img_ij + 5) * flt_k2 +
+                    *(img_ij + 6) * flt_k3 +
+                    *(img_ij + 7) * flt_k4;
+
+                dst_ij += 4;
+                img_ij += 4;
             }
 
             dst_ij += 4;
