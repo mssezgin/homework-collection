@@ -50,17 +50,24 @@ void naive_fusion(int dim, int *img, int *w, int *dst) {
  * fusion - Your current working version of fusion
  * IMPORTANT: This is the version you will be graded on
  */
-char fusion_descr[] = "fusion: 2 by 1 loop unrolling, one loop from 0 to dim^2";
+char fusion_descr[] = "fusion: 8 by 1 loop unrolling";
 void fusion(int dim, int *img, int *w, int *dst) {
 
-    int i, k;
     int dim2 = dim * dim;
-    int* dst0;
+    int* dst_ij;
+    int* dst_end = dst + dim2;
+    int* img_end = img + (dim2 << 2);
 
-    for (k = 0; k < 4; k++) {
-        for (i = 0, dst0 = dst; i < dim2; i += 2, dst0 += 2, w += 2, img += 2) {
-            *dst0 += *w * *img;
-            *(dst0+1) += *(w+1) * *(img+1);
+    while (img < img_end) {
+        for (dst_ij = dst; dst_ij < dst_end; dst_ij += 8, w += 8, img += 8) {
+            *dst_ij += *w * *img;
+            *(dst_ij + 1) += *(w + 1) * *(img + 1);
+            *(dst_ij + 2) += *(w + 2) * *(img + 2);
+            *(dst_ij + 3) += *(w + 3) * *(img + 3);
+            *(dst_ij + 4) += *(w + 4) * *(img + 4);
+            *(dst_ij + 5) += *(w + 5) * *(img + 5);
+            *(dst_ij + 6) += *(w + 6) * *(img + 6);
+            *(dst_ij + 7) += *(w + 7) * *(img + 7);
         }
     }
 }
