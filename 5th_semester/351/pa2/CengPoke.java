@@ -36,4 +36,16 @@ public class CengPoke {
     }
 
     // Own Methods
+
+    public void print(String indent, int maxGlobalDepth) {
+        System.out.print("{\n");
+        String hash = Integer.toBinaryString(pokeKey % CengPokeKeeper.getHashMod());
+        hash = "0".repeat(maxGlobalDepth - hash.length()) + hash;
+        System.out.print(indent + "\t\"hash\": " + hash + ",\n");
+        System.out.print(indent + "\t\"pokeKey\": " + pokeKey + ",\n");
+        System.out.print(indent + "\t\"pokeName\": " + pokeName + ",\n");
+        System.out.print(indent + "\t\"pokePower\": " + pokePower + ",\n");
+        System.out.print(indent + "\t\"pokeType\": " + pokeType + "\n");
+        System.out.print(indent + "}");
+    }
 }
