@@ -35,11 +35,12 @@ void EclipseMap::Render(const char *coloredTexturePath, const char *greyTextureP
 
     initMoonColoredTexture(moonTexturePath, moonShaderID);
 
-    
     // TODO: Set moonVertices
-    
+    setUnitSphereVertices(moonVertices, moonVertexSize, moonIndices, moonIndexSize);
+
     // TODO: Configure Buffers
-    
+    initVertexBuffers(moonVertices, moonIndices, moonVAO, moonVBO, moonEBO);
+
 
     // World commands
     // Load shaders
@@ -49,9 +50,11 @@ void EclipseMap::Render(const char *coloredTexturePath, const char *greyTextureP
     initGreyTexture(greyTexturePath, worldShaderID);
 
     // TODO: Set worldVertices
-    
+    setUnitSphereVertices(worldVertices, worldVertexSize, worldIndices, worldIndexSize);
+
     // TODO: Configure Buffers
-    
+    initVertexBuffers(worldVertices, worldIndices, VAO, VBO, EBO);
+
     // Enable depth test
     glEnable(GL_DEPTH_TEST);
 
@@ -65,40 +68,80 @@ void EclipseMap::Render(const char *coloredTexturePath, const char *greyTextureP
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
 
-
         // TODO: Handle key presses
         handleKeyPress(window);
 
         // TODO: Manipulate rotation variables
-        
+        static float rotationAngle = 0.0;
+        rotationAngle += 0.02;
+
         // TODO: Bind textures
-        
+
         // TODO: Use moonShaderID program
-        
+        glUseProgram(moonShaderID);
+
         // TODO: Update camera at every frame
-        
+        projectionMatrix = glm::perspective((float) (projectionAngle / 180.0 * PI), aspectRatio, near, far);
+        viewMatrix = glm::lookAt(cameraPosition, cameraPosition + cameraDirection, cameraUp);
+
         // TODO: Update uniform variables at every frame
-        
-        // TODO: Bind moon vertex array        
+        moonModelMatrix = glm::translate(glm::mat4(1.0f), moonCenter);
+        moonModelMatrix = glm::rotate(moonModelMatrix, rotationAngle, glm::vec3(0.0f, 0.0f, 1.0f));
+        moonModelMatrix = glm::scale(moonModelMatrix, glm::vec3(moonRadius, moonRadius, moonRadius));
+
+        glUniformMatrix4fv(glGetUniformLocation(moonShaderID, "ProjectionMatrix"), 1, GL_FALSE, glm::value_ptr(projectionMatrix));
+        glUniformMatrix4fv(glGetUniformLocation(moonShaderID, "ViewMatrix"), 1, GL_FALSE, glm::value_ptr(viewMatrix));
+        glUniformMatrix4fv(glGetUniformLocation(moonShaderID, "ModelMatrix"), 1, GL_FALSE, glm::value_ptr(moonModelMatrix));
+
+        // TODO: Bind moon vertex array
+        glBindVertexArray(moonVAO);
+        glBindBuffer(GL_ARRAY_BUFFER, moonVBO);
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, moonEBO);
+        glEnableVertexAttribArray(0);
+        glEnableVertexAttribArray(1);
+        glEnableVertexAttribArray(2);
+        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (GLvoid*) 0);
+        glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (GLvoid*) (3 * sizeof(float)));
+        glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (GLvoid*) (6 * sizeof(float)));
 
         // TODO: Draw moon object
-        
+        glDrawElements(GL_TRIANGLES, moonIndexSize, GL_UNSIGNED_INT, 0);
+
         /*************************/
 
         // TODO: Use worldShaderID program
-        
+        glUseProgram(worldShaderID);
+
         // TODO: Update camera at every frame
 
         // TODO: Update uniform variables at every frame
-        
+        worldModelMatrix = glm::translate(glm::mat4(1.0f), center);
+        worldModelMatrix = glm::rotate(worldModelMatrix, rotationAngle, glm::vec3(0.0f, 0.0f, 1.0f));
+        worldModelMatrix = glm::scale(worldModelMatrix, glm::vec3(radius, radius, radius));
+
+        glUniformMatrix4fv(glGetUniformLocation(worldShaderID, "ProjectionMatrix"), 1, GL_FALSE, glm::value_ptr(projectionMatrix));
+        glUniformMatrix4fv(glGetUniformLocation(worldShaderID, "ViewMatrix"), 1, GL_FALSE, glm::value_ptr(viewMatrix));
+        glUniformMatrix4fv(glGetUniformLocation(worldShaderID, "ModelMatrix"), 1, GL_FALSE, glm::value_ptr(worldModelMatrix));
+
         // TODO: Bind world vertex array
-        
+        glBindVertexArray(VAO);
+        glBindBuffer(GL_ARRAY_BUFFER, VBO);
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+        glEnableVertexAttribArray(0);
+        glEnableVertexAttribArray(1);
+        glEnableVertexAttribArray(2);
+        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (GLvoid*) 0);
+        glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (GLvoid*) (3 * sizeof(float)));
+        glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (GLvoid*) (6 * sizeof(float)));
+
         // TODO: Draw world object
-        
+        glDrawElements(GL_TRIANGLES, worldIndexSize, GL_UNSIGNED_INT, 0);
+
 
         // Swap buffers and poll events
         glfwSwapBuffers(window);
         glfwPollEvents();
+
     } while (!glfwWindowShouldClose(window));
 
     // Delete buffers
@@ -106,12 +149,12 @@ void EclipseMap::Render(const char *coloredTexturePath, const char *greyTextureP
     glDeleteBuffers(1, &moonVBO);
     glDeleteBuffers(1, &moonEBO);
 
-    
+
     // Delete buffers
     glDeleteBuffers(1, &VAO);
     glDeleteBuffers(1, &VBO);
     glDeleteBuffers(1, &EBO);
-   
+
     glDeleteProgram(moonShaderID);
     glDeleteProgram(worldShaderID);
 
@@ -120,10 +163,15 @@ void EclipseMap::Render(const char *coloredTexturePath, const char *greyTextureP
 }
 
 void EclipseMap::handleKeyPress(GLFWwindow *window) {
+
     if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS) {
         glfwSetWindowShouldClose(window, GLFW_TRUE);
     }
 
+    if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) {
+        static unsigned int count = 0;
+        std::cout << "W pressed " << count++ << "\n";
+    }
 }
 
 GLFWwindow *EclipseMap::openWindow(const char *windowName, int width, int height) {
@@ -402,4 +450,124 @@ void EclipseMap::initMoonColoredTexture(const char *filename, GLuint shader) {
     free(raw_image);
     fclose(infile);
 
+}
+
+void EclipseMap::setUnitSphereVertices(std::vector<float>& vertices, unsigned int& vertexSize, std::vector<unsigned int>& indices, unsigned int& indexSize) {
+
+    unsigned int vSize = (verticalSplitCount - 1) * horizontalSplitCount + 2;
+    unsigned int tSize = (verticalSplitCount - 1) * horizontalSplitCount * 2;
+    vertex* v = new vertex[vSize];
+    triangle* t = new triangle[tSize];
+    int index;
+
+
+    // set vertices
+    index = 0;
+
+    // north pole
+    v[index++] = vertex(glm::vec3(0, 0, 1), glm::vec3(0, 0, 1), glm::vec2(0, 0));
+
+    // latitudes and longitudes
+    for (int verticalStep = 1; verticalStep < verticalSplitCount; verticalStep++) {
+        float beta = PI * ((float) verticalStep / (float) verticalSplitCount);
+        float sinBeta = sin(beta);
+        float cosBeta = cos(beta);
+
+        for (int horizontalStep = 0; horizontalStep < horizontalSplitCount; horizontalStep++) {
+            float alpha = 2 * PI * ((float) horizontalStep / (float) horizontalSplitCount);
+            glm::vec3 p(sinBeta * cos(alpha), sinBeta * sin(alpha), cosBeta);
+            v[index++] = vertex(p, p, glm::vec2(0, 0));
+        }
+    }
+
+    // south pole
+    v[index++] = vertex(glm::vec3(0, 0, -1), glm::vec3(0, 0, -1), glm::vec2(0, 0));
+
+
+    // set indices
+    index = 0;
+
+    // north pole
+    for (int i = 1; i < horizontalSplitCount; i++) {
+        t[index++] = triangle(0, i, i + 1);
+    }
+    t[index++] = triangle(0, horizontalSplitCount, 1);
+
+    // latitude and longitude triangle vertex indices
+    for (int j = 1; j < verticalSplitCount - 1; j++) {
+        int m = (j - 1) * horizontalSplitCount; // -1 + index of first vertex of above latitude
+        int n = j * horizontalSplitCount; // -1 + index of first vertex of bottom latitude
+
+        for (int i = 1; i < horizontalSplitCount; i++) { // i = 1 tolerates the offset (-1) of m and n
+            t[index++] = triangle(m + i, n + i, n + i + 1);
+            t[index++] = triangle(n + i + 1, m + i + 1, m + i);
+        }
+        t[index++] = triangle(m + horizontalSplitCount, n + horizontalSplitCount, n + 1);
+        t[index++] = triangle(n + 1, m + 1, m + horizontalSplitCount);
+    }
+
+    // south pole
+    int s = vSize - 1 - horizontalSplitCount;
+    for (int i = 1; i < horizontalSplitCount; i++) {
+        t[index++] = triangle(s + i, vSize - 1, s + i + 1);
+    }
+    t[index++] = triangle(s + horizontalSplitCount, vSize - 1, s + 1);
+
+
+    // copy v into vertices
+    for (int i = 0; i < vSize; i++) {
+        vertices.push_back(v[i].position.x);
+        vertices.push_back(v[i].position.y);
+        vertices.push_back(v[i].position.z);
+        vertices.push_back(v[i].normal.x);
+        vertices.push_back(v[i].normal.y);
+        vertices.push_back(v[i].normal.z);
+        vertices.push_back(v[i].texture.x);
+        vertices.push_back(v[i].texture.y);
+    }
+
+    // copy t into indices
+    for (int i = 0; i < tSize; i++) {
+        indices.push_back(t[i].vertex1);
+        indices.push_back(t[i].vertex2);
+        indices.push_back(t[i].vertex3);
+    }
+
+    std::cout << "vSize = " << vSize << ", index = " << index << std::endl;
+    std::cout << "vertices.size() = " << vertices.size() << std::endl;
+    std::cout << "tSize = " << tSize << ", index = " << index << std::endl;
+    std::cout << "indices.size() = " << indices.size() << std::endl;
+    vertexSize = vertices.size();
+    indexSize = indices.size();
+    delete[] v;
+    delete[] t;
+}
+
+void EclipseMap::initVertexBuffers(std::vector<float>& vertices, std::vector<unsigned int>& indices, unsigned int& VAO, unsigned int& VBO, unsigned int& EBO) {
+
+    glGenVertexArrays(1, &VAO);
+    glBindVertexArray(VAO);
+
+    glEnableVertexAttribArray(0);
+    glEnableVertexAttribArray(1);
+    glEnableVertexAttribArray(2);
+
+    glGenBuffers(1, &VBO);
+    glGenBuffers(1, &EBO);
+
+    glBindBuffer(GL_ARRAY_BUFFER, VBO);
+    glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(float), &vertices[0], GL_STATIC_DRAW);
+
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(int), &indices[0], GL_STATIC_DRAW);
+
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (GLvoid*) 0);
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (GLvoid*) (3 * sizeof(float)));
+    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (GLvoid*) (6 * sizeof(float)));
+
+    // glBindBuffer(GL_ARRAY_BUFFER, 0);
+    // glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+
+    vertices.clear();
+    indices.clear();
 }

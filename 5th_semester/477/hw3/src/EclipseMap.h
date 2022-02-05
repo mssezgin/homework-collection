@@ -50,6 +50,8 @@ private:
     glm::vec3 cameraUp = cameraStartUp;
     glm::vec3 cameraPosition = cameraStartPosition;
     glm::vec3 cameraDirection = cameraStartDirection;
+    glm::mat4 projectionMatrix;
+    glm::mat4 viewMatrix;
 public:
     unsigned int textureColor;
     unsigned int textureGrey;
@@ -57,7 +59,9 @@ public:
     unsigned int VBO, EBO;
     float imageHeight;
     float imageWidth;
+    glm::vec3 center = glm::vec3(0, 0, 0);
     float radius = 600;
+    glm::mat4 worldModelMatrix;
     int horizontalSplitCount = 250;
     int verticalSplitCount = 125;
 
@@ -66,13 +70,19 @@ public:
     unsigned int moonVBO, moonEBO;
     float moonImageHeight;
     float moonImageWidth;
+    glm::vec3 moonCenter = glm::vec3(0, 2600, 0);
     float moonRadius = 162;
+    glm::mat4 moonModelMatrix;
 
     vector<float> worldVertices;
+    unsigned int worldVertexSize;
     vector<unsigned int> worldIndices;
+    unsigned int worldIndexSize;
 
     vector<float> moonVertices;
+    unsigned int moonVertexSize;
     vector<unsigned int> moonIndices;
+    unsigned int moonIndexSize;
 
     GLFWwindow *openWindow(const char *windowName, int width, int height);
 
@@ -86,6 +96,9 @@ public:
 
     void initMoonColoredTexture(const char *filename, GLuint shader);
 
+    void setUnitSphereVertices(std::vector<float>& vertices, unsigned int& vertexSize, std::vector<unsigned int>& indices, unsigned int& indexSize);
+
+    void initVertexBuffers(std::vector<float>& vertices, std::vector<unsigned int>& indices, unsigned int& VAO, unsigned int& VBO, unsigned int& EBO);
 };
 
 #endif

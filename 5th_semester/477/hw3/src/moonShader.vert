@@ -9,6 +9,7 @@ uniform vec3 cameraPosition;
 
 uniform mat4 ProjectionMatrix;
 uniform mat4 ViewMatrix;
+uniform mat4 ModelMatrix;
 uniform mat4 NormalMatrix;
 uniform mat4 MVP;
 
@@ -38,9 +39,7 @@ void main()
     // get orbitDegree value, compute new x, y coordinates
     // there won't be height in moon shader
  
-   // set gl_Position variable correctly to give the transformed vertex position
-
-
-    gl_Position = vec4(0,0,0,0); // this is a placeholder. It does not correctly set the position
-
+    // set gl_Position variable correctly to give the transformed vertex position
+    // gl_Position = vec4(0,0,0,0); // this is a placeholder. It does not correctly set the position
+    gl_Position = ProjectionMatrix * ViewMatrix * ModelMatrix * vec4(VertexPosition, 1.0);
 }

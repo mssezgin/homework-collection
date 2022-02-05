@@ -16,16 +16,31 @@ using namespace std;
 
 GLuint initShaders(const string& vertexShaderName, const string& fragmentShaderName) {
 
-  GLuint idProgramShader = glCreateProgram();
+    GLuint idProgramShader = glCreateProgram();
 
-  GLuint idVertexShader   = initVertexShader(vertexShaderName);
-  GLuint idFragmentShader = initFragmentShader(fragmentShaderName);
+    GLuint idVertexShader   = initVertexShader(vertexShaderName);
+    GLuint idFragmentShader = initFragmentShader(fragmentShaderName);
 
-  glAttachShader(idProgramShader, idVertexShader);
-  glAttachShader(idProgramShader, idFragmentShader);
+    glAttachShader(idProgramShader, idVertexShader);
+    glAttachShader(idProgramShader, idFragmentShader);
 
-  glLinkProgram(idProgramShader);
-  return idProgramShader;
+    glLinkProgram(idProgramShader);
+
+    GLint status;
+    glGetProgramiv(idProgramShader, GL_LINK_STATUS, &status);
+
+    if (status != GL_TRUE) {
+        GLint maxLength = 0;
+        glGetProgramiv(idProgramShader, GL_INFO_LOG_LENGTH, &maxLength);
+
+        std::vector<GLchar> infoLog(maxLength);
+        glGetProgramInfoLog(idProgramShader, maxLength, &maxLength, &infoLog[0]);
+
+        std::cout << "Program link failed" << endl;
+        exit(-1);
+    }
+
+    return idProgramShader;
 }
 
 GLuint initVertexShader(const string& filename)
@@ -48,7 +63,7 @@ GLuint initVertexShader(const string& filename)
     glGetShaderInfoLog(vs, 1024, &length, output);
     printf("VS compile log: %s\n", output);
 
-	  return vs;
+    return vs;
 }
 
 GLuint initFragmentShader(const string& filename)
@@ -71,7 +86,7 @@ GLuint initFragmentShader(const string& filename)
     glGetShaderInfoLog(fs, 1024, &length, output);
     printf("FS compile log: %s\n", output);
 
-	  return fs;
+    return fs;
 }
 
 bool readDataFromFile(const string& fileName, string &data) {
@@ -82,7 +97,7 @@ bool readDataFromFile(const string& fileName, string &data) {
     if (myfile.is_open()) {
         string curLine;
 
-        while (getline(myfile, curLine)){
+        while (getline(myfile, curLine)) {
             data += curLine;
             if (!myfile.eof())
                 data += "\n";

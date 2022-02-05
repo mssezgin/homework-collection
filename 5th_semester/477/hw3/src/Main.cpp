@@ -8,5 +8,5 @@ using namespace std;
 int main(int argc, char* argv[])
 {
     EclipseMap *openGL = new EclipseMap();
-	openGL->Render(argv[2],argv[1],argv[3]);
+    openGL->Render(argv[2],argv[1],argv[3]);
 }
