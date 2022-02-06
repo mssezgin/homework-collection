@@ -52,18 +52,21 @@ private:
     glm::vec3 cameraDirection = cameraStartDirection;
     glm::mat4 projectionMatrix;
     glm::mat4 viewMatrix;
+
 public:
-    unsigned int textureColor;
-    unsigned int textureGrey;
-    unsigned int VAO;
-    unsigned int VBO, EBO;
-    float imageHeight;
-    float imageWidth;
-    glm::vec3 center = glm::vec3(0, 0, 0);
-    float radius = 600;
-    glm::mat4 worldModelMatrix;
     int horizontalSplitCount = 250;
     int verticalSplitCount = 125;
+
+    unsigned int worldTextureColor;
+    unsigned int worldTextureGrey;
+    unsigned int worldVAO;
+    unsigned int worldVBO, worldEBO;
+    float imageHeight;
+    float imageWidth;
+    glm::vec3 worldCenter = glm::vec3(0, 0, 0);
+    float worldRadius = 600;
+    float worldRotationAngle = 0.0f;
+    glm::mat4 worldModelMatrix;
 
     unsigned int moonTextureColor;
     unsigned int moonVAO;
@@ -72,6 +75,7 @@ public:
     float moonImageWidth;
     glm::vec3 moonCenter = glm::vec3(0, 2600, 0);
     float moonRadius = 162;
+    float moonRotationAngle = 0.0f;
     glm::mat4 moonModelMatrix;
 
     vector<float> worldVertices;
@@ -99,6 +103,12 @@ public:
     void setUnitSphereVertices(std::vector<float>& vertices, unsigned int& vertexSize, std::vector<unsigned int>& indices, unsigned int& indexSize);
 
     void initVertexBuffers(std::vector<float>& vertices, std::vector<unsigned int>& indices, unsigned int& VAO, unsigned int& VBO, unsigned int& EBO);
+
+    void updateCamera();
+
+    void drawWorld(GLuint worldShaderID);
+
+    void drawMoon(GLuint worldShaderID);
 };
 
 #endif

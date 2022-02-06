@@ -53,7 +53,7 @@ void EclipseMap::Render(const char *coloredTexturePath, const char *greyTextureP
     setUnitSphereVertices(worldVertices, worldVertexSize, worldIndices, worldIndexSize);
 
     // TODO: Configure Buffers
-    initVertexBuffers(worldVertices, worldIndices, VAO, VBO, EBO);
+    initVertexBuffers(worldVertices, worldIndices, worldVAO, worldVBO, worldEBO);
 
     // Enable depth test
     glEnable(GL_DEPTH_TEST);
@@ -75,67 +75,12 @@ void EclipseMap::Render(const char *coloredTexturePath, const char *greyTextureP
         static float rotationAngle = 0.0;
         rotationAngle += 0.02;
 
-        // TODO: Bind textures
 
-        // TODO: Use moonShaderID program
-        glUseProgram(moonShaderID);
+        updateCamera();
 
-        // TODO: Update camera at every frame
-        projectionMatrix = glm::perspective((float) (projectionAngle / 180.0 * PI), aspectRatio, near, far);
-        viewMatrix = glm::lookAt(cameraPosition, cameraPosition + cameraDirection, cameraUp);
+        drawMoon(moonShaderID);
 
-        // TODO: Update uniform variables at every frame
-        moonModelMatrix = glm::translate(glm::mat4(1.0f), moonCenter);
-        moonModelMatrix = glm::rotate(moonModelMatrix, rotationAngle, glm::vec3(0.0f, 0.0f, 1.0f));
-        moonModelMatrix = glm::scale(moonModelMatrix, glm::vec3(moonRadius, moonRadius, moonRadius));
-
-        glUniformMatrix4fv(glGetUniformLocation(moonShaderID, "ProjectionMatrix"), 1, GL_FALSE, glm::value_ptr(projectionMatrix));
-        glUniformMatrix4fv(glGetUniformLocation(moonShaderID, "ViewMatrix"), 1, GL_FALSE, glm::value_ptr(viewMatrix));
-        glUniformMatrix4fv(glGetUniformLocation(moonShaderID, "ModelMatrix"), 1, GL_FALSE, glm::value_ptr(moonModelMatrix));
-
-        // TODO: Bind moon vertex array
-        glBindVertexArray(moonVAO);
-        glBindBuffer(GL_ARRAY_BUFFER, moonVBO);
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, moonEBO);
-        glEnableVertexAttribArray(0);
-        glEnableVertexAttribArray(1);
-        glEnableVertexAttribArray(2);
-        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (GLvoid*) 0);
-        glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (GLvoid*) (3 * sizeof(float)));
-        glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (GLvoid*) (6 * sizeof(float)));
-
-        // TODO: Draw moon object
-        glDrawElements(GL_TRIANGLES, moonIndexSize, GL_UNSIGNED_INT, 0);
-
-        /*************************/
-
-        // TODO: Use worldShaderID program
-        glUseProgram(worldShaderID);
-
-        // TODO: Update camera at every frame
-
-        // TODO: Update uniform variables at every frame
-        worldModelMatrix = glm::translate(glm::mat4(1.0f), center);
-        worldModelMatrix = glm::rotate(worldModelMatrix, rotationAngle, glm::vec3(0.0f, 0.0f, 1.0f));
-        worldModelMatrix = glm::scale(worldModelMatrix, glm::vec3(radius, radius, radius));
-
-        glUniformMatrix4fv(glGetUniformLocation(worldShaderID, "ProjectionMatrix"), 1, GL_FALSE, glm::value_ptr(projectionMatrix));
-        glUniformMatrix4fv(glGetUniformLocation(worldShaderID, "ViewMatrix"), 1, GL_FALSE, glm::value_ptr(viewMatrix));
-        glUniformMatrix4fv(glGetUniformLocation(worldShaderID, "ModelMatrix"), 1, GL_FALSE, glm::value_ptr(worldModelMatrix));
-
-        // TODO: Bind world vertex array
-        glBindVertexArray(VAO);
-        glBindBuffer(GL_ARRAY_BUFFER, VBO);
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-        glEnableVertexAttribArray(0);
-        glEnableVertexAttribArray(1);
-        glEnableVertexAttribArray(2);
-        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (GLvoid*) 0);
-        glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (GLvoid*) (3 * sizeof(float)));
-        glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (GLvoid*) (6 * sizeof(float)));
-
-        // TODO: Draw world object
-        glDrawElements(GL_TRIANGLES, worldIndexSize, GL_UNSIGNED_INT, 0);
+        drawWorld(worldShaderID);
 
 
         // Swap buffers and poll events
@@ -151,9 +96,9 @@ void EclipseMap::Render(const char *coloredTexturePath, const char *greyTextureP
 
 
     // Delete buffers
-    glDeleteBuffers(1, &VAO);
-    glDeleteBuffers(1, &VBO);
-    glDeleteBuffers(1, &EBO);
+    glDeleteBuffers(1, &worldVAO);
+    glDeleteBuffers(1, &worldVBO);
+    glDeleteBuffers(1, &worldEBO);
 
     glDeleteProgram(moonShaderID);
     glDeleteProgram(worldShaderID);
@@ -169,8 +114,10 @@ void EclipseMap::handleKeyPress(GLFWwindow *window) {
     }
 
     if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) {
-        static unsigned int count = 0;
-        std::cout << "W pressed " << count++ << "\n";
+        // static unsigned int count = 0;
+        // std::cout << "W pressed " << count++ << "\n";
+        worldRotationAngle += 0.02;
+        moonRotationAngle += 0.02;
     }
 }
 
@@ -213,9 +160,10 @@ GLFWwindow *EclipseMap::openWindow(const char *windowName, int width, int height
 
 void EclipseMap::initColoredTexture(const char *filename, GLuint shader) {
     int width, height;
-    glGenTextures(1, &textureColor);
+    glGenTextures(1, &worldTextureColor);
     cout << shader << endl;
-    glBindTexture(GL_TEXTURE_2D, textureColor);
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, worldTextureColor);
     // set the texture wrapping parameters
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S,
                     GL_CLAMP_TO_EDGE);    // set texture wrapping to GL_REPEAT (default wrapping method)
@@ -272,7 +220,7 @@ void EclipseMap::initColoredTexture(const char *filename, GLuint shader) {
 
 
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, raw_image);
-   
+
 
     imageWidth = width;
     imageHeight = height;
@@ -294,8 +242,9 @@ void EclipseMap::initColoredTexture(const char *filename, GLuint shader) {
 
 void EclipseMap::initGreyTexture(const char *filename, GLuint shader) {
 
-    glGenTextures(1, &textureGrey);
-    glBindTexture(GL_TEXTURE_2D, textureGrey);
+    glGenTextures(1, &worldTextureGrey);
+    glActiveTexture(GL_TEXTURE1);
+    glBindTexture(GL_TEXTURE_2D, worldTextureGrey);
     // set the texture wrapping parameters
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S,
                     GL_CLAMP_TO_EDGE);    // set texture wrapping to GL_REPEAT (default wrapping method)
@@ -352,7 +301,7 @@ void EclipseMap::initGreyTexture(const char *filename, GLuint shader) {
     width = cinfo.image_width;
 
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, raw_image);
-  
+
 
 
 
@@ -375,6 +324,7 @@ void EclipseMap::initMoonColoredTexture(const char *filename, GLuint shader) {
     int width, height;
     glGenTextures(1, &moonTextureColor);
     cout << shader << endl;
+    glActiveTexture(GL_TEXTURE2);
     glBindTexture(GL_TEXTURE_2D, moonTextureColor);
     // set the texture wrapping parameters
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S,
@@ -432,10 +382,10 @@ void EclipseMap::initMoonColoredTexture(const char *filename, GLuint shader) {
 
 
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, raw_image);
-   
 
-    imageWidth = width;
-    imageHeight = height;
+
+    moonImageWidth = width;
+    moonImageHeight = height;
 
     glGenerateMipmap(GL_TEXTURE_2D);
 
@@ -465,23 +415,25 @@ void EclipseMap::setUnitSphereVertices(std::vector<float>& vertices, unsigned in
     index = 0;
 
     // north pole
-    v[index++] = vertex(glm::vec3(0, 0, 1), glm::vec3(0, 0, 1), glm::vec2(0, 0));
+    v[index++] = vertex(glm::vec3(0, 0, 1), glm::vec3(0, 0, 1), glm::vec2(0.5, 0)); // or glm::vec2(0, 0)
 
     // latitudes and longitudes
     for (int verticalStep = 1; verticalStep < verticalSplitCount; verticalStep++) {
-        float beta = PI * ((float) verticalStep / (float) verticalSplitCount);
+        float verticalRatio = (float) verticalStep / (float) verticalSplitCount;
+        float beta = PI * verticalRatio;
         float sinBeta = sin(beta);
         float cosBeta = cos(beta);
 
         for (int horizontalStep = 0; horizontalStep < horizontalSplitCount; horizontalStep++) {
-            float alpha = 2 * PI * ((float) horizontalStep / (float) horizontalSplitCount);
+            float horizontalRatio = (float) horizontalStep / (float) horizontalSplitCount;
+            float alpha = 2 * PI * horizontalRatio;
             glm::vec3 p(sinBeta * cos(alpha), sinBeta * sin(alpha), cosBeta);
-            v[index++] = vertex(p, p, glm::vec2(0, 0));
+            v[index++] = vertex(p, p, glm::vec2(horizontalRatio, verticalRatio));
         }
     }
 
     // south pole
-    v[index++] = vertex(glm::vec3(0, 0, -1), glm::vec3(0, 0, -1), glm::vec2(0, 0));
+    v[index++] = vertex(glm::vec3(0, 0, -1), glm::vec3(0, 0, -1), glm::vec2(0.5, 1)); // or glm::vec2(0, 1)
 
 
     // set indices
@@ -570,4 +522,83 @@ void EclipseMap::initVertexBuffers(std::vector<float>& vertices, std::vector<uns
 
     vertices.clear();
     indices.clear();
+}
+
+void EclipseMap::updateCamera() {
+
+    // TODO: Update camera at every frame
+    projectionMatrix = glm::perspective((float) (projectionAngle / 180.0 * PI), aspectRatio, near, far);
+    viewMatrix = glm::lookAt(cameraPosition, cameraPosition + cameraDirection, cameraUp);
+}
+
+void EclipseMap::drawWorld(GLuint worldShaderID) {
+
+    // TODO: Manipulate rotation variables
+    // worldRotationAngle += 0.02;
+
+    // TODO: Use worldShaderID program
+    glUseProgram(worldShaderID);
+
+    // TODO: Bind textures
+    // glClientActiveTexture(GL_TEXTURE0);
+    // glBindTexture(GL_TEXTURE_2D, worldTextureColor);
+
+    // TODO: Update uniform variables at every frame
+    worldModelMatrix = glm::translate(glm::mat4(1.0f), worldCenter);
+    worldModelMatrix = glm::rotate(worldModelMatrix, worldRotationAngle, glm::vec3(0.0f, 0.0f, 1.0f));
+    worldModelMatrix = glm::scale(worldModelMatrix, glm::vec3(worldRadius, worldRadius, worldRadius));
+
+    glUniformMatrix4fv(glGetUniformLocation(worldShaderID, "ProjectionMatrix"), 1, GL_FALSE, glm::value_ptr(projectionMatrix));
+    glUniformMatrix4fv(glGetUniformLocation(worldShaderID, "ViewMatrix"), 1, GL_FALSE, glm::value_ptr(viewMatrix));
+    glUniformMatrix4fv(glGetUniformLocation(worldShaderID, "ModelMatrix"), 1, GL_FALSE, glm::value_ptr(worldModelMatrix));
+
+    // TODO: Bind world vertex array
+    glBindVertexArray(worldVAO);
+    glBindBuffer(GL_ARRAY_BUFFER, worldVBO);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, worldEBO);
+    glEnableVertexAttribArray(0);
+    glEnableVertexAttribArray(1);
+    glEnableVertexAttribArray(2);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (GLvoid*) 0);
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (GLvoid*) (3 * sizeof(float)));
+    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (GLvoid*) (6 * sizeof(float)));
+
+    // TODO: Draw world object
+    glDrawElements(GL_TRIANGLES, worldIndexSize, GL_UNSIGNED_INT, 0);
+}
+
+void EclipseMap::drawMoon(GLuint moonShaderID) {
+
+    // TODO: Manipulate rotation variables
+    // moonRotationAngle += 0.02;
+
+    // TODO: Use moonShaderID program
+    glUseProgram(moonShaderID);
+
+    // TODO: Bind textures
+    // glClientActiveTexture(GL_TEXTURE2);
+    // glBindTexture(GL_TEXTURE_2D, moonTextureColor);
+
+    // TODO: Update uniform variables at every frame
+    moonModelMatrix = glm::translate(glm::mat4(1.0f), moonCenter);
+    moonModelMatrix = glm::rotate(moonModelMatrix, moonRotationAngle, glm::vec3(0.0f, 0.0f, 1.0f));
+    moonModelMatrix = glm::scale(moonModelMatrix, glm::vec3(moonRadius, moonRadius, moonRadius));
+
+    glUniformMatrix4fv(glGetUniformLocation(moonShaderID, "ProjectionMatrix"), 1, GL_FALSE, glm::value_ptr(projectionMatrix));
+    glUniformMatrix4fv(glGetUniformLocation(moonShaderID, "ViewMatrix"), 1, GL_FALSE, glm::value_ptr(viewMatrix));
+    glUniformMatrix4fv(glGetUniformLocation(moonShaderID, "ModelMatrix"), 1, GL_FALSE, glm::value_ptr(moonModelMatrix));
+
+    // TODO: Bind moon vertex array
+    glBindVertexArray(moonVAO);
+    glBindBuffer(GL_ARRAY_BUFFER, moonVBO);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, moonEBO);
+    glEnableVertexAttribArray(0);
+    glEnableVertexAttribArray(1);
+    glEnableVertexAttribArray(2);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (GLvoid*) 0);
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (GLvoid*) (3 * sizeof(float)));
+    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (GLvoid*) (6 * sizeof(float)));
+
+    // TODO: Draw moon object
+    glDrawElements(GL_TRIANGLES, moonIndexSize, GL_UNSIGNED_INT, 0);
 }

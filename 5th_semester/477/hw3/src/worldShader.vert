@@ -35,14 +35,22 @@ out vec3 CameraVector;// Vector from Vertex to Camera;
 
 void main()
 {
-    // Calculate texture coordinate based on data.TexCoord
-    vec2 textureCoordinate = vec2(0, 0);
-    vec4 texColor = texture(TexGrey, textureCoordinate);
+    /*
+        // Calculate texture coordinate based on data.TexCoord
+        // vec2 textureCoordinate = vec2(0, 0);
+        // vec4 texColor = texture(TexGrey, textureCoordinate);
 
-    // get texture value, compute height
-    // compute normal vector
+        // get texture value, compute height
+        // compute normal vector
 
-    // set gl_Position variable correctly to give the transformed vertex position
-    // gl_Position = vec4(0,0,0,0); // this is a placeholder. It does not correctly set the position
+        // set gl_Position variable correctly to give the transformed vertex position
+        // gl_Position = vec4(0,0,0,0); // this is a placeholder. It does not correctly set the position
+    */
+
+
+    data.Position = VertexPosition;
+    data.Normal = VertexNormal;
+    data.TexCoord = VertexTex;
+
     gl_Position = ProjectionMatrix * ViewMatrix * ModelMatrix * vec4(VertexPosition, 1.0);
 }

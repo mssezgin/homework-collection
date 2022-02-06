@@ -36,10 +36,18 @@ out vec3 CameraVector;// Vector from Vertex to Camera;
 
 void main()
 {
-    // get orbitDegree value, compute new x, y coordinates
-    // there won't be height in moon shader
- 
-    // set gl_Position variable correctly to give the transformed vertex position
-    // gl_Position = vec4(0,0,0,0); // this is a placeholder. It does not correctly set the position
+    /*
+        // get orbitDegree value, compute new x, y coordinates
+        // there won't be height in moon shader
+    
+        // set gl_Position variable correctly to give the transformed vertex position
+        // gl_Position = vec4(0,0,0,0); // this is a placeholder. It does not correctly set the position
+    */
+
+
+    data.Position = VertexPosition;
+    data.Normal = VertexNormal;
+    data.TexCoord = VertexTex;
+
     gl_Position = ProjectionMatrix * ViewMatrix * ModelMatrix * vec4(VertexPosition, 1.0);
 }
