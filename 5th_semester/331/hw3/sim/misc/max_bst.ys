@@ -79,4 +79,3 @@ max:
 # stack
 	.pos 0x800
 stack:
-

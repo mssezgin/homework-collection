@@ -5,23 +5,23 @@
 ####################################################################
 
 #################################
-# mustafa sezgin		#
-# 2380863        		#
+# mustafa sezgin                #
+# 2380863                       #
 #################################
-# Fetch				#
-# 	icode:ifun <- M1[PC]	#
-#	rA:rB <- M1[PC+1]	#
-#	valC <- M8[PC+2]	#
-#	valP <- PC+10		#
-# Decode			#
-# 	valB <- R[rB]		#
-# Execute			#
-# 	valE <- valB+valC	#
-# Memory			#
-# Write Back			#
-# 	R[rA] <- valE		#
-# PC Update			#
-# 	PC <- valP		#
+# Fetch                         #
+#       icode:ifun <- M1[PC]    #
+#       rA:rB <- M1[PC+1]       #
+#       valC <- M8[PC+2]        #
+#       valP <- PC+10           #
+# Decode                        #
+#       valB <- R[rB]           #
+# Execute                       #
+#       valE <- valB+valC       #
+# Memory                        #
+# Write Back                    #
+#       R[rA] <- valE           #
+# PC Update                     #
+#       PC <- valP              #
 #################################
 
 ## Your task is to implement the leaq instruction

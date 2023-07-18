@@ -88,7 +88,7 @@ public class CengHashTable {
                 endRow = Integer.parseInt(bucket.prefix + "1".repeat(this.globalDepth - bucket.localDepth), 2);
             }
             for (int i = startRow; i <= endRow; i++) {
-                if (i > 0) {
+                if (i > startRow) {
                     System.out.print(",");
                 }
                 System.out.print("\n\t\"row\": ");
@@ -145,4 +145,20 @@ public class CengHashTable {
         this.hashRows = newHashRows;
         this.globalDepth++;
     }
+
+    /* int mask = prefixMask(globalDepth);
+    int hashIndex = (hashValue & mask) >> (maxGlobalDepth - globalDepth);
+    System.out.println("hashValue: " + hashValue + " mask: " + mask + " hashIndex: " + hashIndex); */
+    /* private int prefixMask(int b) {
+        int mask = 0;
+        int i;
+        for (i = 0; i < b; i++) {
+            mask = mask << 1;
+            mask++;
+        }
+        for (; i < maxGlobalDepth; i++) {
+            mask = mask << 1;
+        }
+        return mask;
+    } */
 }
